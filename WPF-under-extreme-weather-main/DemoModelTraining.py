@@ -79,7 +79,7 @@ dem_realc=np.size(P_nwp,axis=1)
 p_conven_=p_conven_00/Cap
 nwp_conven_=np.empty([1,5],dtype=object)
 for i in range(np.size(nwp_conven_00,axis=1)):
-    nwp_conven_[0,i]=nwp_conven_00[0,i]/np.max(abs(P_nwp[:,i]),axis=0)
+    nwp_conven_[0,i]=nwp_conven_00[:,i].reshape(-1,1)/np.max(abs(P_nwp[:,i]),axis=0)
 for i_nwp in range(np.size(nwp_conven_, axis=1)):
     if i_nwp == 0:
         nwp_conven_1 = nwp_conven_[0, i_nwp].transpose(1, 0)
@@ -96,7 +96,7 @@ test_target_p=test_target_p_.reshape(-1,len_realp,dem_realp)
 test_input_c_=nwp_day[m*d//dem_realp:(m*d+ooo*d)//dem_realp,:]
 test_input_c=test_input_c_.reshape(-1,len_realp,dem_realc)
 p_conven_class_=p_conven_class_00/Cap
-nwp_conven_class_=np.empty([1,5],dtype=object)
+nwp_conven_class_=nwp_conven_class_00.copy()
 for i in range(np.size(nwp_conven_class_00,axis=1)):
     nwp_conven_class_[0,i]=nwp_conven_class_00[0,i]/np.max(abs(P_nwp[:,i]),axis=0)
 p_extre_class__=np.empty([1,4],dtype=object)
@@ -127,6 +127,7 @@ class model_fore(nn.Module):
     def __init__(self,input_channel_fore, output_channel_fore, mode, output_size_baselearner=1,
                  kernel_size=2, dropout=0.3, emb_dropout=0.1):
         super().__init__()
+        self.mode = mode
         self.tcn = TemporalConvNet(input_channel_fore, output_channel_fore, mode, kernel_size, dropout)
         self.emb_dropout = emb_dropout
         self.drop = nn.Dropout(emb_dropout)
@@ -135,6 +136,19 @@ class model_fore(nn.Module):
     def init_weights(self):
         self.fore_baselearner.bias.data.fill_(0)
         self.fore_baselearner.weight.data.normal_(0, 0.01)
+    def get_trainable_params(self):
+        """根据mode返回需要训练的参数"""
+        if self.mode == 'pre':
+            # 预训练：训练所有参数
+            return self.parameters()
+        else:
+            # 元学习：只训练TCN中的LWP层和最后的预测层
+            trainable_params = []
+            for module in self.tcn.modules():
+                if hasattr(module, 'get_trainable_params'):
+                    trainable_params.extend(module.get_trainable_params())
+            trainable_params.extend(self.fore_baselearner.parameters())
+            return trainable_params
     def forward(self, x):
         y = self.drop(x)
         y = self.tcn(y.transpose(1, 2)).transpose(1, 2)
@@ -161,10 +175,10 @@ def penalty(logits, y):
 
 
 ## Define optimizer
-optimizer_fore_pre = torch.optim.Adam(filter(lambda p: p.requires_grad, model_fore_pre.parameters()), lr=0.0002, betas=(0.5, 0.999))
-optimizer_fore_train_task_support = torch.optim.Adam(filter(lambda p: p.requires_grad, model_fore_train_task_support.parameters()), lr=0.0002, betas=(0.5, 0.999))
-optimizer_fore_train_task_query = torch.optim.Adam(filter(lambda p: p.requires_grad, model_fore_train_task_query.parameters()), lr=0.0002, betas=(0.5, 0.999))
-optimizer_fore_test_task_support = torch.optim.Adam(filter(lambda p: p.requires_grad, model_fore_test_task_support.parameters()), lr=0.0002, betas=(0.5, 0.999))
+optimizer_fore_pre = torch.optim.Adam(model_fore_pre.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999))
+optimizer_fore_train_task_support = torch.optim.Adam(model_fore_train_task_support.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999))
+optimizer_fore_train_task_query = torch.optim.Adam(model_fore_train_task_query.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999))
+optimizer_fore_test_task_support = torch.optim.Adam(model_fore_test_task_support.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999))
 Train_target_p=torch.tensor(train_target_p,dtype=torch.float32)
 Train_input_c=torch.tensor(train_input_c,dtype=torch.float32)
 Test_target_p=torch.tensor(test_target_p,dtype=torch.float32)
@@ -225,14 +239,16 @@ for i_t in range(epoch_train_task):
     p_conven_class = list()
     for i_class in range(10):
         for i_nwp in range(np.size(nwp_conven_class_,axis=1)):
+            nwp_data = nwp_conven_class_[0,i_nwp][0,i_class]
+            num_samples = nwp_data.shape[0] // len_realp
+            nwp_reshaped = nwp_data[:num_samples*len_realp].reshape(num_samples, len_realp, 1)
             if i_nwp==0:
-                nwp_conven_class_1=nwp_conven_class_[0,i_nwp][0,i_class].transpose(1,0)
-                nwp_conven_class_1=nwp_conven_class_1[:,:,np.newaxis]
+                nwp_conven_class_1 = nwp_reshaped
             else:
-                nwp_conven_class_0=nwp_conven_class_[0,i_nwp][0,i_class].transpose(1,0)
-                nwp_conven_class_1=np.concatenate((nwp_conven_class_1, nwp_conven_class_0[:,:,np.newaxis]), axis=2)
-        p_conven_class_1 = p_conven_class_[0, i_class].transpose(1, 0)
-        p_conven_class_1 = p_conven_class_1[:, :, np.newaxis]
+                nwp_conven_class_1 = np.concatenate((nwp_conven_class_1, nwp_reshaped), axis=2)
+        p_data = p_conven_class_[0, i_class]
+        num_samples = p_data.shape[0] // len_realp
+        p_conven_class_1 = p_data[:num_samples*len_realp].reshape(num_samples, len_realp, 1)
         nwp_conven_class.append(nwp_conven_class_1)
         p_conven_class.append(p_conven_class_1)
     train_input_dataset=list()
@@ -354,14 +370,16 @@ Test_outputs_support_list=list()
 for i_class in range(4):
     model_fore_test_task_support.load_state_dict(torch.load("model_fore_train_task_query.pth"))
     for i_nwp in range(np.size(nwp_extre_class_, axis=1)):
+        nwp_data = nwp_extre_class_[0, i_nwp][0, i_class]
+        num_samples = nwp_data.shape[0] // len_realp
+        nwp_reshaped = nwp_data[:num_samples*len_realp].reshape(num_samples, len_realp, 1)
         if i_nwp == 0:
-            nwp_extre_class_1 = nwp_extre_class_[0, i_nwp][0, i_class].transpose(1, 0)
-            nwp_extre_class_1 = nwp_extre_class_1[:, :, np.newaxis]
+            nwp_extre_class_1 = nwp_reshaped
         else:
-            nwp_extre_class_0 = nwp_extre_class_[0, i_nwp][0, i_class].transpose(1, 0)
-            nwp_extre_class_1 = np.concatenate((nwp_extre_class_1, nwp_extre_class_0[:, :, np.newaxis]), axis=2)
-    p_extre_class_1 = p_extre_class_[0, i_class].transpose(1, 0)
-    p_extre_class_1 = p_extre_class_1[:, :, np.newaxis]
+            nwp_extre_class_1 = np.concatenate((nwp_extre_class_1, nwp_reshaped), axis=2)
+    p_data = p_extre_class_[0, i_class]
+    num_samples = p_data.shape[0] // len_realp
+    p_extre_class_1 = p_data[:num_samples*len_realp].reshape(num_samples, len_realp, 1)
     nwp_extre_class=nwp_extre_class_1
     p_extre_class=p_extre_class_1
     Test_target_support = torch.tensor(p_extre_class, dtype=torch.float32)

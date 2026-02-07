@@ -58,6 +58,18 @@ class TemporalBlock_v2(nn.Module):
         self.conv2.weight.data.normal_(0, 0.01)
         if self.downsample is not None:
             self.downsample.weight.data.normal_(0, 0.01)
+    
+    def get_trainable_params(self):
+        """根据mode返回需要训练的参数列表"""
+        if self.mode == 'pre':
+            # 预训练模式：训练所有参数
+            return list(self.parameters())
+        else:
+            # 元学习模式：只训练LWP层的参数，冻结卷积层
+            trainable_params = []
+            trainable_params.extend(list(self.lwp1.parameters()))
+            trainable_params.extend(list(self.lwp2.parameters()))
+            return trainable_params
 
     def forward(self, x):
         residual = x
@@ -81,15 +93,5 @@ class TemporalBlock_v2(nn.Module):
             residual = self.downsample(residual)
         out = out + residual
         out = self.relu_final(out)
-
-        # mode 控制：非预训练阶段冻结卷积（只训 LWP 和 head）
-        if self.mode != 'pre':
-            self.conv1.weight.requires_grad_(False)
-            self.conv1.bias.requires_grad_(False) if self.conv1.bias is not None else None
-            self.conv2.weight.requires_grad_(False)
-            self.conv2.bias.requires_grad_(False) if self.conv2.bias is not None else None
-            if self.downsample is not None:
-                self.downsample.weight.requires_grad_(False)
-                self.downsample.bias.requires_grad_(False) if self.downsample.bias is not None else None
 
         return out
