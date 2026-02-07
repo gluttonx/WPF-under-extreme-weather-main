@@ -6,7 +6,7 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 import scipy.io as scio
 import random
-from ModelTool.Model import TemporalBlock_v2
+import model
 from torch.nn.utils import weight_norm
 
 class TemporalConvNet(nn.Module):
@@ -18,7 +18,7 @@ class TemporalConvNet(nn.Module):
             dilation_size = 2 ** i
             in_channels = num_inputs if i == 0 else num_channels[i-1]
             out_channels = num_channels[i]
-            layers += [TemporalBlock_v2(in_channels, out_channels, kernel_size,  stride=1, dilation=dilation_size,
+            layers += [model.TemporalBlock_v2(in_channels, out_channels, kernel_size,  stride=1, dilation=dilation_size,
                                      padding=(kernel_size-1) * dilation_size, dropout=dropout, mode=mode)]
         self.network = nn.Sequential(*layers)
     def forward(self, x):
@@ -50,10 +50,10 @@ nwp_extre_class1_00=wf_1['nwp_extre_class1_']
 nwp_extre_class2_00=wf_1['nwp_extre_class2_']
 nwp_extre_class3_00=wf_1['nwp_extre_class3_']
 nwp_extre_class4_00=wf_1['nwp_extre_class4_']
-P_load1=p[:,1]
+P_load1=p[:,0]
 P_load=P_load1.reshape(np.size(P_load1,axis=0),-1)
 P_nwp1=nwp
-nwp_index=[25,20,2,11,6]
+nwp_index=[0,1,2,3,4]
 for i in range(np.size(nwp_conven_class_00)):
     if i==0:
         P_nwp=P_nwp1[:,nwp_index[i]].reshape(np.size(P_nwp1,axis=0),-1)
