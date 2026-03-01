@@ -1,7 +1,7 @@
-﻿Model,MAE_MW,RMSE_MW,MAPE_%,R2_Score
-Extreme_Weather_Model_1,41.721,54.7537,29296018721.9588,-0.1877
-Extreme_Weather_Model_2,42.318,55.2334,30969329910.3832,-0.2086
-Extreme_Weather_Model_3,42.6165,55.239,31681965762.4388,-0.2088
-Extreme_Weather_Model_4,41.9067,54.8372,30382198861.7616,-0.1913
-Meta_Learning_Model,43.0064,55.9796,33604835179.6241,-0.2415
-Pre_Training_Model,43.2818,56.4041,31840848660.0156,-0.2604
+﻿Model,MAE_%,RMSE_%,MAPE_%,R2_Score
+Extreme_Weather_Model_1,30.6699,39.2522,136.91,-0.7037
+Extreme_Weather_Model_2,30.5204,39.4391,135.96,-0.72
+Extreme_Weather_Model_3,31.0719,39.8088,137.02,-0.7524
+Extreme_Weather_Model_4,30.3416,38.9385,131.02,-0.6766
+Meta_Learning_Model,32.4477,41.5828,146.33,-0.912
+Pre_Training_Model,24.8609,32.9558,102.98,-0.201

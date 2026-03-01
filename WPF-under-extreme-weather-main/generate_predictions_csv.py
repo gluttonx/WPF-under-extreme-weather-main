@@ -72,7 +72,7 @@ print("="*70)
 
 ## Load data
 seed_torch(seed=1029)
-dataFile = 'wf_4_train'
+dataFile = '58wf_4_train'  # 更新后的数据文件（标幺值）
 wf_1  = scio.loadmat(dataFile)
 p=wf_1['p_1h']
 nwp=wf_1['nwp_1h']
@@ -90,11 +90,12 @@ for i in range(5):
 # Define Parameters
 dem_realp=1
 len_realp=12
-Cap=400.5
+Cap=50  # 总装机容量 (MW)
 m=365
 d=24
 ooo=365
-Series_day = P_load.reshape(-1,dem_realp)/Cap
+# 数据已经是标幺值，不需要再归一化
+Series_day = P_load.reshape(-1,dem_realp)
 nwp_day = (P_nwp/np.max(abs(P_nwp),axis=0)).reshape(-1,dem_realp*np.size(P_nwp,axis=1))
 dem_realc=np.size(P_nwp,axis=1)
 
@@ -110,7 +111,7 @@ Test_input_c=torch.tensor(test_input_c,dtype=torch.float32)
 # Prepare training data
 nwp_conven_00=wf_1['nwp_conven_']
 p_conven_00=wf_1['p_conven']
-p_conven_=p_conven_00/Cap
+p_conven_=p_conven_00  # 数据已经是标幺值
 nwp_conven_=np.empty([1,5],dtype=object)
 for i in range(np.size(nwp_conven_00,axis=1)):
     nwp_conven_[0,i]=nwp_conven_00[:,i].reshape(-1,1)/np.max(abs(P_nwp[:,i]),axis=0)
@@ -157,19 +158,34 @@ for i_model in range(6):
             print(f"  加载模型: model_fore_test_task_support_{i_model}.pth")
             model_fore_test_task_query.load_state_dict(torch.load(f"model_fore_test_task_support_{i_model}.pth"))
         elif i_model==4:
-            print(f"  加载模型: model_fore_train_task_query.pth")
-            model_fore_test_task_query.load_state_dict(torch.load("model_fore_train_task_query.pth"))
+            # Meta Learning Model：优先使用train_task_query，不存在则使用预训练
+            import os
+            if os.path.exists("model_fore_train_task_query.pth"):
+                print(f"  加载模型: model_fore_train_task_query.pth（元训练模型）")
+                model_fore_test_task_query.load_state_dict(torch.load("model_fore_train_task_query.pth"))
+            elif os.path.exists("model_fore_pre_federated.pth"):
+                print(f"  加载模型: model_fore_pre_federated.pth（跳过了元训练）")
+                model_fore_test_task_query.load_state_dict(torch.load("model_fore_pre_federated.pth"))
+            else:
+                print(f"  加载模型: model_fore_pre.pth（跳过了元训练）")
+                model_fore_test_task_query.load_state_dict(torch.load("model_fore_pre.pth"))
         elif i_model==5:
-            print(f"  加载模型: model_fore_pre.pth")
-            model_fore_test_task_query.load_state_dict(torch.load("model_fore_pre.pth"))
+            # Pre-training Model：优先使用联邦版
+            import os
+            if os.path.exists("model_fore_pre_federated.pth"):
+                print(f"  加载模型: model_fore_pre_federated.pth（联邦预训练）")
+                model_fore_test_task_query.load_state_dict(torch.load("model_fore_pre_federated.pth"))
+            else:
+                print(f"  加载模型: model_fore_pre.pth（单场站预训练）")
+                model_fore_test_task_query.load_state_dict(torch.load("model_fore_pre.pth"))
         
         Test_input_c_device = Test_input_c.to(device)
         Test_output_query=model_fore_test_task_query(Test_input_c_device)
         test_outputs_query=Test_output_query.to(device0)
         test_outputs_query_=np.array(test_outputs_query.reshape(-1,dem_realp))
         
-        # Store predictions (restore original scale)
-        predictions[model_names[i_model]] = (test_outputs_query_.flatten() * Cap).tolist()
+        # Store predictions (keep in per unit, will convert to MW later)
+        predictions[model_names[i_model]] = test_outputs_query_.flatten().tolist()
 
 # Get training predictions
 print("\n  生成训练集预测...")
@@ -188,39 +204,50 @@ test_target_p_=test_target_p.reshape(-1,dem_realp)
 print("\n创建CSV文件...")
 test_df = pd.DataFrame()
 test_df['Time_Index'] = range(len(test_target_p_.flatten()))
+# 标幺值和MW值都保存
+test_df['True_Power_pu'] = test_target_p_.flatten().round(6)
 test_df['True_Power_MW'] = (test_target_p_.flatten() * Cap).round(4)
 
 for model_name in model_names:
-    test_df[f'Pred_{model_name}_MW'] = [round(x, 4) for x in predictions[model_name]]
+    # 标幺值
+    test_df[f'Pred_{model_name}_pu'] = [round(x, 6) for x in predictions[model_name]]
+    # MW值
+    test_df[f'Pred_{model_name}_MW'] = [round(x * Cap, 4) for x in predictions[model_name]]
 
-# Calculate errors
+# Calculate errors (in per unit)
 for model_name in model_names:
+    test_df[f'Error_{model_name}_pu'] = (test_df[f'Pred_{model_name}_pu'] - test_df['True_Power_pu']).round(6)
     test_df[f'Error_{model_name}_MW'] = (test_df[f'Pred_{model_name}_MW'] - test_df['True_Power_MW']).round(4)
 
 # Create training results DataFrame
 train_df = pd.DataFrame()
 train_df['Time_Index'] = range(len(train_target_p_.flatten()))
+train_df['True_Power_pu'] = train_target_p_.flatten().round(6)
 train_df['True_Power_MW'] = (train_target_p_.flatten() * Cap).round(4)
+train_df['Pred_Pre_Training_Model_pu'] = train_outputs_pre_.flatten().round(6)
 train_df['Pred_Pre_Training_Model_MW'] = (train_outputs_pre_.flatten() * Cap).round(4)
+train_df['Error_Pre_Training_Model_pu'] = (train_df['Pred_Pre_Training_Model_pu'] - train_df['True_Power_pu']).round(6)
 train_df['Error_Pre_Training_Model_MW'] = (train_df['Pred_Pre_Training_Model_MW'] - train_df['True_Power_MW']).round(4)
 
-# Calculate statistics
-print("\n计算评估指标...")
+# Calculate statistics (using per unit values, displayed as percentage)
+print("\n计算评估指标（百分比形式）...")
 stats_data = []
 for model_name in model_names:
-    pred_col = f'Pred_{model_name}_MW'
-    true_vals = test_df['True_Power_MW'].values
-    pred_vals = test_df[pred_col].values
+    # 使用标幺值计算
+    pred_col_pu = f'Pred_{model_name}_pu'
+    true_vals_pu = test_df['True_Power_pu'].values
+    pred_vals_pu = test_df[pred_col_pu].values
     
-    mae = np.mean(np.abs(true_vals - pred_vals))
-    rmse = np.sqrt(np.mean((true_vals - pred_vals)**2))
-    mape = np.mean(np.abs((true_vals - pred_vals) / (true_vals + 1e-8))) * 100
-    r2 = 1 - (np.sum((true_vals - pred_vals)**2) / np.sum((true_vals - np.mean(true_vals))**2))
+    # 标幺值指标转换为百分比 (×100)
+    mae_percent = np.mean(np.abs(true_vals_pu - pred_vals_pu)) * 100
+    rmse_percent = np.sqrt(np.mean((true_vals_pu - pred_vals_pu)**2)) * 100
+    mape = np.mean(np.abs((true_vals_pu - pred_vals_pu) / (true_vals_pu + 1e-8))) * 100
+    r2 = 1 - (np.sum((true_vals_pu - pred_vals_pu)**2) / np.sum((true_vals_pu - np.mean(true_vals_pu))**2))
     
     stats_data.append({
         'Model': model_name,
-        'MAE_MW': round(mae, 4),
-        'RMSE_MW': round(rmse, 4),
+        'MAE_%': round(mae_percent, 4),
+        'RMSE_%': round(rmse_percent, 4),
         'MAPE_%': round(mape, 4),
         'R2_Score': round(r2, 4)
     })
@@ -248,13 +275,14 @@ print("     - True_Power_MW: 真实功率 (MW)")
 print("     - Pred_Pre_Training_Model_MW: 预训练模型预测 (MW)")
 print("     - Error_Pre_Training_Model_MW: 预测误差 (MW)")
 print(f"\n  📈 model_performance_metrics.csv (评估指标)")
-print("     - MAE: 平均绝对误差")
-print("     - RMSE: 均方根误差")
-print("     - MAPE: 平均绝对百分比误差")
+print("     - MAE_%: 平均绝对误差（百分比形式）")
+print("     - RMSE_%: 均方根误差（百分比形式）")
+print("     - MAPE_%: 平均绝对百分比误差")
 print("     - R2_Score: 决定系数")
 print("\n数据说明:")
-print("  - 所有功率值已恢复到原始尺度 (MW)")
-print("  - Cap = 400.5 MW (额定容量)")
+print("  - 功率值同时提供标幺值(_pu)和实际功率(_MW)")
+print("  - 评估指标采用百分比形式 (%)")
+print("  - Cap = 50 MW (总装机容量)")
 print("  - 测试集: 365天数据")
 print("  - 训练集: 常规场景数据")
 print("="*70)

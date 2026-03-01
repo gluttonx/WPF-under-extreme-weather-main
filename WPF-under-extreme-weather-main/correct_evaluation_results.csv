@@ -1,0 +1,7 @@
+﻿Model,Test_Set,Test_Samples,MAE_%,RMSE_%,MAPE_%,R2_Score
+Extreme_Weather_Model_1,Extreme Weather (留出集),48,44.12,56.72,130.15,-2.2279
+Extreme_Weather_Model_2,Extreme Weather (留出集),24,32.13,42.94,193.75,-21.939
+Extreme_Weather_Model_3,Extreme Weather (留出集),24,61.67,68.97,419.85,-4.7368
+Extreme_Weather_Model_4,Extreme Weather (留出集),120,34.08,44.13,168.58,-1.6627
+Meta_Learning_Model,Normal Weather (常规),8760,34.78,44.6,156.16,-1.1993
+Pre_Training_Model,Normal Weather (常规),8760,25.32,33.75,107.02,-0.2593

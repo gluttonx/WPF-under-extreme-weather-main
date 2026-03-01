@@ -71,7 +71,7 @@ print("="*70)
 
 ## Load data
 seed_torch(seed=1029)
-dataFile = 'wf_4_train'
+dataFile = '58wf_4_train'
 wf_1  = scio.loadmat(dataFile)
 p=wf_1['p_1h']
 p_conven_00=wf_1['p_conven']
@@ -90,11 +90,12 @@ for i in range(5):
 # Define Parameters
 dem_realp=1
 len_realp=12
-Cap=400.5
+Cap=50  # 总装机容量 (MW)
 m=365
 d=24
 ooo=365
-Series_day = P_load.reshape(-1,dem_realp)/Cap
+# 数据已经是标幺值，不需要再归一化
+Series_day = P_load.reshape(-1,dem_realp)
 nwp_day = (P_nwp/np.max(abs(P_nwp),axis=0)).reshape(-1,dem_realp*np.size(P_nwp,axis=1))
 dem_realc=np.size(P_nwp,axis=1)
 
@@ -109,7 +110,7 @@ Test_input_c=torch.tensor(test_input_c,dtype=torch.float32)
 
 # Prepare training data (for comparison)
 nwp_conven_00=wf_1['nwp_conven_']
-p_conven_=p_conven_00/Cap
+p_conven_=p_conven_00  # 数据已经是标幺值
 nwp_conven_=np.empty([1,5],dtype=object)
 for i in range(np.size(nwp_conven_00,axis=1)):
     nwp_conven_[0,i]=nwp_conven_00[:,i].reshape(-1,1)/np.max(abs(P_nwp[:,i]),axis=0)
@@ -147,7 +148,7 @@ p_extre_class__[0,0]=p_extre_class1_00
 p_extre_class__[0,1]=p_extre_class2_00
 p_extre_class__[0,2]=p_extre_class3_00
 p_extre_class__[0,3]=p_extre_class4_00
-p_extre_class_=p_extre_class__/Cap
+p_extre_class_=p_extre_class__  # 数据已经是标幺值
 
 test_outputs_query_00= np.empty([1, 6], dtype=object)
 test_outputs_support_00= np.empty([1, 4], dtype=object)
@@ -215,5 +216,5 @@ print("     - test_outputs_support:      极端天气样本预测")
 print("     - train_outputs_pre:         训练集预测")
 print("     - train_target:              训练集真实值")
 print("     - test_target:               测试集真实值")
-print("     - Cap:                       归一化系数 (400.5)")
+print("     - Cap:                       总装机容量 (50 MW)")
 print("="*70)
