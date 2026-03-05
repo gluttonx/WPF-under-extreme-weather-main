@@ -3,6 +3,7 @@ import time
 import numpy as np
 import torch.nn as nn
 import torch
+import copy
 from torch.utils.tensorboard import SummaryWriter
 import scipy.io as scio
 import random
@@ -12,6 +13,10 @@ from torch.nn.utils import weight_norm
 # ========== [联邦新增] 联邦学习开关 ==========
 USE_FEDERATION = True  # True=联邦多场站, False=单场站原方法
 # 说明：设为False时完全退化为原始单场站元学习方法
+
+# ========== 论文口径关键开关 ==========
+TRAIN_META_ONLY_BASELINE = True  # 新增：训练真正的 meta-learning only 基线
+FEW_SHOT_EPOCHS = 50             # 论文口径：每个极端天气 fine-tune 50 epochs
 
 class TemporalConvNet(nn.Module):
     def __init__(self, num_inputs, num_channels, mode='pre', kernel_size=2, dropout=0.2):
@@ -99,6 +104,13 @@ for i in range(np.size(nwp_conven_class_00)):
 # Define training equipment
 device=torch.device("cuda")
 device0=torch.device("cpu")
+
+# 模型文件路径（避免混淆）
+PRETRAIN_MODEL_PATH = "model_fore_pre_federated.pth" if USE_FEDERATION else "model_fore_pre.pth"
+PROPOSED_SUPPORT_MODEL_PATH = "model_fore_train_task_support_proposed.pth"
+PROPOSED_META_MODEL_PATH = "model_fore_train_task_query_proposed.pth"
+META_ONLY_SUPPORT_MODEL_PATH = "model_fore_train_task_support_meta_only.pth"
+META_ONLY_MODEL_PATH = "model_fore_train_task_query_meta_only.pth"
 
 
 # Define Parameters
@@ -297,6 +309,8 @@ model_fore_train_task_support = model_fore(input_channel_fore=dem_realc, output_
 model_fore_train_task_query = model_fore(input_channel_fore=dem_realc, output_channel_fore=[128, 96, 64, 48, 32, 16, 8],mode='train_task_query')
 model_fore_test_task_support = model_fore(input_channel_fore=dem_realc, output_channel_fore=[128, 96, 64, 48, 32, 16, 8],mode='test_task_support')
 model_fore_test_task_query = model_fore(input_channel_fore=dem_realc, output_channel_fore=[128, 96, 64, 48, 32, 16, 8],mode='test_task_support')
+# 保存一份随机初始化权重，供 meta-learning only 使用（不经过 pre-train）
+meta_only_random_init_state = copy.deepcopy(model_fore_train_task_query.state_dict())
 
 
 ## Define loss
@@ -432,175 +446,167 @@ model_fore_pre.eval()
 
 # [联邦修改] 根据模式保存不同的模型文件
 if USE_FEDERATION:
-    torch.save(model_fore_pre.state_dict(),"./model_fore_pre_federated.pth")
-    print("\n✓ 联邦预训练完成: model_fore_pre_federated.pth")
+    torch.save(model_fore_pre.state_dict(), PRETRAIN_MODEL_PATH)
+    print(f"\n✓ 联邦预训练完成: {PRETRAIN_MODEL_PATH}")
 else:
-    torch.save(model_fore_pre.state_dict(),"./model_fore_pre.pth")
-    print("\n✓ 预训练完成: model_fore_pre.pth")
+    torch.save(model_fore_pre.state_dict(), PRETRAIN_MODEL_PATH)
+    print(f"\n✓ 预训练完成: {PRETRAIN_MODEL_PATH}")
 
 
-## train_task_support
-epoch_train_task=70000
-for i_t in range(epoch_train_task):
-    # ========== [联邦修改] 场站分组：每个场站独立贡献任务 ==========
-    # 从每个场站随机选2个类别（3场站×2类=6个任务）
+def sample_meta_batch():
+    """从每个场站采样任务，构造 support/query batch。"""
     selected_tasks = []
-    
     for station_id in station_ids:
-        # 每场站随机选2个类别
         station_classes = random.sample(range(0, 10), 2)
-        
-        # 处理该场站的选中类别
         nwp_conven_class_st = all_stations_full_data[station_id]['nwp_conven_class']
         p_conven_class_st = all_stations_full_data[station_id]['p_conven_class']
-        P_nwp_st = all_stations_full_data[station_id]['P_nwp']
-        
+
         for i_class in station_classes:
-            # 处理NWP数据
             for i_nwp in range(np.size(nwp_conven_class_st, axis=1)):
-                nwp_data = nwp_conven_class_st[0,i_nwp][0,i_class]
+                nwp_data = nwp_conven_class_st[0, i_nwp][0, i_class]
                 num_samples = nwp_data.shape[0] // len_realp
-                nwp_reshaped = nwp_data[:num_samples*len_realp].reshape(num_samples, len_realp, 1)
-                if i_nwp==0:
+                nwp_reshaped = nwp_data[:num_samples * len_realp].reshape(num_samples, len_realp, 1)
+                if i_nwp == 0:
                     nwp_conven_class_1 = nwp_reshaped
                 else:
                     nwp_conven_class_1 = np.concatenate((nwp_conven_class_1, nwp_reshaped), axis=2)
-            
-            # 处理功率数据
+
             p_data = p_conven_class_st[0, i_class]
             num_samples = p_data.shape[0] // len_realp
-            p_conven_class_1 = p_data[:num_samples*len_realp].reshape(num_samples, len_realp, 1)
-            
+            p_conven_class_1 = p_data[:num_samples * len_realp].reshape(num_samples, len_realp, 1)
+
             selected_tasks.append({
-                'station': station_id,
-                'class': i_class,
                 'nwp': nwp_conven_class_1,
                 'p': p_conven_class_1
             })
-    
-    # 构建训练数据集
-    train_input_dataset=list()
-    train_target_dataset = list()
-    for task in selected_tasks:
-        train_input_dataset.append(task['nwp'])
-        train_target_dataset.append(task['p'])
-    
-    # [联邦修改] 使用任务数量（6个任务）
+
+    train_input_dataset = [task['nwp'] for task in selected_tasks]
+    train_target_dataset = [task['p'] for task in selected_tasks]
     num_tasks = len(selected_tasks)
-    train_input_support_=np.empty([10, 12, 5])
-    train_input_query_ = np.empty([10, 12, 5])
-    train_target_support_=np.empty([10, 12, 1])
-    train_target_query_ = np.empty([10, 12, 1])
-    
+
     for i_task in range(num_tasks):
-        index_shot = random.sample(range(0, np.size(train_input_dataset[i_task],axis=0)), 20)
-        train_input_support_=train_input_dataset[i_task][index_shot[0:10],:,:]
+        index_shot = random.sample(range(0, np.size(train_input_dataset[i_task], axis=0)), 20)
+        train_input_support_ = train_input_dataset[i_task][index_shot[0:10], :, :]
         train_input_query_ = train_input_dataset[i_task][index_shot[10:20], :, :]
-        train_target_support_=train_target_dataset[i_task][index_shot[0:10],:,:]
+        train_target_support_ = train_target_dataset[i_task][index_shot[0:10], :, :]
         train_target_query_ = train_target_dataset[i_task][index_shot[10:20], :, :]
-        if i_task==0:
-            train_input_support=train_input_support_
+        if i_task == 0:
+            train_input_support = train_input_support_
             train_input_query = train_input_query_
-            train_target_support=train_target_support_
+            train_target_support = train_target_support_
             train_target_query = train_target_query_
         else:
-            train_input_support=np.concatenate((train_input_support,train_input_support_),axis=0)
+            train_input_support = np.concatenate((train_input_support, train_input_support_), axis=0)
             train_input_query = np.concatenate((train_input_query, train_input_query_), axis=0)
-            train_target_support=np.concatenate((train_target_support,train_target_support_),axis=0)
+            train_target_support = np.concatenate((train_target_support, train_target_support_), axis=0)
             train_target_query = np.concatenate((train_target_query, train_target_query_), axis=0)
-    Train_target_support = torch.tensor(train_target_support, dtype=torch.float32)
-    Train_input_support = torch.tensor(train_input_support, dtype=torch.float32)
-    Train_target_query = torch.tensor(train_target_query, dtype=torch.float32)
-    Train_input_query = torch.tensor(train_input_query, dtype=torch.float32)
-    print(
-        "[##################################################################——————————train_task_support_Epoch %d/%d——————————############################################################]"
-        % (i_t, epoch_train_task)
+
+    return (
+        torch.tensor(train_target_support, dtype=torch.float32),
+        torch.tensor(train_input_support, dtype=torch.float32),
+        torch.tensor(train_target_query, dtype=torch.float32),
+        torch.tensor(train_input_query, dtype=torch.float32)
     )
-    # [联邦修改] 根据模式加载对应的预训练模型
-    if i_t==0:
-        if USE_FEDERATION:
-            model_fore_train_task_support.load_state_dict(torch.load("model_fore_pre_federated.pth"))
+
+
+def run_meta_training(meta_tag, init_state_dict, support_model_path, query_model_path, epoch_train_task=70000):
+    """
+    单次元训练过程：
+    - proposed: init_state_dict 为 pre-train 权重
+    - meta_only: init_state_dict 为随机初始化权重
+    """
+    print("\n" + "=" * 70)
+    print(f"开始元训练: {meta_tag}")
+    print("=" * 70)
+
+    optimizer_support = torch.optim.Adam(
+        model_fore_train_task_support.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999)
+    )
+    optimizer_query = torch.optim.Adam(
+        model_fore_train_task_query.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999)
+    )
+
+    for i_t in range(epoch_train_task):
+        Train_target_support, Train_input_support, Train_target_query, Train_input_query = sample_meta_batch()
+
+        print(
+            "[##################################################################"
+            f"——{meta_tag}:train_task_support_Epoch {i_t}/{epoch_train_task}——"
+            "############################################################]"
+        )
+
+        if i_t == 0:
+            model_fore_train_task_support.load_state_dict(copy.deepcopy(init_state_dict))
         else:
-            model_fore_train_task_support.load_state_dict(torch.load("model_fore_pre.pth"))
-    else:
-        model_fore_train_task_support.load_state_dict(torch.load("model_fore_train_task_query.pth"))
-    total_train_step=0
-    total_test_step=0
-    epoch1_train_task_support = 1
-    start_time=time.time()
-    for i in range(epoch1_train_task_support):
-        k=10
+            model_fore_train_task_support.load_state_dict(torch.load(query_model_path))
+
+        model_fore_train_task_support.train()
         Train_target_support = Train_target_support.to(device)
         Train_input_support = Train_input_support.to(device)
-        model_fore_train_task_support.train()
-        Train_outputs_support=model_fore_train_task_support(Train_input_support)
-        loss1=penalty(Train_outputs_support,Train_target_support)
-        loss2=loss_fn_1(Train_outputs_support,Train_target_support)
-        loss_en=k*loss1+loss2
-        optimizer_fore_train_task_support.zero_grad()
+        Train_outputs_support = model_fore_train_task_support(Train_input_support)
+        loss1 = penalty(Train_outputs_support, Train_target_support)
+        loss2 = loss_fn_1(Train_outputs_support, Train_target_support)
+        loss_en = 10 * loss1 + loss2
+        optimizer_support.zero_grad()
         loss_en.backward()
-        optimizer_fore_train_task_support.step()
-        #
-        if (i + 1) % 2 == 0:
-            end_time = time.time()
-            print(end_time - start_time)
-            print(
-                "[Epoch %d/%d] [loss_mse: %f]"
-                % (i, epoch1_train_task_support, loss2.item())
-            )
-            writer1.add_scalar("loss_mse_train_task_support", loss1.item(),
-                              epoch1_pre + i_t * epoch1_train_task_support + i)
-            writer2.add_scalar("loss_mse_train_task_support", loss2.item(), epoch1_pre+i_t*epoch1_train_task_support+i)
-    model_fore_train_task_support.eval()
-    torch.save(model_fore_train_task_support.state_dict(),"./model_fore_train_task_support.pth")
+        optimizer_support.step()
+        model_fore_train_task_support.eval()
+        torch.save(model_fore_train_task_support.state_dict(), support_model_path)
 
+        writer1.add_scalar(f"loss_penalty_train_task_support_{meta_tag}", loss1.item(), i_t)
+        writer2.add_scalar(f"loss_mse_train_task_support_{meta_tag}", loss2.item(), i_t)
 
-    ## train_task_query
-    print(
-        "[##################################################################——————————train_task_query_Epoch %d/%d——————————############################################################]"
-        % (i_t, epoch_train_task)
-    )
-    # [联邦修改] 根据模式加载对应的预训练模型
-    if i_t==0:
-        if USE_FEDERATION:
-            model_fore_train_task_query.load_state_dict(torch.load("model_fore_pre_federated.pth"))
+        print(
+            "[##################################################################"
+            f"——{meta_tag}:train_task_query_Epoch {i_t}/{epoch_train_task}——"
+            "############################################################]"
+        )
+
+        if i_t == 0:
+            model_fore_train_task_query.load_state_dict(copy.deepcopy(init_state_dict))
+            model_fore_train_task_support.load_state_dict(torch.load(support_model_path))
         else:
-            model_fore_train_task_query.load_state_dict(torch.load("model_fore_pre.pth"))
-        model_fore_train_task_support.load_state_dict(torch.load("model_fore_train_task_support.pth"))
-    else:
-        model_fore_train_task_query.load_state_dict(torch.load("model_fore_train_task_query.pth"))
-        model_fore_train_task_support.load_state_dict(torch.load("model_fore_train_task_support.pth"))
-    total_train_step=0
-    total_test_step=0
-    epoch1_train_task_query = 1
-    start_time=time.time()
-    for i in range(epoch1_train_task_query):
-        k=10
+            model_fore_train_task_query.load_state_dict(torch.load(query_model_path))
+            model_fore_train_task_support.load_state_dict(torch.load(support_model_path))
+
+        model_fore_train_task_query.train()
         Train_target_query = Train_target_query.to(device)
         Train_input_query = Train_input_query.to(device)
-        model_fore_train_task_support.train()
-        Train_outputs_query_=model_fore_train_task_support(Train_input_query)
-        loss1 = penalty(Train_outputs_query_, Train_target_query)
-        loss2=loss_fn_1(Train_outputs_query_,Train_target_query)
-        loss_en=k*loss1+loss2
-        optimizer_fore_train_task_query.zero_grad()
-        loss_en.backward()
-        optimizer_fore_train_task_query.step()
-        Train_outputs_query=model_fore_train_task_query(Train_input_query)
-        #
-        if (i + 1) % 1 == 0:
-            end_time = time.time()
-            print(end_time - start_time)
-            print(
-                "[Epoch %d/%d] [loss_mse: %f] "
-                % (i, epoch1_train_task_query, loss2.item())
-            )
+        Train_outputs_query_ = model_fore_train_task_query(Train_input_query)
+        loss1_q = penalty(Train_outputs_query_, Train_target_query)
+        loss2_q = loss_fn_1(Train_outputs_query_, Train_target_query)
+        loss_en_q = 10 * loss1_q + loss2_q
+        optimizer_query.zero_grad()
+        loss_en_q.backward()
+        optimizer_query.step()
+        model_fore_train_task_query.eval()
+        torch.save(model_fore_train_task_query.state_dict(), query_model_path)
 
-            writer1.add_scalar("loss_mse_train_task_query", loss1.item(), epoch1_pre+i_t*(epoch1_train_task_support+epoch1_train_task_query)+epoch1_train_task_support+i)
-            writer2.add_scalar("loss_mse_train_task_query", loss2.item(), epoch1_pre + i_t * (
-                        epoch1_train_task_support + epoch1_train_task_query) + epoch1_train_task_support + i)
-    model_fore_train_task_query.eval()
-    torch.save(model_fore_train_task_query.state_dict(),"./model_fore_train_task_query.pth")
+        writer1.add_scalar(f"loss_penalty_train_task_query_{meta_tag}", loss1_q.item(), i_t)
+        writer2.add_scalar(f"loss_mse_train_task_query_{meta_tag}", loss2_q.item(), i_t)
+
+    print(f"✓ 元训练完成: {query_model_path}")
+
+
+# 1) Proposed: Pre-train 初始化后再 Meta-training（单次训练阶段的一部分）
+proposed_init_state = torch.load(PRETRAIN_MODEL_PATH)
+run_meta_training(
+    meta_tag="proposed",
+    init_state_dict=proposed_init_state,
+    support_model_path=PROPOSED_SUPPORT_MODEL_PATH,
+    query_model_path=PROPOSED_META_MODEL_PATH,
+    epoch_train_task=70000
+)
+
+# 2) Meta-only: 随机初始化后直接 Meta-training（新增真正基线）
+if TRAIN_META_ONLY_BASELINE:
+    run_meta_training(
+        meta_tag="meta_only",
+        init_state_dict=meta_only_random_init_state,
+        support_model_path=META_ONLY_SUPPORT_MODEL_PATH,
+        query_model_path=META_ONLY_MODEL_PATH,
+        epoch_train_task=70000
+    )
 
 
 ## test_task_support
@@ -617,8 +623,12 @@ for station_id in station_ids:
     for i_class in range(4):
         print(f"\n  极端天气类别 {i_class+1}:")
         
-        # 加载元训练模型作为初始化
-        model_fore_test_task_support.load_state_dict(torch.load("model_fore_train_task_query.pth"))
+        # 加载 Proposed 的元训练模型作为初始化（单次训练后，按天气快速适配）
+        model_fore_test_task_support.load_state_dict(torch.load(PROPOSED_META_MODEL_PATH))
+        # 每个场站/类别重置优化器状态，避免Adam动量跨任务串扰
+        optimizer_fore_test_task_support = torch.optim.Adam(
+            model_fore_test_task_support.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999)
+        )
         # [联邦修改] 获取该场站该类的极端天气数据
         nwp_extre_st = all_stations_full_data[station_id]['nwp_extre']
         p_extre_st = all_stations_full_data[station_id]['p_extre']
@@ -647,22 +657,20 @@ for station_id in station_ids:
         print(f"    样本数: {num_samples}")
         total_train_step=0
         total_test_step=0
-        # [修改] 增加few-shot训练轮数
-        epoch1_test_task_support = 100  # 从10改为100，增加训练充分性
+        # 论文口径：每个极端天气固定 fine-tune 50 epochs
+        epoch1_test_task_support = FEW_SHOT_EPOCHS
+        print(f"    训练轮数: {epoch1_test_task_support}")
         start_time=time.time()
         
         for i in range(epoch1_test_task_support):
-            # [修改] 添加penalty正则化
-            k=5  # 从0改为5，添加正则化避免过拟合
             Test_target_support = Test_target_support.to(device)
             Test_input_support = Test_input_support.to(device)
             model_fore_test_task_support.train()
             Test_outputs_support=model_fore_test_task_support(Test_input_support)
-            loss1 = penalty(Test_outputs_support, Test_target_support)
+            # 论文 fine-tuning：experience loss（MSE）
             loss2=loss_fn_1(Test_outputs_support,Test_target_support)
-            loss_en=k*loss1+loss2
             optimizer_fore_test_task_support.zero_grad()
-            loss_en.backward()
+            loss2.backward()
             optimizer_fore_test_task_support.step()
             
             if (i + 1) % 20 == 0:
@@ -717,8 +725,9 @@ for station_id in station_ids:
         
         print(f"  ✓ 极端类别{i_class+1}")
     
-    # 预测：元学习模型
-    model_fore_test_task_query.load_state_dict(torch.load("model_fore_train_task_query.pth"))
+    # 预测：元学习模型（meta-only baseline）
+    meta_model_path = META_ONLY_MODEL_PATH if TRAIN_META_ONLY_BASELINE else PROPOSED_META_MODEL_PATH
+    model_fore_test_task_query.load_state_dict(torch.load(meta_model_path))
     with torch.no_grad():
         Test_input_device = Test_input_c_st.to(device)
         Test_output = model_fore_test_task_query(Test_input_device)
@@ -728,10 +737,7 @@ for station_id in station_ids:
     print(f"  ✓ 元学习模型")
     
     # 预测：预训练模型
-    if USE_FEDERATION:
-        model_fore_test_task_query.load_state_dict(torch.load("model_fore_pre_federated.pth"))
-    else:
-        model_fore_test_task_query.load_state_dict(torch.load("model_fore_pre.pth"))
+    model_fore_test_task_query.load_state_dict(torch.load(PRETRAIN_MODEL_PATH))
     with torch.no_grad():
         Test_input_device = Test_input_c_st.to(device)
         Test_output = model_fore_test_task_query(Test_input_device)
@@ -747,7 +753,10 @@ print("✓ 已保存: all_stations_test_results.mat")
 
 print("\n" + "="*70)
 print("✓✓✓ 训练和测试全部完成！")
-print(f"生成的模型: {len(all_personalized_models)}个个性化模型 + 1个元学习模型 + 1个预训练模型")
+if TRAIN_META_ONLY_BASELINE:
+    print(f"生成的模型: {len(all_personalized_models)}个个性化模型 + Proposed元模型 + Meta-only元模型 + 1个预训练模型")
+else:
+    print(f"生成的模型: {len(all_personalized_models)}个个性化模型 + Proposed元模型 + 1个预训练模型")
 print("="*70)
 
 # [删除] 原来的单场站保存代码
@@ -778,4 +787,3 @@ if False:  # 禁用原代码
             train_outputs_support=Train_outputs_support.to(device0)
             train_outputs_query=Train_outputs_query.to(device0)
             pass  # [联邦修改] 原单场站保存逻辑已被新的多场站逻辑替代
-
