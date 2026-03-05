@@ -1,5 +1,5 @@
 ﻿Station,Model,MAE_%,RMSE_%,MAPE_%,R2_Score
-58,Extreme_Weather_Class1,23.6195,30.5451,94.08,-0.0317
+58,Extreme_Weather_Class1,23.6631,30.2414,96.78,-0.0113
 58,Extreme_Weather_Class2,23.21,30.0912,93.0,-0.0013
 58,Extreme_Weather_Class3,24.288,31.2426,99.48,-0.0793
 58,Extreme_Weather_Class4,21.9953,28.8971,83.99,0.0766
