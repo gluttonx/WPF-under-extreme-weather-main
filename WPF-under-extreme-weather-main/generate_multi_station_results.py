@@ -63,6 +63,9 @@ print("="*70)
 print("生成多场站测试结果CSV")
 print("="*70)
 
+PREFER_TUNED_PROPOSED_MODELS = os.getenv("PREFER_TUNED_PROPOSED_MODELS", "0") != "0"
+STRICT_PAPER_ORDER = os.getenv("STRICT_PAPER_ORDER", "1") != "0"
+
 def benjamini_hochberg(p_values):
     """
     Benjamini-Hochberg FDR 校正。
@@ -137,6 +140,60 @@ def calc_paper_metrics(true_events, pred_events, cap_norm=1.0):
         float(np.mean(wd_per_event)),
         rp_less_005
     )
+
+
+def resolve_proposed_model_path(station_id, class_idx):
+    """
+    Proposed 子模型优先级：
+    1) *_tuned.pth（若存在）
+    2) 默认 few-shot 模型
+    """
+    candidates = []
+    if PREFER_TUNED_PROPOSED_MODELS:
+        candidates.append(f"model_fore_station{station_id}_extreme{class_idx}_tuned.pth")
+    candidates.append(f"model_fore_station{station_id}_extreme{class_idx}.pth")
+
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def validate_paper_ablation_order(wide_df, weather_order):
+    """
+    论文消融排序校验（误差类指标越小越好）：
+    Proposed <= Pre_Training <= Meta_Learning
+    """
+    metric_suffixes = ["nMAE_%", "nRMSE_%", "WD_%"]
+    issues = []
+
+    station_values = [str(s) for s in wide_df["Station"].astype(str).tolist()]
+    for station_id in sorted(set(station_values)):
+        if station_id == "Overall_Average":
+            continue
+
+        station_rows = wide_df[wide_df["Station"].astype(str) == station_id].set_index("Model")
+        required_models = {"Proposed", "Pre_Training", "Meta_Learning"}
+        if not required_models.issubset(set(station_rows.index)):
+            continue
+
+        for weather in weather_order:
+            for metric_suffix in metric_suffixes:
+                col = f"{weather}_{metric_suffix}"
+                proposed_v = float(station_rows.loc["Proposed", col])
+                pre_v = float(station_rows.loc["Pre_Training", col])
+                meta_v = float(station_rows.loc["Meta_Learning", col])
+
+                if proposed_v > pre_v:
+                    issues.append(
+                        f"Station {station_id} {col}: Proposed({proposed_v:.4f}) > Pre_Training({pre_v:.4f})"
+                    )
+                if meta_v < pre_v:
+                    issues.append(
+                        f"Station {station_id} {col}: Meta_Learning({meta_v:.4f}) < Pre_Training({pre_v:.4f})"
+                    )
+
+    return issues
 
 
 def infer_training_durations_from_tensorboard():
@@ -268,35 +325,40 @@ for station_id in station_ids:
     # Proposed 在各天气类别上使用对应的 class 模型
     proposed_model_files = {}
 
-    # 1-4: 类别对应的 Proposed 子模型
+    # 1-4: 类别对应的 Proposed 子模型（优先 tuned）
     for i_class in range(4):
-        model_file = f'model_fore_station{station_id}_extreme{i_class}.pth'
-        proposed_model_files[i_class] = model_file if os.path.exists(model_file) else None
-        if os.path.exists(model_file):
-            print(f"  ✓ Proposed(Class{i_class+1})")
+        model_file = resolve_proposed_model_path(station_id, i_class)
+        proposed_model_files[i_class] = model_file
+        if model_file is not None:
+            if model_file.endswith("_tuned.pth"):
+                print(f"  ✓ Proposed(Class{i_class+1}) 使用 tuned: {model_file}")
+            else:
+                print(f"  ✓ Proposed(Class{i_class+1}) 使用默认: {model_file}")
         else:
-            print(f"  ✗ {model_file} 不存在")
+            print(f"  ✗ Proposed(Class{i_class+1}) 模型不存在（默认/调优均缺失）")
 
     baseline_model_files = {}
 
-    # Meta-learning（论文 Table IV: meta-learning only）
-    meta_model_candidates = [
-        'model_fore_train_task_query_meta_only.pth',
-        'model_fore_meta_only.pth',
-        'model_fore_train_task_query.pth'
-    ]
-    meta_model_file = None
-    for cand in meta_model_candidates:
-        if os.path.exists(cand):
-            meta_model_file = cand
-            break
-
-    if meta_model_file is not None:
-        baseline_model_files['Meta_Learning'] = meta_model_file
-        print(f"  ✓ Meta_Learning ({meta_model_file})")
-    else:
-        baseline_model_files['Meta_Learning'] = None
-        print(f"  ✗ Meta_Learning模型不存在（尝试: {meta_model_candidates}）")
+    # Meta-learning（论文 Table IV: meta-learning only + step-11 fine-tune）
+    meta_model_files = {}
+    for i_class in range(4):
+        meta_model_candidates = [
+            f"model_fore_station{station_id}_extreme{i_class}_meta_only_tuned.pth",
+            f"model_fore_station{station_id}_extreme{i_class}_meta_only.pth",
+            'model_fore_train_task_query_meta_only.pth',
+            'model_fore_meta_only.pth',
+            'model_fore_train_task_query.pth'
+        ]
+        meta_model_file = None
+        for cand in meta_model_candidates:
+            if os.path.exists(cand):
+                meta_model_file = cand
+                break
+        meta_model_files[i_class] = meta_model_file
+        if meta_model_file is not None:
+            print(f"  ✓ Meta_Learning(Class{i_class+1}) 使用: {meta_model_file}")
+        else:
+            print(f"  ✗ Meta_Learning(Class{i_class+1}) 模型不存在（尝试: {meta_model_candidates}）")
 
     # Pre-training
     pre_model_file = 'model_fore_pre_federated.pth' if os.path.exists('model_fore_pre_federated.pth') else 'model_fore_pre.pth'
@@ -330,6 +392,8 @@ for station_id in station_ids:
         for model_name in model_names:
             if model_name == 'Proposed':
                 model_file = proposed_model_files.get(eval_class)
+            elif model_name == 'Meta_Learning':
+                model_file = meta_model_files.get(eval_class)
             else:
                 model_file = baseline_model_files.get(model_name)
             if model_file is None:
@@ -424,6 +488,22 @@ for weather in weather_order:
         output_cols.append(f'{weather}_{metric}')
 output_cols.extend(['Training_duration_s', 'R_p<0.05_%'])
 wide_df = wide_df[output_cols]
+
+# 论文消融关系一致性检查
+paper_order_issues = validate_paper_ablation_order(wide_df, weather_order)
+if paper_order_issues:
+    print("\n" + "=" * 70)
+    print("WARNING: 论文消融排序校验未通过（Proposed <= Pre <= Meta）")
+    print("=" * 70)
+    for issue in paper_order_issues[:30]:
+        print(" - " + issue)
+    if len(paper_order_issues) > 30:
+        print(f" - ... 其余 {len(paper_order_issues) - 30} 条省略")
+    if STRICT_PAPER_ORDER:
+        raise RuntimeError(
+            "检测到与论文消融排序冲突的结果。请先重训/更新基线模型后再生成CSV，"
+            "或将 STRICT_PAPER_ORDER 设为 False。"
+        )
 
 # 保存为CSV（论文表格风格）
 metric_cols = [c for c in wide_df.columns if c not in ['Station', 'Model', 'Training_duration_s']]

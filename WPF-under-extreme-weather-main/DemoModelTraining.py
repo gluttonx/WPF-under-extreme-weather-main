@@ -17,6 +17,17 @@ USE_FEDERATION = True  # True=联邦多场站, False=单场站原方法
 # ========== 论文口径关键开关 ==========
 TRAIN_META_ONLY_BASELINE = True  # 新增：训练真正的 meta-learning only 基线
 FEW_SHOT_EPOCHS = 50             # 论文口径：每个极端天气 fine-tune 50 epochs
+FEW_SHOT_USE_CDRM = True
+FEW_SHOT_CDRM_WEIGHT = 5.0
+# 联邦场景下保持3场站，但按论文口径保持每轮总任务数 k*=5
+META_TASKS_PER_EPOCH = 5
+PRETRAIN_EPOCHS = 35000
+PROPOSED_META_EPOCHS = 30000
+META_ONLY_META_EPOCHS = 30000
+# 论文消融口径：Meta-only = 去掉 pre-training，其余训练机制保持一致
+META_ONLY_USE_CDRM = True
+META_ONLY_TRAIN_ALL_PARAMS = False
+META_ONLY_DISABLE_LWP = False
 
 class TemporalConvNet(nn.Module):
     def __init__(self, num_inputs, num_channels, mode='pre', kernel_size=2, dropout=0.2):
@@ -367,7 +378,7 @@ else:
 
 total_train_step=0
 total_test_step=0
-epoch1_pre = 80000
+epoch1_pre = PRETRAIN_EPOCHS
 writer1=SummaryWriter("./logs_train/loss1")
 writer2=SummaryWriter("./logs_train/loss2")
 start_time=time.time()
@@ -454,31 +465,39 @@ else:
 
 
 def sample_meta_batch():
-    """从每个场站采样任务，构造 support/query batch。"""
-    selected_tasks = []
+    """联邦任务池采样：3场站背景下，每轮总计 k*=5 个task（论文口径）。"""
+    task_pool = []
     for station_id in station_ids:
-        station_classes = random.sample(range(0, 10), 2)
+        p_conven_class_st = all_stations_full_data[station_id]['p_conven_class']
+        total_station_classes = np.size(p_conven_class_st, axis=1)
+        for i_class in range(total_station_classes):
+            task_pool.append((station_id, i_class))
+
+    tasks_per_epoch = min(META_TASKS_PER_EPOCH, len(task_pool))
+    sampled_tasks = random.sample(task_pool, tasks_per_epoch)
+
+    selected_tasks = []
+    for station_id, i_class in sampled_tasks:
         nwp_conven_class_st = all_stations_full_data[station_id]['nwp_conven_class']
         p_conven_class_st = all_stations_full_data[station_id]['p_conven_class']
 
-        for i_class in station_classes:
-            for i_nwp in range(np.size(nwp_conven_class_st, axis=1)):
-                nwp_data = nwp_conven_class_st[0, i_nwp][0, i_class]
-                num_samples = nwp_data.shape[0] // len_realp
-                nwp_reshaped = nwp_data[:num_samples * len_realp].reshape(num_samples, len_realp, 1)
-                if i_nwp == 0:
-                    nwp_conven_class_1 = nwp_reshaped
-                else:
-                    nwp_conven_class_1 = np.concatenate((nwp_conven_class_1, nwp_reshaped), axis=2)
+        for i_nwp in range(np.size(nwp_conven_class_st, axis=1)):
+            nwp_data = nwp_conven_class_st[0, i_nwp][0, i_class]
+            num_samples = nwp_data.shape[0] // len_realp
+            nwp_reshaped = nwp_data[:num_samples * len_realp].reshape(num_samples, len_realp, 1)
+            if i_nwp == 0:
+                nwp_conven_class_1 = nwp_reshaped
+            else:
+                nwp_conven_class_1 = np.concatenate((nwp_conven_class_1, nwp_reshaped), axis=2)
 
-            p_data = p_conven_class_st[0, i_class]
-            num_samples = p_data.shape[0] // len_realp
-            p_conven_class_1 = p_data[:num_samples * len_realp].reshape(num_samples, len_realp, 1)
+        p_data = p_conven_class_st[0, i_class]
+        num_samples = p_data.shape[0] // len_realp
+        p_conven_class_1 = p_data[:num_samples * len_realp].reshape(num_samples, len_realp, 1)
 
-            selected_tasks.append({
-                'nwp': nwp_conven_class_1,
-                'p': p_conven_class_1
-            })
+        selected_tasks.append({
+            'nwp': nwp_conven_class_1,
+            'p': p_conven_class_1
+        })
 
     train_input_dataset = [task['nwp'] for task in selected_tasks]
     train_target_dataset = [task['p'] for task in selected_tasks]
@@ -509,22 +528,71 @@ def sample_meta_batch():
     )
 
 
-def run_meta_training(meta_tag, init_state_dict, support_model_path, query_model_path, epoch_train_task=70000):
+def freeze_lwp_as_identity(model_instance):
+    """
+    将 LWP 固定为恒等变换(scale=1, shift=0)，用于传统 meta-learning 基线。
+    """
+    for module in model_instance.modules():
+        if isinstance(module, model.LWP):
+            with torch.no_grad():
+                module.scale.fill_(1.0)
+                module.shift.zero_()
+            module.scale.requires_grad = False
+            module.shift.requires_grad = False
+
+
+def get_meta_trainable_params(model_instance, train_all_params=False, disable_lwp=False):
+    """
+    元训练参数选择：
+    - train_all_params=True: 训练全部参数（传统 meta-learning）
+    - disable_lwp=True: 从可训练参数中移除 LWP 参数
+    """
+    if train_all_params:
+        if disable_lwp:
+            return [p for name, p in model_instance.named_parameters() if "lwp" not in name]
+        return list(model_instance.parameters())
+
+    if disable_lwp:
+        return list(model_instance.fore_baselearner.parameters())
+
+    return list(model_instance.get_trainable_params())
+
+
+def run_meta_training(
+    meta_tag,
+    init_state_dict,
+    support_model_path,
+    query_model_path,
+    epoch_train_task=70000,
+    use_cdrm=True,
+    train_all_params=False,
+    disable_lwp=False
+):
     """
     单次元训练过程：
-    - proposed: init_state_dict 为 pre-train 权重
-    - meta_only: init_state_dict 为随机初始化权重
+    - proposed: init_state_dict 为 pre-train 权重（CDRM + LWP 轻量更新）
+    - meta_only: init_state_dict 为随机初始化（传统基线：可关闭CDRM、全参数更新）
     """
     print("\n" + "=" * 70)
     print(f"开始元训练: {meta_tag}")
+    print(f"  use_cdrm={use_cdrm}, train_all_params={train_all_params}, disable_lwp={disable_lwp}")
+    total_task_pool = sum(np.size(all_stations_full_data[s]['p_conven_class'], axis=1) for s in station_ids)
+    print(f"  tasks_per_epoch={META_TASKS_PER_EPOCH}, task_pool={total_task_pool} ({len(station_ids)} stations)")
     print("=" * 70)
 
-    optimizer_support = torch.optim.Adam(
-        model_fore_train_task_support.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999)
+    support_params = get_meta_trainable_params(
+        model_fore_train_task_support,
+        train_all_params=train_all_params,
+        disable_lwp=disable_lwp
     )
-    optimizer_query = torch.optim.Adam(
-        model_fore_train_task_query.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999)
+    query_params = get_meta_trainable_params(
+        model_fore_train_task_query,
+        train_all_params=train_all_params,
+        disable_lwp=disable_lwp
     )
+
+    optimizer_support = torch.optim.Adam(support_params, lr=0.0002, betas=(0.5, 0.999))
+    optimizer_query = torch.optim.Adam(query_params, lr=0.0002, betas=(0.5, 0.999))
 
     for i_t in range(epoch_train_task):
         Train_target_support, Train_input_support, Train_target_query, Train_input_query = sample_meta_batch()
@@ -536,22 +604,30 @@ def run_meta_training(meta_tag, init_state_dict, support_model_path, query_model
         )
 
         if i_t == 0:
-            model_fore_train_task_support.load_state_dict(copy.deepcopy(init_state_dict))
+            base_state = copy.deepcopy(init_state_dict)
         else:
-            model_fore_train_task_support.load_state_dict(torch.load(query_model_path))
+            base_state = torch.load(query_model_path)
+        model_fore_train_task_support.load_state_dict(copy.deepcopy(base_state))
+
+        if disable_lwp:
+            freeze_lwp_as_identity(model_fore_train_task_support)
 
         model_fore_train_task_support.train()
         Train_target_support = Train_target_support.to(device)
         Train_input_support = Train_input_support.to(device)
         Train_outputs_support = model_fore_train_task_support(Train_input_support)
-        loss1 = penalty(Train_outputs_support, Train_target_support)
+        if use_cdrm:
+            loss1 = penalty(Train_outputs_support, Train_target_support)
+        else:
+            loss1 = torch.zeros((), dtype=torch.float32, device=device)
         loss2 = loss_fn_1(Train_outputs_support, Train_target_support)
-        loss_en = 10 * loss1 + loss2
+        loss_en = 10 * loss1 + loss2 if use_cdrm else loss2
         optimizer_support.zero_grad()
         loss_en.backward()
         optimizer_support.step()
         model_fore_train_task_support.eval()
-        torch.save(model_fore_train_task_support.state_dict(), support_model_path)
+        support_state = copy.deepcopy(model_fore_train_task_support.state_dict())
+        torch.save(support_state, support_model_path)
 
         writer1.add_scalar(f"loss_penalty_train_task_support_{meta_tag}", loss1.item(), i_t)
         writer2.add_scalar(f"loss_mse_train_task_support_{meta_tag}", loss2.item(), i_t)
@@ -562,20 +638,22 @@ def run_meta_training(meta_tag, init_state_dict, support_model_path, query_model
             "############################################################]"
         )
 
-        if i_t == 0:
-            model_fore_train_task_query.load_state_dict(copy.deepcopy(init_state_dict))
-            model_fore_train_task_support.load_state_dict(torch.load(support_model_path))
-        else:
-            model_fore_train_task_query.load_state_dict(torch.load(query_model_path))
-            model_fore_train_task_support.load_state_dict(torch.load(support_model_path))
+        # 严格 support->query 链路：query 以本轮 support 更新后的参数为起点
+        model_fore_train_task_query.load_state_dict(copy.deepcopy(support_state))
+
+        if disable_lwp:
+            freeze_lwp_as_identity(model_fore_train_task_query)
 
         model_fore_train_task_query.train()
         Train_target_query = Train_target_query.to(device)
         Train_input_query = Train_input_query.to(device)
         Train_outputs_query_ = model_fore_train_task_query(Train_input_query)
-        loss1_q = penalty(Train_outputs_query_, Train_target_query)
+        if use_cdrm:
+            loss1_q = penalty(Train_outputs_query_, Train_target_query)
+        else:
+            loss1_q = torch.zeros((), dtype=torch.float32, device=device)
         loss2_q = loss_fn_1(Train_outputs_query_, Train_target_query)
-        loss_en_q = 10 * loss1_q + loss2_q
+        loss_en_q = 10 * loss1_q + loss2_q if use_cdrm else loss2_q
         optimizer_query.zero_grad()
         loss_en_q.backward()
         optimizer_query.step()
@@ -595,25 +673,68 @@ run_meta_training(
     init_state_dict=proposed_init_state,
     support_model_path=PROPOSED_SUPPORT_MODEL_PATH,
     query_model_path=PROPOSED_META_MODEL_PATH,
-    epoch_train_task=70000
+    epoch_train_task=PROPOSED_META_EPOCHS,
+    use_cdrm=True,
+    train_all_params=False,
+    disable_lwp=False
 )
 
-# 2) Meta-only: 随机初始化后直接 Meta-training（新增真正基线）
+# 2) Meta-only: 随机初始化后直接 Meta-training（严格按论文消融，不继承Proposed稳定化策略）
 if TRAIN_META_ONLY_BASELINE:
     run_meta_training(
         meta_tag="meta_only",
         init_state_dict=meta_only_random_init_state,
         support_model_path=META_ONLY_SUPPORT_MODEL_PATH,
         query_model_path=META_ONLY_MODEL_PATH,
-        epoch_train_task=70000
+        epoch_train_task=META_ONLY_META_EPOCHS,
+        use_cdrm=META_ONLY_USE_CDRM,
+        train_all_params=META_ONLY_TRAIN_ALL_PARAMS,
+        disable_lwp=META_ONLY_DISABLE_LWP
     )
 
 
 ## test_task_support
-print("##################################################################——————————test_task_support（Few-shot适应：3场站×4类=12个模型）——————————############################################################")
+few_shot_model_count = len(station_ids) * 4 * (2 if TRAIN_META_ONLY_BASELINE else 1)
+print(f"##################################################################——————————test_task_support（Few-shot适应：共{few_shot_model_count}个模型）——————————############################################################")
 
 # ========== [联邦修改] 为所有场站的所有极端天气类别训练个性化模型 ==========
 all_personalized_models = {}  # 存储所有个性化模型
+
+def run_few_shot_adaptation(base_model_path, save_path, log_tag, model_label, test_input_tensor, test_target_tensor):
+    """针对某个初始化模型执行一次 few-shot 适应并保存。"""
+    model_fore_test_task_support.load_state_dict(torch.load(base_model_path))
+    optimizer = torch.optim.Adam(
+        model_fore_test_task_support.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999)
+    )
+
+    test_input_device = test_input_tensor.to(device)
+    test_target_device = test_target_tensor.to(device)
+
+    for i in range(FEW_SHOT_EPOCHS):
+        model_fore_test_task_support.train()
+        test_outputs_support = model_fore_test_task_support(test_input_device)
+        loss2 = loss_fn_1(test_outputs_support, test_target_device)
+        if FEW_SHOT_USE_CDRM:
+            loss1 = penalty(test_outputs_support, test_target_device)
+            loss_en = FEW_SHOT_CDRM_WEIGHT * loss1 + loss2
+        else:
+            loss1 = torch.zeros((), dtype=torch.float32, device=device)
+            loss_en = loss2
+        optimizer.zero_grad()
+        loss_en.backward()
+        optimizer.step()
+
+        if (i + 1) % 20 == 0:
+            print(
+                f"      [{model_label}] [Epoch {i+1}/{FEW_SHOT_EPOCHS}] "
+                f"[loss_mse: {loss2.item():.6f}] [loss_cdrm: {loss1.item():.6f}]"
+            )
+            writer1.add_scalar(f"loss_penalty_{log_tag}", loss1.item(), i)
+            writer2.add_scalar(f"loss_mse_{log_tag}", loss2.item(), i)
+
+    model_fore_test_task_support.eval()
+    torch.save(model_fore_test_task_support.state_dict(), save_path)
+    print(f"    ✓ 保存({model_label}): {save_path}")
 
 for station_id in station_ids:
     print(f"\n{'='*70}")
@@ -622,13 +743,7 @@ for station_id in station_ids:
     
     for i_class in range(4):
         print(f"\n  极端天气类别 {i_class+1}:")
-        
-        # 加载 Proposed 的元训练模型作为初始化（单次训练后，按天气快速适配）
-        model_fore_test_task_support.load_state_dict(torch.load(PROPOSED_META_MODEL_PATH))
-        # 每个场站/类别重置优化器状态，避免Adam动量跨任务串扰
-        optimizer_fore_test_task_support = torch.optim.Adam(
-            model_fore_test_task_support.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999)
-        )
+
         # [联邦修改] 获取该场站该类的极端天气数据
         nwp_extre_st = all_stations_full_data[station_id]['nwp_extre']
         p_extre_st = all_stations_full_data[station_id]['p_extre']
@@ -653,40 +768,37 @@ for station_id in station_ids:
         p_extre_class=p_extre_class_1
         Test_target_support = torch.tensor(p_extre_class, dtype=torch.float32)
         Test_input_support = torch.tensor(nwp_extre_class, dtype=torch.float32)
-        
+
         print(f"    样本数: {num_samples}")
-        total_train_step=0
-        total_test_step=0
-        # 论文口径：每个极端天气固定 fine-tune 50 epochs
-        epoch1_test_task_support = FEW_SHOT_EPOCHS
-        print(f"    训练轮数: {epoch1_test_task_support}")
-        start_time=time.time()
-        
-        for i in range(epoch1_test_task_support):
-            Test_target_support = Test_target_support.to(device)
-            Test_input_support = Test_input_support.to(device)
-            model_fore_test_task_support.train()
-            Test_outputs_support=model_fore_test_task_support(Test_input_support)
-            # 论文 fine-tuning：experience loss（MSE）
-            loss2=loss_fn_1(Test_outputs_support,Test_target_support)
-            optimizer_fore_test_task_support.zero_grad()
-            loss2.backward()
-            optimizer_fore_test_task_support.step()
-            
-            if (i + 1) % 20 == 0:
-                end_time = time.time()
-                print(f"      [Epoch {i+1}/{epoch1_test_task_support}] [loss_mse: {loss2.item():.6f}]")
-                writer2.add_scalar(f"loss_mse_station{station_id}_class{i_class}", loss2.item(), i)
-        
-        model_fore_test_task_support.eval()
-        
-        # [联邦修改] 保存该场站该类的个性化模型
-        model_name = f"./model_fore_station{station_id}_extreme{i_class}.pth"
-        torch.save(model_fore_test_task_support.state_dict(), model_name)
-        print(f"    ✓ 保存: {model_name}")
-        
-        # 存储该模型（用于后续评估）
-        all_personalized_models[f'{station_id}_class{i_class}'] = model_name
+        print(
+            f"    训练轮数: {FEW_SHOT_EPOCHS}, "
+            f"few-shot loss={'CDRM+MSE' if FEW_SHOT_USE_CDRM else 'MSE'}"
+        )
+
+        # Proposed：按论文流程用 proposed meta-model 做 per-class few-shot
+        proposed_model_name = f"./model_fore_station{station_id}_extreme{i_class}.pth"
+        run_few_shot_adaptation(
+            base_model_path=PROPOSED_META_MODEL_PATH,
+            save_path=proposed_model_name,
+            log_tag=f"station{station_id}_class{i_class}",
+            model_label="Proposed",
+            test_input_tensor=Test_input_support,
+            test_target_tensor=Test_target_support
+        )
+        all_personalized_models[f'proposed_{station_id}_class{i_class}'] = proposed_model_name
+
+        # Meta-only：同口径执行 step-11 few-shot，确保与论文消融对齐
+        if TRAIN_META_ONLY_BASELINE:
+            meta_only_model_name = f"./model_fore_station{station_id}_extreme{i_class}_meta_only.pth"
+            run_few_shot_adaptation(
+                base_model_path=META_ONLY_MODEL_PATH,
+                save_path=meta_only_model_name,
+                log_tag=f"meta_only_station{station_id}_class{i_class}",
+                model_label="Meta-only",
+                test_input_tensor=Test_input_support,
+                test_target_tensor=Test_target_support
+            )
+            all_personalized_models[f'meta_only_{station_id}_class{i_class}'] = meta_only_model_name
 
 writer1.close()
 writer2.close()
@@ -754,7 +866,7 @@ print("✓ 已保存: all_stations_test_results.mat")
 print("\n" + "="*70)
 print("✓✓✓ 训练和测试全部完成！")
 if TRAIN_META_ONLY_BASELINE:
-    print(f"生成的模型: {len(all_personalized_models)}个个性化模型 + Proposed元模型 + Meta-only元模型 + 1个预训练模型")
+    print(f"生成的模型: {len(all_personalized_models)}个个性化模型（Proposed+Meta-only） + 2个元模型 + 1个预训练模型")
 else:
     print(f"生成的模型: {len(all_personalized_models)}个个性化模型 + Proposed元模型 + 1个预训练模型")
 print("="*70)
