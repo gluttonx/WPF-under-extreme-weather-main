@@ -1,0 +1,526 @@
+# Wind Power Forecasting Under Extreme Weather: a Novel Few-Shot Learning Architecture
+
+Chuanyu Xu, Shichang Cui, Lishen Wei, Bangxian Zhu, Xiaomeng Ai, Member, IEEE, Jiakun Fang, Senior Member, IEEE, and Jinyu Wen, Member, IEEE
+
+Abstract—Neural networks (NNs) based wind power forecasting (WPF) under extreme weather conditions faces challenges, including limited sample sizes, domain shift problem between conventional and extreme weather, and difficulty in generalizing across diverse extreme weather conditions. To this end, a novel few-shot learning architecture is proposed for accurate WPF under extreme weather conditions. Firstly, a novel transfer learning strategy containing cross-task meta-training is presented, which reduces sample size requirements of traditional NNs and enhances generalization across shifted domains under diverse extreme weather conditions. Secondly, to address the trade-off between underfitting in shallow NNs and overfitting in deep NNs when incorporating embedded meta-training in transfer learning, a lightweight parameter layer is included in the NN structure. The layer reduces the number of parameters that need to be trained, thereby facilitating the effective utilization of deep NNs. Additionally, the layer helps mitigate the domain shift problem by aligning the data distribution. Finally, a cross-domain risk minimization loss function is developed to enhance the robustness and generalization of the model, adopting second-order gradients to ensure consistent forecasting performance across diverse extreme weather conditions. Numerical results using realistic wind farm data show the effectiveness of the proposed method (nRMSE: $6 . 2 6 \% - 1 5 . 3 7 \%$ , reduced by $2 . 0 5 \% - 4 3 . 5 5 \%$ nMAE: $7 . 6 2 \% - 1 8 . 5 4 \%$ , reduced by $\mathbf { 0 . 8 5 \% - 4 3 . 3 9 \% }$ compared to benchmark models) and promise economic dispatch $( 3 8 . 6 9 \%$ cost reduction with equal $1 . 9 8 \%$ nRMSE improvement) due to accurately forecasting power trends and mitigating extreme errors under extreme weather conditions.
+
+Index Terms—wind power forecasting, extreme weather, fewshot learning, meta-training, domain shift.
+
+# I. INTRODUCTION
+
+W IND power generation is greatly influenced by weather,especially extreme weather [1], which poses significant supply reliability issues and scheduling challenges. Statistics indicate that $8 0 { - } 9 0 \%$ of customer outages are caused by the most impactful $2 0 \%$ of failures [2]. The increasing frequency of extreme weather [3] and growing wind power capacity further exacerbate this risk [4]. Thus, accurate wind power forecasting (WPF) under extreme weather conditions is crucial for ensuring reliable power supply and promoting the adoption of wind energy systems.
+
+Several studies have investigated WPF under extreme weather conditions. [5] proposes a physical model of wind power generation during winter extremes. However, physical methods require prior estimation of microscale wind speeds via mesoscale numerical weather prediction (NWP). NWP is based on numerous physical assumptions that are often not satisfied in practice, leading to significant forecasting errors. In contrast, neural networks (NNs) are more suitable for endto-end modeling of the complex non-linear mappings between mesoscale NWP and wind power generation [6]. [7] trains six radial basis function NN models to forecast wind power under extreme events in three regions. [8] improves a shallow concept bottleneck NN to enhance interpretability in extreme wind speed forecasting. [9] employs a large language model to annotate mutation wind power events and subsequently utilizes the entire dataset for prediction. Alternatively, probabilistic models are used to capture the uncertainty in the wind power forecast under extreme weather conditions. [10] adaptively extracts the mutation period that is indicative of extreme weather, and generates predictions via interval forecasting based on kernel density estimation. However, given that extreme weather is a low-probability, albeit critical, event [1], it is a challenge to obtain a sufficient number of samples. This can result in overfitting or even failure to generate an accurate model for NN-based and probabilistic approaches [11]. It is called the few-shot dilemma in this paper.
+
+Two main approaches exist to address this few-shot dilemma in WPF under extreme weather conditions.
+
+1) Data augmentation (DA). It can provide additional samples for training through transformation-based [12] or generation-based [13] methods. A conditional generative adversarial network generates samples for WPF in extreme weather conditions [14], and a variational auto-encoder is used for extreme wind speed forecasting [15]. However, transformation-based methods may disrupt temporal relationships or introduce additional deviations, causing augmented samples to deviate from realistic patterns in extreme weather conditions [16]. Furthermore, generation-based methods may struggle to accurately capture the complex nonlinear features and abrupt patterns of extreme weather data due to its scarcity, resulting in distorted generated samples.
+
+2) Few-shot learning. It is a machine learning approach designed to achieve strong generalization performance with very limited target-task data. It often relies on transfer learning, metric learning, and meta-learning.
+
+a) Transfer learning is a widely used strategy. By transferring models [16], samples [17], or features [18] from a source domain (i.e., a relevant and data-rich set) to the target domain (i.e., extreme weather), transfer learning effectively reduces the sample size requirements of traditional NNs. [19] extracted abrupt features as input and performed minibatch resampling of the transferred samples for probabilistic prediction in extreme events. [20] transfers the sample under cold wave weather from adjacent wind farms, and transitional weather features are transferred for probabilistic WPF under extreme events. Transfer learning has been widely applied to handle sample scarcity, such as obtaining wind speed data for new wind farms by transferring samples [21], pretraining ensemble learning architecture [22] on samples from neighboring wind farms, and transferring wind speed data across different heights [23]. However, under extreme weather conditions, the significant disparity between the target domain and the source domain may lead to transfer failure or even negative transfer [24].
+
+b) Metric learning aims to develop a distance metric that effectively integrates samples with varying similarities [25]. Clustering and multi-source domain adaptation [26] are used to measure similarity for WPF at new farms. [27] utilizes all samples for training while assigning greater loss weights to samples under extreme wind speeds. However, samples under extreme weather conditions are often located in the long tail of the data distribution. Traditional metrics may struggle in these sparse distribution intervals, compromising the generalization performance under extreme weather conditions [28].
+
+c) Meta-learning trains models to quickly adapt to new tasks with few-shot data [29]. Reptile is a meta-learning method that updates the initial parameters by averaging the differences between the trained parameters of various tasks and the initial parameters. However, the averaging strategy overlooks taskspecific differences, resulting in weak generalization. Although [30] improves the Reptile for WPF in a new wind farm by incorporating task classification and gradient-weighted initialization, Reptile still lacks fine-grained modeling of the dynamic learning process within each task. [31] employed a modelagnostic meta-learning method to correct forecasting errors under icing conditions. Although its gradient is finely updated, training with mini-batch samples makes it prone to overfitting. Moreover, meta-learning often struggles to converge across complex tasks [32], such as those involving extreme weather conditions.
+
+The above-mentioned methods have been shown to alleviate the few-shot dilemma in WPF, however, the following challenges still remain for WPF under extreme weather conditions:
+
+1) The domain shift problem in the few-shot dilemma poses a significant challenge in forecasting accuracy. The model is difficult to train with insufficient samples directly, which often leads to overfitting. Naturally, transfer learning, metric learning, or meta-learning should be adopted. However, substantial shifts exist between conventional and extreme weather, in terms of weather conditions [33], weather-power relationships [34], and power characteristics [10]. These shifts hinder model generalization and reduce forecasting accuracy under extreme weather conditions when relying on conventional weather data or knowledge to assist training [35]. This is known as the domain shift problem.
+
+2) Difficulties in generalizing across diverse extreme weather conditions. High temperatures are often associated with low wind speeds [36], frost-induced blade icing limits wind generation [37] (a key factor in the $\because 2 . 1 5 \ "$ Texas blackout, USA [38]), and cold waves or high wind can cause sharp fluctuations in power output [39]. Domain shifts across these diverse conditions further complicate generalization. Modeling each event separately requires separate source domain cleaning or pre-training [40], adding complexity of method design.
+
+To fill the two research gaps, this paper proposes a novel few-shot learning architecture for accurate day-ahead WPF under diverse extreme weather conditions, the main contributions can be concluded as follows:
+
+• A novel architecture is proposed to address the fewshot dilemma and domain shift problem in WPF under extreme weather conditions, where key innovations include: a) A meta-training strategy is integrated into general transfer learning to develop shifted-domains generalization and few-shot suitability. b) A lightweight parameter (LWP) layer aligns the shifted distribution, alleviating domain shifts. c) A cross-domain risk minimization (CDRM) loss function adopts a second-order gradient to enhance robustness and generalization ability. These elements work collectively to improve the accuracy of WPF under extreme weather conditions.   
+• Compared to traditional transfer learning, which increases the complexity and computational cost of modeling under each extreme weather condition, the proposed architecture is trained once and adapts to diverse extreme weather conditions. Specifically, the parameters are updated with out-of-task samples in meta-training, enabling multi-task learning capabilities and accurate forecasting under diverse extreme weather conditions by fine-tuning the metatrained model with a few samples.   
+The learning architecture is extended to deep neural networks, addressing the overfitting typically caused by mini-batch updates in meta-training-based methods. The special design of the trainable LWP layer reduces the number of parameters that need to be trained, facilitating effective utilization of deep NNs, which often offer superior fitting and expressive capabilities compared to shallow NNs.
+
+The remainder of this paper is organized as follows. Section II provides the domain shift problem in detail, and the overall architecture is introduced. Section III details the methodology underlying the three novel contributions, i.e., training strategy, model structure, and loss function. Section IV concludes the algorithm process. Section V discusses a case study using real operational data to validate the method in terms of effectiveness, accuracy, and low cost in optimal economic dispatch. Finally, section VI concludes the paper.
+
+# II. PROBLEM STATEMENT AND OVERALL ARCHITECTURE
+
+# A. Domain Shift Problem
+
+The goal of deep learning can be understood as inferring NN parameters to maximize the probability of target $Y$ for any input $X$ , as shown in (1).
+
+$$
+f \left( D ; [ \xi , \eta ] \right) \to \operatorname { a r g m a x } \left( P ( Y | X ) _ { [ \xi , \eta ] } \right)
+$$
+
+where $D$ is the training dataset. $[ \xi , \eta ]$ represents model parameters. $P ( { Y \vert } X )$ denotes the conditional distribution.
+
+Based on Bayes’ theorem, the conditional distribution $P ( { Y \vert } X )$ can be described by (2). NNs implicitly learn the marginal distribution $P ( X )$ , prior distribution $P ( Y )$ , and likelihood function $P ( X | Y )$ (viewed as gradient backpropagation) through large-scale datasets.
+
+$$
+P \left( Y | X \right) = \frac { P \left( X | Y \right) P \left( Y \right) } { P \left( X \right) }
+$$
+
+Domain shift arises from differences in the $P ( Y )$ , $P ( X )$ , and $P ( X | Y )$ , which complicates accurate estimation of $P ( { Y \vert } X )$ in a new domain. The corresponding shifts are known as prior, covariate, and concept shifts [41]. Moreover, the three types of shifts are particularly pronounced in extreme weather conditions, i.e., weather feature, weather-power conversion relationship, and power characteristics all shift. The accumulation of these shifts under extreme weather conditions makes accurate modeling especially challenging.
+
+# B. Overall Architecture Design
+
+WPF modeling under various extreme weather conditions requires multi-task learning capabilities. Transfer learning typically involves obtaining a model for a specific target domain through pre-training and fine-tuning, as shown in (3). Multitask learning, on the other hand, aims to adapt a model across different tasks by sharing parameters in the lower layers and employing task-specific base learners for predictions, as shown in (4).
+
+$$
+f _ { t } \to \arg \operatorname* { m i n } ( L ( F T \left( f _ { s } ( X _ { t } ) \right) , Y _ { t } ) )
+$$
+
+$$
+f _ { m t } \to \mathop { \mathrm { a r g } } \operatorname* { m i n } \sum _ { i = 1 } ^ { k } \left( L \left( f _ { m t } ( X _ { t a s k \cdot i } , [ \xi , \eta _ { t a s k \cdot i } ] \right) , Y _ { t a s k \cdot i } ) \right)
+$$
+
+where $f _ { t }$ is the target-domain model after transferring. $f _ { s }$ and $f _ { m t }$ are the source-domain and multi-task model, respectively. $X _ { t }$ and $Y _ { t }$ are inputs and labels for the source domain, respectively. $F T$ represents fine-tuning. $L$ is the loss function. $X _ { ( t a s k \cdot i ) }$ and $Y _ { \left( t a s k \cdot i \right) }$ denote inputs and labels of the $i ^ { t h }$ task, respectively. $\left[ \xi , \eta _ { t a s k \cdot i } \right]$ represents the shared parameters and task-specific parameters of task $i$ , with $k$ tasks in total.
+
+The objective of this paper is described by (5), and is to train a model $f _ { m t t }$ that can adapt to different tasks by finetuning the task-specific parameters $\eta _ { t a s k \cdot i }$ , and each target task is with a few samples and exhibits domain shift.
+
+$$
+\begin{array} { l } { { f _ { m t t } \to \mathrm { a r g } \mathrm { m i n } } } \\ { { \displaystyle \sum _ { i = 1 } ^ { k } \left( L \left( F T _ { | \eta _ { t a s k \cdot i } } \left( f _ { s \cdot m t } \left( X _ { t \cdot t a s k \cdot i } , \left[ \xi , \eta _ { t a s k \cdot i } \right] \right) \right) , Y _ { t \cdot t a s k \cdot i } \right) \right) } } \end{array}
+$$
+
+This work addresses the problem through three aspects, training strategy of $f _ { ( s \cdot m t ) }$ , model structure $[ \xi , \eta ]$ , and loss function $L$ . Fig. 1 illustrates the overall approach. To enhance forecasting accuracy under extreme weather conditions, a training strategy that integrates transfer learning and metalearning is designed. This strategy effectively mitigates the few-shot dilemma while addressing the domain shift problem across various extreme weather conditions. However, this integration introduces two additional issues: a) overfitting problem when applying deep NN in the mini-batch meta-training, and b) difficulty in generalizing across complex extreme weather conditions. To address the former, the model structure is optimized by introducing an LWP layer containing two trainable parameters, replacing the original parameters that require updates. To address the latter, a special loss function, CDRM loss function, is designed to promote cross-task generalization. Furthermore, the combination of the optimized model structure and CDRM loss function further alleviates the domain shift problem, improving forecasting performance under extreme weather conditions.
+
+![](images/e8914b616a9176a5eef7df05aabd80562415e32e438d9b6347e92d9ce620ddd4.jpg)  
+Fig. 1. The framework of the proposed method.
+
+# III. MAIN METHODOLOGY
+
+# A. Mini-Batch Across-Task Training Strategy
+
+Transfer learning can reduce the sample size requirement, but may fail when faced with the domain shift problem. Meta-learning, designed to ”learn how to learn”, operates at a conceptual level above task-specific models yet struggles to converge across complex tasks. To reduce sample size requirements of traditional NNs and enhance generalization across shifted domains under complex extreme weather conditions, this architecture integrates meta-training into transfer learning. Specifically, a cross-task parameter update method with minibatch data is embedded after pre-training in transfer learning. The process is detailed as follows:
+
+1) Model construction. A WPF NN is developed, consisting of a feature extractor (shared parameters) and a task-specific base learner.
+
+2) Source domain filtering. Clean source domain data that significantly differs from extreme weather conditions [16].
+
+3) Pre-training. Conduct the pre-train procedure as a conventional WPF task, which optimizes the shared and task-specific parameters as (6).
+
+$$
+[ \xi _ { 0 } , \eta _ { 0 } ]  [ \xi _ { 0 } , \eta _ { 0 } ] - \sigma _ { 0 } \nabla L _ { O } ( [ \xi _ { 0 } , \eta _ { 0 } ] )
+$$
+
+where $[ \xi _ { 0 } , \eta _ { 0 } ]$ represents the parameters of the feature extractor and base learner in pre-training. $\sigma _ { 0 }$ is the learning rate, and $L _ { O }$ is the loss function, which is set to MSE in this study.
+
+4) Task clustering. Divide the source domain data into $k$ tasks by an improved K-means method [42], each task containing a support set and a query set. The support and query sets must originate from the same tasks but should not share identical samples. The support set trains the model for task adaptation, while the query set, with distinct but related data, computes gradients for updating initial parameters, enhancing out-of-sample generalization.
+
+5) Model initialization. Establish NN models for the support set $F _ { S S }$ , query set $F _ { S Q }$ , and target domain $F _ { T }$ , respectively. The hypo-parameter and parameter of the above NN are similar to the pre-train model $F _ { P R E }$ .
+
+6) Support set training of $F _ { S S }$ (first epoch). Sample $k ^ { * }$ tasks from the $\mathbf { k }$ tasks and ${ n _ { 1 } } ^ { * }$ shots per task to form the support set. Update the base learner parameters $\eta _ { S S }$ by the sample shots, as shown in (7).
+
+$$
+\eta _ { S S }  \eta _ { S S } - \sigma _ { \mathrm { s s } } \nabla _ { \eta _ { S S } } L ( [ \xi _ { S S } , \eta _ { S S } ] )
+$$
+
+where the $\sigma _ { S S }$ is the learning rate of $F _ { S S }$ , $\left[ \xi _ { S S } , \eta _ { S S } \right]$ represents the parameters in $F _ { S S }$ .
+
+7) Query set training of $F _ { S Q }$ (first epoch). Sample ${ n _ { 2 } } ^ { * }$ shots from corresponding tasks in step 6) to form the query set. Calculate the gradient using the query set shots and parameters from $\left[ \xi _ { S S } , \eta _ { S S } \right]$ , then update $F _ { S Q }$ parameters as (8).
+
+$$
+[ \xi _ { S Q } , \eta _ { S Q } ]  [ \xi _ { S Q } , \eta _ { S Q } ] - \sigma _ { s q } \nabla _ { [ \xi _ { S S } , \eta _ { S S } ] } L ( [ \xi _ { S S } , \eta _ { S S } ] )
+$$
+
+where $[ \xi _ { S Q } , \eta _ { S Q } ]$ represents the parameters in $F _ { S Q }$ and $\sigma _ { s q }$ is the learning rate of $F _ { S Q }$ .
+
+8) Support set training of $F _ { S S }$ (subsequent epochs). Resample the tasks and shots as in step 6). Assign the parameter of $F _ { S Q }$ in the last epoch as (9) to $F _ { S S }$ , and update $\eta _ { S S }$ by the sample shots, as shown in (7).
+
+$$
+[ \xi _ { S S } , \eta _ { S S } ]  [ \xi _ { S Q } , \eta _ { S Q } ]
+$$
+
+9) Query set training of $F _ { S Q }$ (subsequent epochs). Repeat step 7) with resampled query set shots to further update $F _ { S Q }$ parameters as (8).
+
+10) Return to step 8) until the specified number of epochs or convergence is reached. The trained $F _ { S Q }$ is the meta-model that can quickly adapt to various extreme weather conditions only with few-shot data.
+
+11) Fine-tuning for various extreme weather conditions. Assign the trained $F _ { S Q }$ parameter to $F _ { T }$ , and update the base learner parameters for specific extreme weather using the corresponding target domain shots as (10).
+
+$$
+\begin{array} { r l r } {  { \eta _ { T } \to \eta _ { T } - \sigma _ { t } \nabla _ { \eta _ { T } } L ( [ \xi _ { T } , \eta _ { T } ] ) } } \\ & { } & { \to \eta _ { T } - \sigma _ { t } \nabla _ { \eta _ { T } } L ( [ \xi _ { S Q } , \eta _ { T } ] ) } \end{array}
+$$
+
+where $\sigma _ { t }$ is the learning rate of $F _ { T } . \ [ \xi _ { T } , \eta _ { T } ]$ represents the parameters in $F _ { T }$ .
+
+The training process is illustrated in Fig. 2. Note that the calculated gradient in steps 6) and 8) is only for $F _ { S S }$ and does not update the parameters of $F _ { S Q }$ . Each completion of steps 8) to 9) is referred to as an epoch. $F _ { S S }$ or $F _ { S Q }$ can be updated with several iterations in an epoch, respectively. The process leverages three key characteristics to achieve accurate WPF under extreme weather conditions. 1) Out-ofsample generalization. Gradients for meta-model parameter updates are calculated only by the query set, which consists of distinct but related data, preliminary improving generalization ability for unseen data. 2) Multi-shifted-task generalization. Parameter updates with out-of-task shots (compared to the previous epoch) promote cross-task generalization, further enabling quick adaptation to new tasks. The characteristics 1) and 2) progressively enhance the generalization of the model for domain shift WPF tasks. 3) Few-shot suitability. Transfer learning reduces the need for sample size. Gradient updates with few samples per epoch during meta-training adapt the modeling to few-shot extreme weather conditions.
+
+![](images/b34789b26a7eee3f37f80d31b493fce96707a29d5d3996d99ea4eb4aebffab64.jpg)  
+Fig. 2. The mini-batch multi-task training process and traditional transfer training process.
+
+# B. Heterogeneous Space Regularization by a LWP Layer
+
+Transfer learning relies on sufficiently deep NNs to extract and retain general knowledge. However, in meta-training, parameter updates with mini-batch data often result in overfitting in deep NNs. To balance the trade-off between underfitting in shallow networks and overfitting in deep NNs while integrating meta-training into transfer learning, a trainable LWP layer is designed into the NN structure. The LWP layer bridges heterogeneous feature spaces between conventional and extreme weather by normalizing both the feedforward inputs and the feedback gradients, enabling the knowledge (i.e., pre-trained parameters) from conventional weather to remain frozen. Updating only the parameters of the LWP layer reduces the parameters that need to be trained, facilitating the effective use of deep NNs. Moreover, the LWP layer learns consistent feature representations, enhancing the model to generalize across the inherent domain shift between conventional and extreme weather.
+
+The LWP layer consisting of trainable scale and shift parameters $S S$ , as shown in (11), can adjust both the marginal and conditional distributions of the input features. By adding this layer before (and after) each non-linear layer in the NN, the feedforward feature (and feedback gradients) distribution is normalized, then adapted for each specific task through the
+
+TABLE I PARAMETERS NUMBER IN DIFFERENT NETWORKS   
+
+<table><tr><td>Model</td><td>Hyper-parameters</td><td>Number of parameters</td></tr><tr><td>CNN</td><td>1 × 4 kernel, 64 channels</td><td>(4 weight of convolutional kernel+1 bias of convolutional Kernel) ×64 channels = 320</td></tr><tr><td>Full connection (FC)</td><td>64 neurons</td><td>22 Weight between input layer×64 neurons = 1408</td></tr><tr><td>LSTM</td><td>64 neurons</td><td>(22 weights for input+64 hidden states+2 biases)×64 neurons × 4 gates = 22528</td></tr><tr><td>LWP</td><td>/</td><td>22 scale parameters+22 shift parameters = 44</td></tr></table>
+
+SS parameters.
+
+$$
+y ^ { \ast } = S S _ { 1 } \times \frac { x - E \left( x ^ { \ast } \right) } { \sqrt { V a r \left( x ^ { \ast } \right) } } + S S _ { 2 }
+$$
+
+indicates that deep ReLU networks can be effectively approximated by shallower three-layer architectures with similar expressiveness.
+
+where $x ^ { * }$ and $y ^ { * }$ are the input and output of the layer, with $S S _ { 1 }$ and $S S _ { 2 }$ representing the trainable scale and shift parameters.
+
+Since the pre-train model has been optimized in conventional WPF tasks, training only the $S S$ parameters within $\xi$ enables the model to learn consistent feature representations for diverse extreme weather conditions while reducing the number of parameters to be trained. Thus, (8) is improved as (12), where gradient calculations and parameter updates are restricted to $S S _ { 1 , 2 }$ and $\eta$ , with all other parameters frozen.
+
+$$
+\begin{array} { c } { { [ S S _ { \{ 1 , 2 \} } , \eta _ { S Q } ]  [ S S _ { \{ 1 , 2 \} } , \eta _ { S Q } ] - } } \\ { { \sigma _ { s q } \nabla _ { [ S S _ { \{ 1 , 2 \} } , \eta _ { S S } ] } L ( [ \xi _ { S S } , \eta _ { S S } ] , S S _ { \{ 1 , 2 \} } ) } } \end{array}
+$$
+
+TABLE I compares the parameter counts between the LWP layer and other classic NN layers, using a 22-dimensional input as an example. The LWP layer reduces the parameter load to just $0 . 2 0 \% - 1 3 . 7 5 \%$ of the benchmark models, enabling deep NN training even in few-shot tasks. Additionally, overfitting can also be mitigated in fine-tuning process under target domain by the LWP layer, and then step 11) can be improved, involving updating the parameters of $S S _ { 1 , 2 }$ and $\eta$ by the target task as (13).
+
+$$
+\begin{array} { c } { { [ S S _ { \{ 1 , 2 \} } , \eta _ { T } ]  [ S S _ { \{ 1 , 2 \} } , \eta _ { T } ] - } } \\ { { \sigma _ { t } \nabla _ { [ S S _ { \{ 1 , 2 \} } , \eta _ { T } ] } L ( [ \xi _ { T } , \eta _ { T } ] , S S _ { \{ 1 , 2 \} } ) } } \end{array}
+$$
+
+Notably, when only linear layers exist between two LWP layers, one (the latter in this paper) can be omitted, since linear transformations do not affect data distributions. The LWP layer serves beyond traditional normalization (i.e., stabilizing training) and addresses two additional challenges: 1) mitigating overfitting in few-shot training and 2) aligning feature distributions between conventional and extreme weather conditions to reduce domain shift. To prevent overfitting, LWP employs localized training, keeping the pre-trained backbone frozen and updating only the learnable $S S$ parameters within each LWP layer. For domain shift mitigation, the lWP layer paper employs a specialized structure that aligns shifted feature distributions by placing LWP layers before and after nonlinear layers. This design ensures that both forward activations and backpropagated gradients are consistently mapped into a shared representation space, enhancing generalization across domains. Although LWP layers are uniformly placed around nonlinear layers, their placement could be further optimized based on specific activation functions, as a recent finding [43]
+
+# C. Cross-Domain Risk Minimization Loss Function
+
+While integrating meta-training into transfer learning, pretrained deep NNs may focus on extracting task-specific features in cross-task training, limiting generalization across shifted domains. To enhance the simultaneous generalization across various tasks, the CDRM loss is designed in the training process. Specifically, the crucial solution is to ensure that the model extracts invariant features, enabling an optimal predictor $[ \tilde { \xi } , \tilde { \eta } ]$ across tasks [44]. The extracted features $\psi \stackrel { \cdot } {  } \tilde { \xi } ( X )$ are invariant if the base learner $\tilde { \eta }$ is optimal for all tasks simultaneously. Extracting invariant features can also alleviate the domain shift problem under extreme weather conditions. The process is named CDRM in this paper, as shown in (14).
+
+$$
+\underset { \ b { \tilde { \eta } } } { \arg \operatorname* { m i n } } L \left( f \left( X _ { t a s k \cdot i } , \left[ \boldsymbol { \tilde { \xi } } , \boldsymbol { \tilde { \eta } } \right] \right) , Y _ { t a s k \cdot i } \right) , \mathrm { i } \in [ 1 : k ]
+$$
+
+The traditional experience loss, as shown in (15), cannot meet the CDRM.
+
+$$
+\sum _ { \mathrm { i } = 1 } ^ { \mathrm { k } } L \left( f \left( X _ { t a s k \cdot i } , \left[ \tilde { \xi } , \tilde { \eta } \right] \right) , Y _ { t a s k \cdot i } \right) , \mathrm { i } \in [ 1 : k ]
+$$
+
+The goal consists of cross-task generalization and high forecasting accuracy, which can be described as a bi-level optimization problem shown in (16). From the perspective of base learner $\tilde { \eta }$ , it seeks to minimize the total experience loss across all tasks by ensuring that the experience loss of each individual task is minimized simultaneously.
+
+$$
+\left\{ \begin{array} { l } { \displaystyle \operatorname* { m i n } \sum _ { \mathrm { i = 1 } } ^ { \mathrm { k } } L _ { t a s k \cdot i } , \mathrm { i } \in [ 1 : k ] } \\ { L _ { t a s k \cdot i } = L \left( f \left( X _ { t a s k \cdot i } , \left[ \tilde { \xi } , \tilde { \eta } \right] \right) , Y _ { t a s k \cdot i } \right) } \\ { \displaystyle s . t . \tilde { \eta } \in \arg \operatorname* { m i n } L _ { t a s k \cdot i } , \mathrm { i } \in [ 1 : k ] } \end{array} \right.
+$$
+
+The cross-task generalization constraint can be achieved by second-order gradient, which ensures the optimal consistency of the forecasting performance across diverse weather conditions. Additionally, the problem needs to be optimized in each constraint, which is challenging to solve directly. Thus, the constraint is simplified as a penalty term, as shown in (17).
+
+$$
+\operatorname* { m i n } \sum _ { \mathrm { i } = 1 } ^ { \mathrm { k } } L _ { t a s k \cdot i } + \lambda { ( \nabla _ { \eta } L _ { t a s k \cdot i } ) } ^ { 2 } , 1 \in [ 1 : k ]
+$$
+
+where $\lambda$ is the balance coefficient between experience loss and CDRM loss.
+
+To further facilitate smooth gradient descent and enhance generalization, the base learner $\tilde { \eta }$ is fixed and employs minibatch stochastic gradients. The detailed derivations and unbiased estimation proof are provided in the Appendix.A. The simplified CDRM loss is shown in (18).
+
+$$
+\begin{array} { l } { { \displaystyle L _ { C D R M } = \sum _ { \mathrm { i } = 1 } ^ { \mathrm { k } } L _ { t a s k \cdot i } + } \ } \\ { { \displaystyle \lambda \left[ \left( \nabla _ { \eta | \eta = 1 . 0 } L _ { t a s k \cdot i } ^ { \mathrm { m } } \right) \cdot \left( \nabla _ { \eta | \eta = 1 . 0 } L _ { t a s k \cdot i } ^ { n } \right) \right] } \ ~ } \\ { { \displaystyle m \neq n a n d m , n \in t a s k \cdot i } } \end{array}
+$$
+
+where $m$ and $n$ are two mini-batches among the sampled tasks.
+
+Then, the loss function in pre-train and meta-train processes should be enhanced, improving (6), (7), and (12) to (19), (20), and (21).
+
+$$
+[ \xi _ { 0 } , \eta _ { 0 } ]  [ \xi _ { 0 } , \eta _ { 0 } ] - \sigma _ { 0 } \nabla L _ { C D R M } ( [ \xi _ { 0 } , \eta _ { 0 } ] )
+$$
+
+$$
+\eta _ { S S }  \eta _ { S S } - \sigma _ { \mathrm { s s } } \nabla _ { \eta _ { S S } } L _ { C D R M } ( [ \xi _ { S S } , \eta _ { S S } ] )
+$$
+
+$$
+[ S S _ { \{ 1 , 2 \} } , \eta _ { S Q } ]  [ S S _ { \{ 1 , 2 \} } , \eta _ { S Q } ] -
+$$
+
+$$
+\begin{array} { c } { { \lfloor { S S _ { \{ 1 , 2 \} } , \eta _ { S Q } } \rfloor \to \lfloor { S S _ { \{ 1 , 2 \} } , \eta _ { S Q } } \rfloor - } } \\ { { \sigma _ { s q } \nabla _ { \left[ { S S _ { \{ 1 , 2 \} } , \eta _ { S S } } \right] } L _ { C D R M } \left( \left[ { \xi _ { S S } , \eta _ { S S } } \right] , S S _ { \{ 1 , 2 \} } \right) } } \end{array}
+$$
+
+# IV. OVERALL ALGORITHM
+
+This paper presents a novel few-shot learning architecture for WPF under extreme weather conditions, with the key innovations detailed in Section III. The overall training and corresponding parameters update process is shown in Fig. 3. In the algorithm, meta-learning is initialized with parameters from transfer learning, while support-set updates primarily serve to construct the gradient computation model for queryset training. The parameter updates are restricted to $S S _ { 1 , 2 }$ and $\eta$ after pre-training. The $L _ { C D R M }$ is applied in both pre-train and meta-train processes according to (19)-(20). In fine-tuning for specific tasks, the experience loss function is employed, with gradient updates as (13). Although studies integrating transfer learning and meta-learning exist [32], this paper further addresses domain shift and generalization challenges in WPF under extreme weather conditions. A temporal convolutional network (TCN) [45] module serves as the feature extractor. The parameters update process is demonstrated using this TCN module as a working example. The pseudo-code of the multi-task transfer learning architecture is shown in Algorithm 1. The code is open source in https://github.com/ChuanyuXu/WPF-under-extremeweather/tree/main.
+
+# V. CASE STUDY
+
+# A. Datasets and Implementation Details
+
+The data used in this study is from a wind farm located in Northeastern China, with an installed capacity of $4 0 0 . 5 \ \mathrm { M W } .$ . Given that this paper focuses on the influence of mesoscale extreme weather on wind farm generation using an end-to-end modeling framework, the wind farm is treated as a whole for prediction purposes. It spans a period from 0:00 on January 1, 2018, to 23:45 on December 31, 2019, with a 1-hour temporal resolution. The input NWP has a spatial resolution of $0 . 1 ^ { \circ } \times 0 . 1 ^ { \circ }$ (approximately $8 ~ \mathrm { k m }$ (east-west) $\times 1 1 ~ \mathrm { k m }$ (northsouth) in Northeastern China) and includes wind speed at a
+
+INPUT: The source domain and target domain dataset.   
+Learning rate $\sigma _ { 0 }$ , $\sigma _ { S S }$ , $\sigma _ { s q }$ , $\sigma _ { t }$ . Epoch number of pre-train   
+$m _ { p }$ , meta-train $m _ { m }$ , and fine-tune $m _ { f }$ . Iteration number $I _ { s }$   
+of support set training in a meta-train epoch.   
+OUTPUT: $\left( \left[ \xi _ { T } , \eta _ { T } \right] , \ S S _ { \{ 1 , 2 \} } \right)$   
+Randomly initialize $\left( [ \xi _ { 0 } , \eta _ { 0 } ] , S S _ { 1 , 2 } \right)$ ;   
+for all $i { : } = 1$ to $m _ { p }$ do Optimize $[ \xi _ { 0 } , \eta _ { 0 } ]$ as (19);   
+end for   
+for all $i { : } = 1$ to $m - m$ do if $\mathrm { { } } i { : } = { = } 1$ then Assign the parameter of $F _ { P R E }$ to $F _ { S S }$ ; else Assign the parameter of $F _ { S Q }$ to $F _ { S S }$ ; end if Resample $k ^ { * }$ tasks from the $k$ tasks and ${ n _ { 1 } } ^ { * }$ shots from each corresponding task; for all $i { : } = 1$ to $I _ { s }$ do Optimize $\eta _ { S S }$ in $F _ { S S }$ by the sampling shots as (20); end for if $\mathrm { { } } i { : } = { = } 1$ then Assign the parameter of $F _ { P R E }$ to $F _ { S S }$ ; else Assign the parameter of $F _ { S Q }$ to $F _ { S Q }$ end if Assign the parameter of $F _ { P R E }$ to $F _ { S Q }$ ; Sample ${ n _ { 2 } } ^ { * }$ shots from each corresponding task; Calculate the gradient by $F _ { S S }$ and optimize $\left[ S S _ { 1 , 2 } , \eta _ { S Q } \right]$ by the sampling shots as (21);   
+end for   
+Assign the trained parameter of $F _ { S Q }$ to $F _ { T }$ ;   
+for all $i { : } = 1$ to $m - f$ do Optimize $\left[ S S _ { 1 , 2 } , \eta _ { T } \right]$ by the shots of a specific task as (13);   
+end for
+
+height of $1 0 0 ~ \mathrm { { m } }$ , wind direction at a height of $1 0 0 ~ \mathrm { m }$ , surface pressure, humidity, and temperature. The data in 2018 is set as the training set, and 2019 is the testing set.
+
+The backbone network follows a TCN architecture. The feature extractor within this architecture consists of 7 residual modules, each containing 2 TCN layers. The TCN layer follows a ReLU activation function and dropout layer. The kernel size $^ { \prime = 2 }$ , dropout rate ${ \it \Omega } = 0 . 2$ , channel number=[128, 96, 64, 48, 32, 16, 8]. Adam is adopted as the optimizer. The learning rate $= 0 . 0 0 0 2$ , betas=[0.5, 0.999]. The pre-train epoch $\scriptstyle 1 = 8 0 0 0 0$ , and meta-train epoch $= 7 0 0 0 0$ . The iteration is 1 in the support set and query set. The cluster number $k { = } 1 0$ . $k ^ { * } { = } 5$ and ${ n _ { 1 } } ^ { * } \substack { = } { n _ { 2 } } ^ { * } \substack { = } 1 0$ in each meta-train epoch. $\lambda = 1 0$ . The training process adopts a progressive strategy, where $\lambda$ is set to 0, 1, and 5 for the first 30,000 epochs, increasing every 10,000 epochs, and then fixed at 10 from epoch 30,001 to 80,000. This gradual increase ensures that second-order gradients are only introduced after the model has reached a stable loss in the empirical loss phase, preventing early-stage instability and improving convergence reliability. The NN-related hyperparameters are determined through classical grid search method, as detailed in the Appendix.C. The hyperparameters of all NN-related benchmark methods are also selected using a classical grid search strategy without any specialized tuning. The search range was kept consistent with the proposed method. Each sample is arranged into $1 2 \times 5$ time segments (i.e., time segment length $\times \ \mathrm { N W P }$ dimension), and the samples under extreme weather conditions are arranged identically to those in conventional weather conditions to avoid separate preprocessing pipelines.
+
+![](images/b16010b7c9f6a90ef4f0ec370a3aa3f3e460c147d140de174d9b8571a4a257b6.jpg)  
+Fig. 3. The training and corresponding parameters updating process of the architecture.
+
+This paper considers four extreme weather conditions, high wind, high temperature, cold wave, and frost, defined according to the criteria of the China Meteorological Administration [46], as detailed in TABLE II. These conditions are selected for their pronounced impact on wind power generation. WPF under such complex scenarios remains challenging, and the specific effects of each condition are summarized below.
+
+• High wind: Wind speeds exceeding turbine cut-off thresholds can trigger shutdowns, particularly in onshore areas where such events are typically brief [47] can result in rapid fluctuations. This aligns with the Weibull distribution, that low probability density for extreme speeds. Consequently, turbines may experience high generation, zero generation, or power ramp events.
+
+• High temperature: Extremely high ground temperatures suppress convection, reducing wind speeds. In some regions, large diurnal temperature variations can cause short-lived valley winds. Turbines under such conditions typically exhibit low generation or brief ramping events.
+
+• Cold wave: The arrival of a cold front brings strong winds, but as cold air stabilizes, wind speeds can drop sharply or stop entirely. Higher air density during low temperatures can also boost power generation. Thus, turbines may face sharp fluctuations or prolonged low generation periods.
+
+• Frost: Frost affects blade balance, often triggering shutdowns for protection. Unlike cold waves, frost requires high humidity. Despite anti-icing measures (e.g., blade heating or coatings), effectiveness can be limited. This leads to extended periods of zero output until de-icing is complete.
+
+The normalized root mean square error (nRMSE), normalized mean absolute error (nMAE), and Wasserstein distance (WD) are adopted as the evaluation indices. The formulation is as (22), (23), and (24). The p-value significance testing, corrected using the false discovery rate (FDR) [48] to account for multiple comparisons, is employed to evaluate robustness. In this paper, the significance threshold is set at 0.05. $R _ { p < 0 . 0 5 }$ represents the proportion of samples with $\scriptstyle { p < 0 . 0 5 }$ . A value closer to 1 indicates that more samples reject the null hypothesis, suggesting a significant difference between predicted and measured values.
+
+$$
+E _ { R } = \frac { 1 } { N _ { e } } \sum _ { e = 1 } ^ { N _ { e } } { \sqrt { \frac { 1 } { N } \sum _ { \mathrm { j } = 1 } ^ { N } { \left( \frac { y _ { \mathrm { e } \cdot j } - \tilde { y } _ { \mathrm { e } \cdot j } } { C a p } \right) } ^ { 2 } } } \times 1 0 0 \%
+$$
+
+$$
+E _ { M } = \frac { 1 } { N _ { e } N } \sum _ { e = 1 } ^ { N _ { e } } \sum _ { \mathrm { j } = 1 } ^ { N } \left| \left( \frac { y _ { \mathrm { e } \cdot j } - \tilde { y } _ { \mathrm { e } \cdot j } } { C a p } \right) \right| \times 1 0 0 \%
+$$
+
+$$
+W _ { d } = \frac { 1 } { N _ { e } N } \sum _ { e = 1 } ^ { N _ { e } } \sum _ { \mathrm { j } = 1 } ^ { N } \left| \left( \frac { y _ { \mathrm { e } ( j ) } - \tilde { y } _ { \mathrm { e } ( j ) } } { C a p } \right) \right| \times 1 0 0 \%
+$$
+
+where $y _ { \mathrm { e } \cdot j }$ and $\tilde { y } _ { \mathrm { e } \cdot j }$ represent the $j ^ { t h }$ measured and forecasting power value in $e ^ { t h }$ extreme event, respectively. $y _ { \mathrm { e } ( j ) }$ represents the $j ^ { t h }$ value of $y _ { \mathrm { e } }$ sorted in ascending order, similar to $\tilde { y } _ { \mathrm { e } ( j ) }$ . Cap denotes the capacity of the wind farm. $N _ { e }$ is the number of evaluated events. $N$ is the number of evaluated time points in an event, and $N = 1 2$ in this case.
+
+The loss convergence process of the proposed method is shown in Fig. 4, with 100 points sampled from pre-training and meta-training epochs, respectively. In pre-training, the CDRM loss is gradually introduced using a warm-up strategy by progressively increasing $\lambda$ , enhancing general feature extraction. Despite some noise, the loss stabilizes after 60,000 epochs. In meta-training, cross-task updates initially cause a spike in loss due to task adaptation, which then converges after 35,000 epochs. For fine-tuning, although the model initially exhibited higher loss (the averaged loss across four extreme weather conditions), it stabilized after 50 epochs. To avoid overfitting and ensure generalization, we limit fine-tuning to 50 epochs. Despite some fluctuations, the model achieves stable convergence through the pre-training before cross-task training, LWP layer, CDRM loss, and progressive training trick.
+
+TABLE II THE DEFINITION AND REQUIREMENTS FOR TARGET DOMAIN SAMPLE OF FOUR TYPES OF EXTREME WEATHER   
+
+<table><tr><td>Extreme weather</td><td>Definition</td><td>Time proportion requirement</td><td>Extreme event ratio</td></tr><tr><td>High wind</td><td>The next-12 h average wind speed ≥ 13.9 m/s, or the instantaneous wind speed ≥ 17.2 m/s</td><td>Extreme weather exceeding 4 h within 12 h.</td><td>0.85%</td></tr><tr><td>High temperature</td><td>The next-24 h maximum temperature ≥ 35 °C.</td><td>Extreme weather exceeding 8 h within 12 h.</td><td>0.96%</td></tr><tr><td>Cold wave</td><td>Within 24 hours, minimum temperature decrease amplitude ≥ 8 , the minimum temperature ≤ 0 , and the instantaneous wind speed ≥ 10.8 m/s.</td><td>Extreme weather exceeding 8 h within 12 h.</td><td>1.14%</td></tr><tr><td>Frost</td><td>The temperature ≤ -5 °C and the humidity ≥ 80%.</td><td>Extreme weather exceeding 8 h within 12 h.</td><td>7.30%</td></tr></table>
+
+![](images/52723a0d4be1a65dc5b9e5ad7e60b1d9be70586152b6e76eab8dc636ae3f28ad.jpg)  
+Fig. 4. The MSE loss of the proposed method.
+
+# B. Effectiveness under Extreme Weather Conditions
+
+This section compares the performance of various models under extreme weather conditions, including traditional shallow NNs (LSTM, CNN, and FC, with hyperparameters listed in TABLE I), well-validated deep NNs (ResNet-18 [49], VGG11 [50], YOLOv3-Tiny [51], and LeNet-5 [52]), and nonNN methods (the wind speed-power curve (WSPC), detailed in Appendix.B). These models do not specifically account for extreme weather conditions. The models are available at https://github.com/ChuanyuXu/WPF-under-extreme-weather.
+
+To analyze the effectiveness of the proposed architecture, TABLE III summarizes the evaluation indicators of the benchmark methods and the proposed method. The traditional WSPC method outperforms NN-based benchmark models in high wind and cold wave conditionslikely because it relies solely on wind speed, avoiding the influence of variables like atmospheric pressure that remain stable over a day. This suits the sharp fluctuations typical of high wind and cold wave conditions. WSPC has limited potential for forecasting accuracy improvement as it relies only on the wind speed-power relationship and lacks adaptability to varying weather patterns. Compared with deep models, shallow models exhibit larger forecasting errors in extreme weather conditions. However, this advantage is not absolute. For instance, LSTM achieves the lowest nRMSE compared to the NN-based benchmarks in high-temperature conditions, likely due to its cross-timeseries-sample gradient propagation, which suits the relatively stable power series in such conditions. Among these NN-based benchmarks, VGG-11 performs best, achieving the lowest nRMSE in high wind, cold wave, and frost weather conditions, indicating its robustness. The backbone model, TCN, shows nRMSE values $0 . 4 7 \% { - 2 . 8 7 \% }$ higher and nMAE values $0 . 1 3 \% { - 3 . 3 8 \% }$ higher than VGG-11. However, with the proposed architecture, nRMSE is reduced by $5 . 9 7 \% - 8 . 4 1 \%$ and nMAE by $4 . 0 3 \% - 7 . 3 4 \%$ compared to VGG-11. Furthermore, statistical significance testing reveals that at least $3 0 . 4 6 \%$ of forecasts from benchmark methods exhibit significant differences from measured values, while the proposed method reduces this proportion to only $4 . 7 3 \%$ . While benchmark models are widely validated in other fields, they show significant errors under extreme weather conditions. In contrast, the proposed method consistently and robustly outperforms all benchmarks across extreme weather conditions.
+
+Regarding training duration, all models are trained on an NVIDIA V100S (32G8) GPU. While shallow NNs train faster, their accuracy is only satisfactory for specific extreme weather conditions. Additionally, it is worth noting that WPF typically adopts offline training and online prediction, with online learning still being rare in practical engineering applications. While the proposed method requires more training time than shallow networks, it shows significant improvements in prediction accuracy, and the training time of $1 5 { , } 6 7 0 { . } 6 0 \mathrm { ~ s }$ is acceptable given its substantial accuracy improvement, and its inference time (including all models in TABLE III) is under 3 s per prediction, meeting engineering requirements.
+
+To evaluate the ability of the proposed method to capture the characteristics of wind power generation under diverse extreme weather conditions, forecasts during diverse extreme weather conditions are examined, as shown in Fig. 5. The proposed method more accurately captures the wind power trends during extreme weather. For example, high wind conditions produce high generation with intermittent steep rises or falls, while high-temperature weather results in low wind speeds and generation. Under cold waves, turbines may generate more power due to higher air density, whereas frost conditions hinder turbine generation due to excessive humidity and low temperatures. In contrast, models such as TCN and VGG11 fail to accurately follow these trends, leading to larger forecasting errors. The frequency of extreme forecasting errors (defined as errors greater than $3 0 \%$ of capacity) is summarized in Fig. 6. Compared to methods that do not specifically consider extreme weather conditions, the proposed architecture more effectively tracks wind generation under extreme weather conditions and significantly reduces extreme errors.
+
+TABLE III STATISTICAL EVALUATION OF THE BENCHMARK AND PROPOSED METHODS.   
+
+<table><tr><td rowspan="2"></td><td colspan="3">High wind</td><td colspan="3">High temperature</td><td colspan="3">Cold wave</td><td colspan="3">Frost</td><td rowspan="2">Training duration</td><td rowspan="2">Rp&lt;0.05</td></tr><tr><td>EM %</td><td>ER%</td><td>WD</td><td>EM %</td><td>ER%</td><td>WD</td><td>EM %</td><td>ER%</td><td>WD</td><td>EM %</td><td>ER%</td><td>WD</td></tr><tr><td>LSTM</td><td>red28.83</td><td>33.16</td><td>0.218</td><td>9.84</td><td>12.41</td><td>0.065</td><td>20.81</td><td>25.20</td><td>0.152</td><td>17.76</td><td>21.20</td><td>0.147</td><td>404.6s</td><td>36.52%</td></tr><tr><td>CNN</td><td>25.82</td><td>29.04</td><td>0.238</td><td>10.46</td><td>12.67</td><td>0.087</td><td>20.76</td><td>23.56</td><td>0.159</td><td>17.04</td><td>19.27</td><td>0.142</td><td>331.88 s</td><td>49.76%</td></tr><tr><td>FC</td><td>23.58</td><td>28.23</td><td>0.197</td><td>11.47</td><td>13.42</td><td>0.097</td><td>19.42</td><td>23.44</td><td>0.154</td><td>16.98</td><td>19.42</td><td>0.143</td><td>137.14 s</td><td>42.86%</td></tr><tr><td>WSPC</td><td>20.39</td><td>24.22</td><td>0.170</td><td>12.34</td><td>114.17</td><td>0.091</td><td>18.22</td><td>22.35</td><td>0.146</td><td>20.95</td><td>23.50</td><td>00.167</td><td>/</td><td>52.41%</td></tr><tr><td>ResNet-18</td><td>22.68</td><td>27.43</td><td>0.168</td><td>9.12</td><td>12.53</td><td>0.062</td><td>19.64</td><td>24.80</td><td>0.150</td><td>15.74</td><td>19.38</td><td>0.121</td><td>13228.66 s</td><td>30.46%</td></tr><tr><td>G-11</td><td>22.71</td><td>26.95</td><td>0.177</td><td>10.29</td><td>14.00</td><td>0.071</td><td>19.29</td><td>23.43</td><td>0.150</td><td>16.03</td><td>19.20</td><td>0.131</td><td>18763.80 s</td><td>36.14%</td></tr><tr><td>YO0W3-Tiny</td><td>28.22</td><td>32.41</td><td>0.233</td><td>9.81</td><td>12.76</td><td>0.072</td><td>22.46</td><td>27.28</td><td>0.179</td><td>18.51</td><td>21.85</td><td>0.150</td><td>5373.27 s</td><td>40.96%</td></tr><tr><td>TCN</td><td>24.06</td><td>28.09</td><td>0.197</td><td>13.67</td><td>16.28</td><td>0.091</td><td>19.42</td><td>23.90</td><td>0.147</td><td>18.61</td><td>22.07</td><td>0.156</td><td>5652.60 s</td><td>45.79%</td></tr><tr><td>LeNet-5</td><td>29.13</td><td>32.82</td><td>0.235</td><td>12.74</td><td>15.02</td><td>0.108</td><td>22.29</td><td>26.32</td><td>0.187</td><td>17.37</td><td>20.45</td><td>0.146</td><td>203.91 s</td><td>45.41%</td></tr><tr><td>Proposed</td><td>15.37</td><td>18.54</td><td>0.090</td><td>6.26</td><td>7.62</td><td>0.027</td><td>12.69</td><td>15.60</td><td>0.082</td><td>10.83</td><td>13.23</td><td>0.066</td><td>15670.60 s</td><td>4.73%</td></tr></table>
+
+![](images/e36e5713b95cc578515a642786107cb50ae30fb9f1c06b43850f047c12b71f67.jpg)  
+Fig. 5. The forecasts by different methods.
+
+![](images/e4939ef5a9d2fdba663b465085a57d3e756a49958907cbd5114ea35b9c00a00b.jpg)  
+Fig. 6. Extreme error statistics of different methods.
+
+To validate the effectiveness of the proposed architecture in alleviating domain shifts, this paper employs the False Discovery Rate (FDR) and Fold Change (FC) tests [48]. FDR values below 0.05 $( \mathrm { o r } ~ \ge ~ - l o g 1 0 ( 0 . 0 5 ) { = } 1 . 3 )$ indicate a significant difference between forecasting power under extreme weather conditions and measured power under conventional weather. FC, calculated as the ratio of means, reflects the magnitude of these differences, with larger absolute values indicating greater shifts. The threshold is set to $\log 2 \left( F C \right) \ \geq \ 2$ . The results are shown in Fig. 7. The measured power under high wind, cold wave, and frost weather exhibits significant shifts from conventional weather. Under high-temperature weather, the measured power aligns more closely with conventional weather, resulting in the lowest forecast error across the four extreme weather conditions. The forecasts by proposed method accurately reflect these characteristics. However, the forecasts generated by benchmarks exhibit similarity to conventional weather across all extreme weather conditions, leading to their lower forecasting accuracy. Additionally, the evaluation results of WD confirm the effectiveness of the proposed method in mitigating distributional shifts under extreme weather conditions. The forecasts produced by the proposed method achieve WD between 0.027 and 0.09, whereas benchmark methods show significantly larger deviations, ranging from 0.062 to 0.238. Thus, the proposed method outperforms the benchmarks by effectively adapting to domain shifts in diverse extreme weather conditions.
+
+# C. Accuracy Comparison with Other Few-Shot Learning Methods and Ablation Experiments
+
+This section compares the proposed architecture with other few-shot learning methods and develops ablation experiments to assess the necessity of each module of the proposed architecture. The baseline methods include, DA method (diffusion model [53]), proposed architecture without meta-training and fine-tuning (i.e., pre-train TCN), proposed architecture without pre-training (i.e., meta-learning only), proposed architecture without meta-training (i.e., transfer learning only), proposed architecture without heterogeneous space regularization (WLWP), and proposed architecture without cross-task risk minimization loss (WCDRM). The baseline transfer learning follows a classic model transfer [16], i.e., pre-training and then fine-tuning, with hyper-parameters consistent with the proposed method. TABLE IV reports the nMAE and nRMSE results, with key findings as follows:
+
+TABLE IV STATISTICAL EVALUATION OF OTHER FEW-SHOT LEARNING METHODS AND ABLATION EXPERIMENTS.   
+
+<table><tr><td rowspan="2"></td><td colspan="2">High wind</td><td colspan="4">High temperature</td><td colspan="3">Cold wave</td><td colspan="3">Frost</td><td rowspan="2">Training</td><td rowspan="2">Rp&lt;0.05</td></tr><tr><td>EM %</td><td>ER%</td><td>WD</td><td>EM %</td><td>ER%</td><td>WD</td><td>EM %</td><td>ER%</td><td>WD</td><td>EM %</td><td>ER% WD</td><td>duration</td></tr><tr><td>DA</td><td>21.43</td><td>24.34</td><td>0.169</td><td>7.11</td><td>9.67</td><td>0.052</td><td>20.93</td><td>25.19</td><td>0.159</td><td>16.95</td><td>20.11</td><td>0.146</td><td>26712.12 s</td><td>41.76%</td></tr><tr><td>Pre-train</td><td>24.06</td><td>28.09</td><td>0.197</td><td>13.67</td><td>16.28</td><td>0.091</td><td>19.42</td><td>23.90</td><td>0.147</td><td>18.61</td><td>22.07</td><td>0.156</td><td>5652.60 s</td><td>45.79%</td></tr><tr><td>Meta-learning</td><td>58.76</td><td>61.66</td><td>0.587</td><td>18.31</td><td>21.08</td><td>0.183</td><td>55.94</td><td>59.15</td><td>0.559</td><td>27.23</td><td>30.88</td><td>0.270</td><td>8342.32 s</td><td>74.04%</td></tr><tr><td>Transfer learning</td><td>21.36</td><td>24.90</td><td>0.159</td><td>13.35</td><td>17.11</td><td>0.098</td><td>19.80</td><td>23.52</td><td>0.163</td><td>13.86</td><td>16.54</td><td>0.119</td><td>55656.01 s</td><td>36.52%</td></tr><tr><td>WLWP</td><td>37.81</td><td>45.33</td><td>0.237</td><td>11.83</td><td>15.01</td><td>0.084</td><td>23.47</td><td>28.10</td><td>0.149</td><td>16.70</td><td>20.03</td><td>0.144</td><td>16138.46 s</td><td>40.78%</td></tr><tr><td>WCDRM</td><td>27.95</td><td>32.20</td><td>0.232</td><td>15.87</td><td>19.67</td><td>0.117</td><td>25.36</td><td>31.02</td><td>0.205</td><td>18.02</td><td>21.50</td><td>0.143</td><td>12333.04 s</td><td>46.07%</td></tr><tr><td>Proposed</td><td>15.37</td><td>18.54</td><td>0.090</td><td>6.26</td><td>7.62</td><td>0.027</td><td>12.69</td><td>15.60</td><td>0.082</td><td>10.83</td><td>13.23</td><td>0.066</td><td>15670.60 s</td><td>4.73%</td></tr></table>
+
+![](images/d058eac97f7c38f5abb787a887b612155c838b8f028913cc0506a68e0be0957a.jpg)  
+Fig. 7. The FDR and FC test under diverse extreme weather conditions.
+
+1) Error reduction. After DA, error decreased under high wind, high temperatures, and frost conditions compared to training with unaugmented samples. However, for cold wave weather, nMAE increased by $1 . 5 1 \%$ and nRMSE by $1 . 2 9 \%$ . This may be due to the pattern collapse in extreme weather conditions. Specifically, generative models also face the fewshot dilemma when training data is limited and tasks are complex, they often produce only a single pattern of samples, reducing diversity and increasing forecasting errors. In contrast, the proposed architecture reduces prediction errors across extreme weather conditions, achieving nRMSE reductions of $2 . 0 5 \% { - 9 . 5 9 \% }$ and nMAE reductions of $0 . 8 5 \% 8 . 6 9 \%$ compared to the DA and pre-trained models. For the two few-shot learning methods, the nRMSE of the proposed architecture is reduced by $3 . 3 1 \% - 4 3 . 5 5 \%$ and nMAE by $3 . 0 3 \% - 4 3 . 3 9 \%$ . The minimal WD of the forecasts produced by the proposed method further validates its effectiveness in reducing forecasting errors, while statistical significance testing confirms the robustness of this error reduction.
+
+2) Multi-task generalization ability. Traditional transfer learning fails under certain extreme conditions, particularly experiencing negative transfer effects during high-temperature and cold-wave weather. While transfer learning slightly reduces errors under high wind and frost conditions, it still exhibits higher nRMSE and nMAE than the proposed architecture.
+
+![](images/51558114830b047a117bcd10c013400bdb8fc63d1fb03a2f3fd96fb83d553023.jpg)  
+Fig. 8. The MSE loss in query-set training.
+
+3) Training effectiveness. Traditional meta-learning struggles to converge or generalize across tasks. Fig. 8 illustrates the MSE loss, highlighting fluctuations and convergence difficulties in meta-training without pre-training. This is because meta-learning based on cross-task training struggles to capture generalized features in complex tasks [29]. Additionally, although incorporating the second-order gradient in the CDRM loss increases computation time, the increase in time is relatively small, as the second-order gradient computation benefits from the parameter freezing strategy and mini-batch training of meta-training. Some approximation techniques could accelerate the process but may introduce bias or hinder convergence. Given that the total training duration of 15,670.60 s remains practical for real-world applications, the approximation methods are not employed in this work.
+
+4) Module Necessity. Each module in the proposed architecture is essential. The WLWP model exhibits overfitting, with nRMSE increases of $1 7 . 2 4 \%$ during high wind and $4 . 2 \%$ during cold wave conditions. Negative transfer effects are also observed with the WCDRM model. Especially in high wind and cold wave conditions, nRMSE increased by $1 3 . 6 6 \%$ and $1 5 . 4 2 \%$ , respectively, and nMAE increased by $1 2 . 5 8 \%$ and $1 2 . 6 7 \%$ . This could be attributed to the complexity of power generation patterns under these conditions, including cut-out shutdowns from excessive wind speed, rapid power ramps, and windless periods after cold fronts. Without CDRM loss, the model struggles to generalization and cannot effectively capture these diverse generation patterns.
+
+# D. Effectiveness in Optimal Economic Dispatch
+
+To evaluate the effectiveness of the proposed architecture in optimal economic dispatch, its forecasts were integrated into an optimal dispatch model and compared with an earlystopping TCN model (with equivalent nRMSE) and a pretrained TCN model. The dispatch model, as described in [54], uses an IEEE 118-node network with wind, thermal, and load capacity ratios referring to Gansu province, China, as configured in 2023. Given the focus is not on developing a new unit commitment method, and the uncertainty boundaries are difficult to define due to limited data and sparse longterm error distributions, deterministic optimization is adopted for computational simplicity. For each forecast, a unit commitment plan is generated, followed by simulations under measured wind power where commitment plans are fixed. The nRMSE of the pre-trained TCN model was $1 8 . 1 3 \%$ , while both the early-stop TCN and proposed method achieved $1 6 . 1 5 \%$ . Unlike the early-stop TCN reducing errors uniformly, the proposed method focuses on reducing errors during extreme weather events, offering a more targeted improvement.
+
+TABLE V summarizes the cost statistics for different boundaries, while Fig. 9 illustrates the operating situation changes of the early-stop TCN and the proposed method compared to pre-train TCN. The operation situation with forecasts of the proposed method as the boundary closely aligns with measured power, achieving a $3 8 . 6 9 \%$ reduction in total cost compared to the early-stop TCN. The key driver of cost reduction lies in whether forecasting error reductions can influence unit commitment decisions. Large errors primarily lead to two issues: 1) Overestimation (Forecast $>$ measured Generation), which may result in insufficient committed generation capacity, causing load shedding and penalty costs. 2) Underestimation (Forecast $<$ measured Generation), which causes excessive committed generation, increasing wind power curtailment, thermal unit cycling costs, and unnecessary operational expenses. Traditional forecasting methods focus on overall accuracy improvements across all conditions, but the minor error reductions are often insufficient to correct inappropriate unit commitment decisions, resulting in limited cost savings. In contrast, the proposed method explicitly targets extreme weather conditions, significantly narrowing error bounds in these periods, leading to more effective cost reductions. This is further illustrated in Fig. 10 and Fig. 11. Fig. 10 shows the proposed method has the lowest extreme error proportion. Fig. 11 (error calculated as $\tilde { y } - y )$ shows the proposed method better tracks the measured power during periods prone to extreme errors. For instance, when wind speeds exceed the cut-out threshold (assuming an average wind speed above 18 $\mathrm { m / s }$ , indicating potential turbine shutdowns due to intra-farm wind speed variability), benchmark methods fail to capture this physical phenomenon, resulting in power overestimation and substantial forecasting errors. In contrast, the proposed method effectively recognizes this trend, producing lower forecasts with smaller errors. Moreover, power overestimation is critical in dispatch operations, as it may result in insufficient thermal start-up capacity and potential load shedding [55], [56]. The proposed method maintains the lowest upper error boundary across six wind speed ranges. Overall, by focusing on extreme weather conditions, which are crucial for power system dispatch, the proposed model achieves significant cost reductions.
+
+TABLE V STATISTICS ON ANNUAL TOTAL COST, OPERATING COST OF THERMAL UNITS (OC), START-UP AND SHUT-DOWN COST OF THERMAL UNITS (SSC) (MILLION CNY), CURTAILED WIND ENERGY (CWE), AND SHED LOAD ENERGY (SLE) (MILLION MWH)   
+
+<table><tr><td>Boundary</td><td>Total cost</td><td>OC</td><td>SSC</td><td>CWE</td><td>SLE</td></tr><tr><td>Pre-train TCN</td><td>10791.01</td><td>3579.11</td><td>493.97</td><td>12.50</td><td>0.470</td></tr><tr><td>Early-stop TCN</td><td>10662.12</td><td>3559.76</td><td>495.55</td><td>12.35</td><td>0.427</td></tr><tr><td>Proposed</td><td>10612.25</td><td>3549.17</td><td>490.83</td><td>12.30</td><td>0.420</td></tr><tr><td>Measured</td><td>9940.55</td><td>3532.72</td><td>490.25</td><td>11.79</td><td>0.020</td></tr></table>
+
+![](images/bd8b8cf11bf06d92fa49a3d8dd5b157afdb2fae4ffcc5b59471069c0148f9787.jpg)  
+Fig. 9. The operating situation changes of the early-stop TCN and the proposed method compared to pre-train TCN.
+
+![](images/b58678062a8962c1893672879e7277944d9dd81af9214e1e3fc03e032b16dc14.jpg)  
+Fig. 10. Extreme error statistics under different methods.
+
+Additionally, operations during an extreme cold wave day are analyzed, as shown in Fig. 12. The cold wave causes a rapid increase in wind power, which the pre-trained and earlystop TCN fail to follow, leading to excessive online capacity, higher operational costs, and substantial wind curtailment. While sudden surges make some wind curtailment inevitable, the forecasts by proposed method yielded operating costs closest to those achieved using measured power as the boundary. These results demonstrate that the proposed method can follow power trends under extreme weather conditions, reducing costs and wind curtailment in optimal economic dispatch.
+
+# VI. CONCLUSION
+
+Accurate WPF under extreme weather conditions is essential for ensuring reliable power supply and facilitating wind energy accommodation. A novel few-shot learning architecture is proposed for accurate WPF under extreme weather conditions, incorporating tailored training strategies, LWP layer structures, and optimized CDRM loss functions. The conclusions are as follows:
+
+![](images/d86c066d85031bf261ef09ea7cf20b694a6acbf83cce52cc1fa41b283f462054.jpg)  
+Fig. 11. Boxplot of errors across different measured wind speed ranges under extreme weather conditions
+
+1) The proposed architecture is effective for WPF under extreme weather conditions. Benchmark methods (including three shallow NNs, four widely validated deep-learning models, WSPC, and the backbone model), which do not specifically consider extreme weather, showed significant forecasting errors in such weather conditions. In contrast, the proposed method reduced nRMSE by $5 . 6 8 \% - 1 4 . 6 2 \%$ and nMAE by $2 . 8 6 \% - 1 3 . 7 6 \%$ . Validated by FDR and FC tests, the proposed model effectively adapts to domain shifts in extreme weather conditions, enabling accurate wind generation trends tracking and reducing extreme forecasting errors.
+
+2) The proposed architecture outperforms traditional fewshot learning approaches in error reduction, multi-task generalization, and training efficiency. It reduces nRMSE by $3 . 3 1 \%$ - $4 3 . 5 5 \%$ and nMAE by $3 . 0 3 \% \substack { - 4 3 . 3 9 \% }$ compared to transfer learning and meta-learning. Additionally, each component of the proposed architecture is necessary. Omitting meta-learning or CDRM loss results in negative transfer, while excluding the LWP layer or pre-training leads to overfitting or underfitting, respectively.
+
+3) The proposed architecture demonstrates greater effectiveness in optimal economic dispatch, compared to forecasts with the same nRMSE that focus on all time-period errors. Although both approaches reduce nRMSE by $1 . 9 8 \%$ than the baseline model, the proposed model achieves a $3 8 . 6 9 \%$ cost reduction compared to the all-time-period-focused model and incurs lower load shedding and wind curtailment. These cost savings come from improved unit commitment, driven by the ability of the proposed method to accurately track wind generation trends and reduce extreme errors under extreme weather conditions, which are critical for economic dispatch.
+
+The limitations of the proposed method include: 1) It struggles with extreme weather conditions that cause turbine damage, such as electrical short circuits during rainy weather or micro-scale lightning strikes, which are unpredictable on a day-ahead timescale. The transfer methods, designed to learn deterministic patterns, may not be suitable for such stochastic events. 2) Unseen weather (or power) patterns. If an entirely new type of extreme weather emerges that was not present in the training set, the performance of the transferred model may be compromised. 3) The method relies on NWP, which can fail if extreme weather events are misjudged. To address these, future improvements will focus on: 1) Developing an interval forecasting approach that balances coverage and bandwidth in uncertainty estimation with limited samples. 2) Zero-shot learning or data augmentation for unprecedented weather conditions. Using metric learning to construct a distance function for weather features, quantifying similarities between unseen extreme weather and historical patterns for reliable power forecasts. Data augmentation techniques have the potential to generate realistic but novel samples. 3) Introducing various
+
+![](images/2cbcabdb89996105eed6a807ddb608f692de702ab67226ab51b620db18a23832.jpg)  
+Fig. 12. Operating situation during an extreme cold wave day.
+
+NWP models, such as high-resolution forecasts and ensemble prediction systems from the European Center for MediumRange Weather Forecasts, to better capture specific weather patterns. Notably, these solutions are fully compatible with our method and can be seamlessly integrated. Additionally, two further directions will be explored: 1) Computational costs could be further optimized, especially with complex backbone models. This can be addressed by selectively placing LWP layers and approximating second-order gradient estimates. 2) A systematic evaluation of the relationship between forecasting errors and dispatch costs, analyzing how forecasting accuracy influences unit commitment, operational reserves, and cost efficiency across various grid boundaries and optimization frameworks.
+
+# VII. APPENDIX
+
+# A. Simplification Process Derivations and Unbiased Estimation Proof of the CDRM loss
+
+To further simplify CDRM loss, the base learner $\tilde { \eta }$ is fixed and the fixed-value derivative term promotes the gradient to descend smoothly. Representing NN processing as $\tilde { \eta } \circ \tilde { \xi }$ and assuming $\tilde { \eta }$ is linear in this paper, the simplification can be explained as shown in (25). Since $\eta ^ { * }$ can take any non-zero value if $Z$ is invertible, the $\eta ^ { * }$ can be fixed and (25) can be expanded to (26) (with $\eta ^ { * } { = } 1 . 0$ as an example), that has the similar structural and do not influence the performance.
+
+$$
+\begin{array} { c } { { \tilde { \eta } \circ \tilde { \xi }  ( \tilde { \eta } \circ Z ^ { - 1 } ) \circ ( Z \circ \tilde { \xi } ) } } \\ { {  \eta ^ { * } \circ \xi ^ { * } } } \end{array}
+$$
+
+$$
+\begin{array} { r l } & { \eta ^ { * } \circ \xi ^ { * }  ( \eta ^ { * } \eta ^ { * } { = } 1 . 0 ) \circ ( Z \circ \tilde { \xi } ) } \\ & {  ( \eta ^ { * } \eta ^ { * } { = } 1 . 0 ) \circ \underbrace { Z \circ \hat { \eta } } _ { \eta } \circ \underbrace { \hat { \xi } } _ { \xi } } \end{array}
+$$
+
+where the $Z \circ \hat { \eta }$ can be considered $\eta$ and $\hat { \xi }$ be considered $\xi$ in the WPF NN.
+
+A theoretical justification for the unbiased estimation of the trained parameters induced by the CDRM loss is provided. Due to current limitations in nonlinear causal inference theory, the proof is presented under a simplified linear model. Assuming the CDRM penalty term holds, the condition in (27) is satisfied for all tasks.
+
+$$
+\boldsymbol { E _ { t a s k } } \big [ \big ( \boldsymbol { \left[ \xi , \eta \right] } ^ { \top } \boldsymbol { X _ { t } } - Y _ { t } \big ) \boldsymbol { X _ { t } } \big ] = 0
+$$
+
+Assuming a model parameter $[ \xi , \eta ] _ { \mathrm { i n v } } ^ { \ast }$ exists that fully extracts invariant features, substituting it into (27) yields the (28).
+
+$$
+\begin{array} { r } { E _ { t a s k } [ ( ( [ \xi , \eta ] _ { i n v } - [ \xi , \eta ] _ { i n v } ^ { * } ) X _ { \mathrm { i n v } } + [ \xi , \eta ] _ { s p e } ^ { \top } X _ { \mathrm { s p e } } ) X _ { t } ] = 0 } \end{array}
+$$
+
+where $X _ { i n v }$ and $X _ { s p e }$ denote the invariant and task-specific feature, respectively, with $X ~ = ~ [ X _ { \mathrm { i n v } } , X _ { \mathrm { s p e } } ]$ . The $[ \xi , \eta ] _ { i n v }$ and $[ \xi , \eta ] _ { s p e }$ correspond to the trained model parameters for extracting invariant and task-specific features.
+
+For (28) to hold, the condition in (29) must be satisfied.
+
+$$
+\begin{array} { r l } & { ( [ \xi , \eta ] _ { i n v } - [ \xi , \eta ] _ { i n v } ^ { * } ) E _ { t a s k } [ X _ { \mathrm { i n v } } X _ { \mathrm { i n v } } ^ { \top } ] = 0 } \\ & {  [ \xi , \eta ] _ { i n v } = [ \xi , \eta ] _ { i n v } ^ { * } } \\ & { [ \xi , \eta ] _ { s p e } ^ { \top } E _ { t a s k } [ X _ { \mathrm { s p e } } X _ { \mathrm { s p e } } ^ { \top } ] = 0 } \\ & {  [ \xi , \eta ] _ { s p e } = 0 } \end{array}
+$$
+
+The unique solution $[ \xi , \eta ] = [ [ \xi , \eta ] _ { i n v } ^ { \ast } , 0 ]$ is an unbiased estimator, satisfying $E [ [ \xi , \eta _ { i n v } ] ] = [ \xi , \eta ] _ { i n v } ^ { * }$ .
+
+# B. Data Arrangement, Data Preparation, and Benchmarks
+
+For data arrangement, each NN-based method in this paper uses a standardized input format of $1 2 \times 5$ time segments (i.e., time segment length $\mathbf { \nabla } \times \mathbf { N W P }$ dimension) to ensure a fair comparison. While some models require special processing, such as unfolding time segments into $6 0 \times 1$ for the FC model, causal padding for TCN, and padding an extra dimension for VGG-11, these adjustments are inherent to the respective models or necessary to preserve their original architecture. These details are also reflected in the open-source benchmark models.
+
+The data preparation process primarily involves source domain filtering and task clustering (steps 2) and 4) in Section III.A). Source domain filtering follows the method in [16].
+
+1) Concatenate the input and target matrices of each training sample into a $1 2 \times 6$ matrix.
+
+2) Compute the maximum mean discrepancy (MMD) distance (detailed in [16]) between each concatenated matrix for conventional weather and all matrices for extreme weather, then calculate the average distance.
+
+3) Exclude conventional weather samples with MMD distances exceeding three times the standard deviation (based on the three times standard deviation principle).
+
+Task clustering, follows the method in [42], uses the firstorder difference of the cubic wind speed, power values, and input NWP features are extracted as clustering inputs. The training samples are then categorized into 10 categories using the improved K-means algorithm.
+
+The wind speed power curve is based on historical adjusted wind speed (where the $1 0 0 \mathrm { ~ m ~ }$ wind speed from NWP is adjusted to the hub height via classical linear regression) and corresponding power, fitted using a cubic function (derived from the physical wind speed power formula). Lower than the cutting-in wind speed or higher than the cutting-out wind speed is set as a fixed value. The model is as (30), where $v$ represents the adjusted wind speed.
+
+$$
+P _ { \mathrm { M } } = \left\{ \begin{array} { c c } { 0 } & { v < 3 } \\ { - 9 . 5 7 3 9 \times 1 0 ^ { - 4 } v ^ { 3 } + 0 . 0 2 5 4 v ^ { 2 } } & { 3 \leq v < 1 3 } \\ { - 0 . 1 0 6 v + 0 . 1 1 9 4 } & { 1 3 \leq v < 2 2 } \\ { 0 . 9 2 6 3 } & { v \geq 2 2 } \end{array} \right.
+$$
+
+The DA method utilizes an improved diffusion model [53], where NWP $( 1 2 \times 5 )$ and power $( 1 2 \times 1 )$ time segments are concatenated into a $( 1 2 \times 6 )$ matrix as input and target. Numbers 1-5 serve as conditional information for four extreme weather types and conventional conditions. Hyperparameters follow [53]. Samples for each extreme weather condition are generated until they match the number of conventional weather samples. The augmented dataset is then used as a new training set for the backbone TCN model.
+
+Additional robustness validation was conducted on a 99 MW wind farm in Gansu province, China. Despite some changes in the performance ranking of benchmark methods, the proposed method consistently demonstrated its advantage. It demonstrates its robustness and generalizability to different regional characteristics. The detailed results are available at https://github.com/ChuanyuXu/WPF-under-extreme-weather.
+
+TABLE VI THE GRID SEARCH RESULTS (MSELOSS) FOR PRE-TRAINING.   
+
+<table><tr><td></td><td rowspan="2">1</td><td rowspan="2">5</td><td rowspan="2">10</td><td rowspan="2">15</td><td rowspan="2">20</td></tr><tr><td>σ0</td></tr><tr><td>0.0001</td><td>0.01035</td><td>0.01035</td><td>0.01035</td><td>0.01078</td><td>0.01158</td></tr><tr><td>0.0002</td><td>0.01035</td><td>0.01035</td><td>0.01035</td><td>001091</td><td>0.01188</td></tr><tr><td>0.0005</td><td>0.01094</td><td>0.01096</td><td>0.01148</td><td>0.01199</td><td>0.01241</td></tr><tr><td>0.001</td><td>0.01198</td><td>0.01131</td><td>0.01171</td><td>0.01202</td><td>0.01285</td></tr></table>
+
+# C. Hyperparameter Determination
+
+The optimal clustering number of tasks $k$ , is determined using the classical elbow method [42] during the clustering phase. The results indicate that when $k { = } 1 0$ , the separation between categories stabilized, ensuring sufficient representation while avoiding insufficient intra-category sample sizes.
+
+For NN-related hyperparameters, a classical grid search is used, optimized separately for pre-training and meta-training (including fine-tuning). Due to the scarcity of extreme weather samples, a separate validation set was not feasible. Instead, 10 samples from each conventional weather type in the 2018 training set were sampled, using half for fine-tuning and the other half for validation, which was excluded from training during grid search.
+
+Regarding pre-training, the learning rate $\sigma _ { 0 }$ and balance coefficient $\lambda$ are optimized. Since pre-training involves the widest task variety (whereas meta-training iterates over sampled subsets), $\lambda$ is determined at this stage. Results (as shown in TABLE VI) indicate that $\sigma _ { 0 } { = } 0 . 0 0 0 2$ ensured rapid convergence without performance degradation, and $\lambda { = } 1 0$ achieved an optimal balance between generalization and accuracy.
+
+Regarding meta-training, the learning rates $( \sigma _ { s s } , \ \sigma _ { s q } , \ \sigma _ { t } )$ , momentum parameters $( b e t a _ { 1 } , \ b e t a _ { 2 } )$ , and the number of sampled shots $( n ^ { * } )$ and tasks $( k ^ { * } )$ are tuned. Since support and query sets in the source domain belong to the same tasks, and meta-training shares a similar parameter updating mechanism with fine-tuning, a unified learning rate is adopted. Regarding momentum, $b e t a _ { 1 }$ (first-order momentum) controls sensitivity to recent gradients, while $b e t a _ { 2 }$ (secondorder momentum) governs long-term adaptation. Given that meta-training iterates across tasks, only $b e t a _ { 1 }$ is adjusted for adaptability to new weather conditions while keeping $b e t a _ { 2 } { = } 0 . 9 9 9$ (PyTorch default) to prevent gradient oscillations. Additionally, to balance fine-tuning adaptability with sufficient samples for meta-training updates, this paper ensures the number of sampled instances matches the most abundant extreme weather type (frost, covering $7 . 3 \%$ of 8760 hourly data points, 53 segments). Thus, the combinations, $4 \times 1 3$ , $5 \times 1 0$ , $6 \times 9$ , and $7 \times 7$ $( k ^ { * } \times n ^ { * } )$ , are tested. The Grid search results are shown in TABLE VII, led to the final hyperparameters: $\sigma _ { s s } = \sigma _ { s q } = \sigma _ { t } = 0 . 0 0 0 2$ , $b e t a s _ { 1 } { = } 0 . 5$ , $k ^ { * } { = } 5$ , and $n ^ { * } { = } 1 0$ .
+
+Overall, the pre-training phase shows robustness to hyperparameter variations. Meta-training remained insensitive to learning rate, the number of sampled shots, and the number of sampled tasks. While $\beta _ { 1 }$ influenced adaptation (higher values reduced sensitivity to cross-task generalization, increasing errors in unseen weather, while lower values hindered convergence), its effect remained within an acceptable range.
+
+# VIII. ACKNOWLEDGMENT
+
+The computation is completed in the HPC Platform of Huazhong University of Science and Technology.
+
+# REFERENCES
+
+[1] A. C. R. Gonc¸alves et al., “Extreme weather events on energy systems: a comprehensive review on impacts, mitigation, and adaptation measures,” Sustainable Energy Research, vol. 11, no. 1, p. 4, 2024.   
+[2] C. Ji et al., “Large-scale data analysis of power grid resilience across multiple US service regions,” Nature Energy, vol. 1, no. 5, p. 16052, 2016.   
+[3] IPCC (Intergovernmental Panel on Climate Change), “AR6 Synthesis Report: Climate Change 2023,” Tech. Rep., 2023.   
+[4] L. Xu et al., “Resilience of renewable power systems under climate risks,” Nature Reviews Electrical Engineering, vol. 1, no. 1, pp. 53–66, 2024.   
+[5] L. Gao, T. Dasari, and J. Hong, “Wind farm icing loss forecast pertinent to winter extremes,” Sustainable Energy Technologies and Assessments, vol. 50, no. December 2021, p. 101872, 2022.   
+[6] M. Yang et al., “Review of several key processes in wind power forecasting: Mathematical formulations, scientific problems, and logical relations,” Applied Energy, vol. 377, no. PC, p. 124631, 2025.   
+[7] G. Sideratos and N. D. Hatziargyriou, “Wind power forecasting focused on extreme power system events,” IEEE Transactions on Sustainable Energy, vol. 3, no. 3, pp. 445–454, 2012.   
+[8] C. Alvarez-Rodr ´ ´ıguez et al., “Interpretable extreme wind speed prediction with concept bottleneck models,” Renewable Energy, vol. 231, no. April, p. 120935, 2024.   
+[9] Z. Duan et al., “Prompting large language model for multi-location multi-step zero-shot wind power forecasting,” Expert Systems with Applications, p. 127436, 2025.   
+[10] G. Z. Yu et al., “Ultra-Short-Term Wind Power Subsection Forecasting Method Based on Extreme Weather,” IEEE Transactions on Power Systems, vol. 38, no. 6, pp. 5045–5056, 2023.   
+[11] Y. Wang et al., “Generalizing from a few examples: A survey on fewshot learning,” ACM computing surveys (csur), vol. 53, no. 3, pp. 1–34, 2020.   
+[12] Y. Fujimoto, Y. Takahashi, and Y. Hayashi, “Alerting to rare largescale ramp events in wind power generation,” IEEE Transactions on Sustainable Energy, vol. 10, no. 1, pp. 55–65, 2018.   
+[13] L. Zhu and D. J. Hill, “Data/Model Jointly Driven High-Quality Case Generation for Power System Dynamic Stability Assessment,” IEEE Transactions on Industrial Informatics, vol. 18, no. 8, pp. 5055–5066, 2022.   
+[14] W. Deng et al., “Wind Power Interval Prediction Based on CGAN and KELM under Extreme Weather Scenarios,” in 2023 IEEE IAS Industrial and Commercial Power System Asia, I and CPS Asia 2023. IEEE, 2023, pp. 2341–2346.   
+[15] M. Vega-Bayo et al., “Improving the prediction of extreme wind speed events with generative data augmentation techniques,” Renewable Energy, vol. 221, no. November 2023, p. 119769, 2024.   
+[16] H. Yin et al., “A novel transfer learning approach for wind power prediction based on a serio-parallel deep learning architecture,” Energy, vol. 234, nov 2021.   
+[17] X. Liu, Z. Cao, and Z. Zhang, “Short-term predictions of multiple wind turbine power outputs based on deep neural networks with transfer learning,” Energy, vol. 217, feb 2021.   
+[18] Y. Liu and J. Wang, “Transfer learning based multi-layer extreme learning machine for probabilistic wind power forecasting,” Applied Energy, vol. 312, no. February, p. 118729, 2022.   
+[19] Y. Liu, J. Wang, and L. Liu, “Physics-informed reinforcement learning for probabilistic wind power forecasting under extreme events,” Applied Energy, vol. 376, p. 124068, 2024.   
+[20] Z. Cai et al., “Wind Power Loss Forecasting and Early Warning Based on Transfer Learning under Extreme Weather,” in EI2 2022 - 6th IEEE Conference on Energy Internet and Energy System Integration, 2022, pp. 2911–2915.   
+[21] J. Hu and H. Li, “A transfer learning-based scenario generation method for stochastic optimal scheduling of microgrid with newly-built wind farm,” Renewable Energy, vol. 185, pp. 1139–1151, 2022.   
+[22] Y. Sun and Z. Tian, “Solving few-shot problem in wind speed prediction: A novel transfer strategy based on decomposition and learning ensemble,” Applied Energy, vol. 377, p. 124717, 2025.   
+[23] S. Yu and R. Vautard, “A transfer method to estimate hub-height wind speed from 10 meters wind speed based on machine learning,” Renewable and Sustainable Energy Reviews, vol. 169, no. August, p. 112897, 2022.   
+[24] J. Lan et al., “Generation of power system typical operation mode samples: a generation adversarial network and model-based transfer learning approach,” Proc. CSEE, vol. 42, no. 08, pp. 2889–2900, 2022.   
+[25] Mahmut Kaya and Hasan Sakir Bilge, “Deep Metric Learning : A Survey,” Symmetry, vol. 11.9, p. 1066, 2019.   
+[26] S. Tasnim et al., “Wind power prediction in new stations based on knowledge of existing Stations: A cluster based multi source domain adaptation approach,” Knowledge-Based Systems, vol. 145, pp. 15–24, 2018.   
+[27] P. Mode´ et al., “Short-term extreme wind speed forecasting using dualoutput lstm-based regression and classification model,” Journal of Wind Engineering and Industrial Aerodynamics, vol. 259, p. 106035, 2025.   
+[28] W. Zheng et al., “Composite quantile regression extreme learning machine with feature selection for short-term wind speed forecasting: A new approach,” Energy Conversion and Management, vol. 151, pp. 737–752, nov 2017.   
+[29] C. Finn, P. Abbeel, and S. Levine, “Model-agnostic meta-learning for fast adaptation of deep networks,” in International conference on machine learning. PMLR, 2017, pp. 1126–1135.   
+[30] F. Chen et al., “A novel meta-learning approach for few-shot short-term wind power forecasting,” Applied Energy, vol. 362, no. December 2023, p. 122838, 2024.   
+[31] M. Yang et al., “A correction method for wind power forecast considering the dynamic process of wind turbine icing,” Electric Power Systems Research, vol. 246, p. 111669, 2025.   
+[32] Q. Sun et al., “Meta-transfer learning for few-shot learning,” 2019.   
+[33] L. Mahmoudi, W. Wang, and N. Ikegaya, “Comparing annual extreme winds in Iran predicted by numerical weather forecasting and GramCharlier statistical model with meteorological observation data,” Building and Environment, vol. 261, no. June, p. 111726, 2024.   
+[34] Y. Song et al., “Short-Term Power Forecasting for Wind Power Generation under Extreme Weather Conditions,” in 2023 IEEE IAS Industrial and Commercial Power System Asia, I and CPS Asia 2023, no. 5108. IEEE, 2023, pp. 1905–1911.   
+[35] I. Redko et al., “A survey on domain adaptation theory: learning bounds and theoretical guarantees,” arXiv preprint arXiv:2004.11829, 2020.   
+[36] A. Goodrick, “Study on Correlation between Wind Speed and Temperature using Information Entropy,” International Journal on Information Theory, vol. 11, pp. 1–6, jul 2022.   
+[37] S. C. Pryor and R. J. Barthelmie, “Climate change impacts on wind energy: A review,” Renewable and Sustainable Energy Reviews, vol. 14, no. 1, pp. 430–437, 2010.   
+[38] X. M. An et al., “Analysis and lessons of Texas power outage event on February 15, 2021,” Proceedings of the CSEE, vol. 41, no. 10, pp. 3407–3415, 2021.   
+[39] X. Costoya et al., “Combining offshore wind and solar photovoltaic energy to stabilize energy supply under climate change scenarios: A case study on the western Iberian Peninsula,” Renewable and Sustainable Energy Reviews, vol. 157, p. 112037, 2022.   
+[40] F. Zhuang et al., “A Comprehensive Survey on Transfer Learning,” Proceedings of the IEEE, vol. 109, no. 1, pp. 43–76, 2021.   
+[41] G. Csurka, “Domain adaptation for visual applications: A comprehensive survey,” arXiv preprint arXiv:1702.05374, 2017.   
+[42] M. Yang et al., “Power transfer characteristics in fluctuation partition algorithm for wind speed and its application to wind power forecasting,” Renewable Energy, vol. 211, pp. 582–594, 2023.   
+[43] M. J. Villani and N. Schoots, “Any deep relu network is shallow,” arXiv preprint arXiv:2306.11827, 2023.   
+[44] M. Arjovsky et al., “Invariant risk minimization,” arXiv preprint arXiv:1907.02893, 2019.   
+[45] S. Bai, J. Z. Kolter, and V. Koltun, “An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling,” 2018.   
+[46] “Meteorological Warning and Defense,” http://www.qxkp.net/zhfy/.   
+[47] P. Sheridan, “Current gust forecasting techniques, developments and challenges,” Advances in Science and Research, vol. 15, pp. 159–172, 2018.   
+[48] J. A. Osborne, “Estimating the false discovery rate using SAS,” in SAS Users Group International Proceedings, vol. 190, 2006, pp. 1–10.   
+[49] K. He et al., “Deep residual learning for image recognition,” Proceedings of the IEEE Computer Society Conference on Computer Vision and Pattern Recognition, vol. 2016-Decem, pp. 770–778, 2016.   
+[50] K. Simonyan and A. Zisserman, “Very deep convolutional networks for large-scale image recognition,” arXiv preprint arXiv:1409.1556, 2014.   
+[51] J. Redmon, “Yolov3: An incremental improvement,” arXiv preprint arXiv:1804.02767, 2018.   
+[52] Y. LeCun et al., “Gradient-based learning applied to document recognition,” Proceedings of the IEEE, vol. 86, no. 11, pp. 2278–2324, 1998.   
+[53] S. Li et al., “Scenario generation of renewable energy based on improved diffusion model,” in 2023 IEEE Sustainable Power and Energy Conference (iSPEC), 2023, pp. 1–7.   
+[54] S. Liao et al., “Chronological operation simulation framework for regional power system under high penetration of renewable energy using meteorological data,” Applied Energy, vol. 203, pp. 816–828, 2017.   
+[55] X. Chen, Y. Liu, and L. Wu, “Towards improving unit commitment economics: An add-on tailor for renewable energy and reserve predictions,” IEEE Transactions on Sustainable Energy, vol. 15, no. 4, pp. 2547–2566, 2024.   
+[56] X. Yan et al., “A cost-oriented score evaluation index to align probabilistic forecasting and uncertain decision-making in power systems,” IEEE Transactions on Power Systems, vol. 40, no. 2, pp. 1981–1984, 2025.
+
+TABLE VII THE GRID SEARCH RESULTS (MSELOSS) FOR META-TRAINING.   
+
+<table><tr><td>k* × n*</td><td colspan="4">4×13</td><td colspan="4">5×10</td></tr><tr><td>σss betast</td><td>0.0001</td><td>0.0002</td><td>0.0005</td><td>0.001</td><td>0.0001</td><td>0.0002</td><td>0.0005</td><td>0.001</td></tr><tr><td>0.3</td><td>0.00975</td><td>0.00976</td><td>0.01185</td><td>0.01091</td><td>0.00999</td><td>0.00972</td><td>0.01082</td><td>0.01197</td></tr><tr><td>0.5</td><td>0.00965</td><td>0.00965</td><td>0.00974</td><td>0.00982</td><td>0.00958</td><td>0.00958</td><td>0.00968</td><td>0.00996</td></tr><tr><td>0.7</td><td>0.00978</td><td>0.0098</td><td>0.00988</td><td>0.00996</td><td>0.00975</td><td>0.00975</td><td>0.00983</td><td>0.00993</td></tr><tr><td>0.9</td><td>0.00991</td><td>0.00992</td><td>0.00999</td><td>0.01006</td><td>0.00986</td><td>0.00987</td><td>0.00995</td><td>0.01002</td></tr><tr><td colspan="2">k*× n*</td><td colspan="3">6×9</td><td colspan="4">7×7</td></tr><tr><td>σss betasI</td><td>0.0001</td><td>0.0002</td><td>0.0005</td><td>0.001</td><td>0.0001</td><td>0.0002</td><td>0.0005</td><td>0.001</td></tr><tr><td>0.3</td><td>0.00971</td><td>0.00974</td><td>0.01004</td><td>0.01189</td><td>0.00985</td><td>0.00979</td><td>0.01099</td><td>0.01194</td></tr><tr><td>0.5</td><td>0.00971</td><td>0.00963</td><td>0.00972</td><td>0.00978</td><td>0.00966</td><td>0.00968</td><td>0.00976</td><td>0.00981</td></tr><tr><td>0.7</td><td>0.00983</td><td>0.00978</td><td>0.01085</td><td>0.01194</td><td>0.00989</td><td>0.00984</td><td>0.00991</td><td>0.00999</td></tr><tr><td>0.9</td><td>0.00996</td><td>0.00989</td><td>0.01098</td><td>0.01194</td><td>0.01001</td><td>0.00995</td><td>0.01003</td><td>0.01009</td></tr></table>

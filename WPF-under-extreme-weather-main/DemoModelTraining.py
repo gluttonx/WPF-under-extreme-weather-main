@@ -17,7 +17,7 @@ USE_FEDERATION = True  # True=联邦多场站, False=单场站原方法
 # ========== 论文口径关键开关 ==========
 TRAIN_META_ONLY_BASELINE = True  # 新增：训练真正的 meta-learning only 基线
 FEW_SHOT_EPOCHS = 50             # 论文口径：每个极端天气 fine-tune 50 epochs
-FEW_SHOT_USE_CDRM = True
+FEW_SHOT_USE_CDRM = False
 FEW_SHOT_CDRM_WEIGHT = 5.0
 # 联邦场景下保持3场站，但按论文口径保持每轮总任务数 k*=5
 META_TASKS_PER_EPOCH = 5
@@ -714,12 +714,7 @@ def run_few_shot_adaptation(base_model_path, save_path, log_tag, model_label, te
         model_fore_test_task_support.train()
         test_outputs_support = model_fore_test_task_support(test_input_device)
         loss2 = loss_fn_1(test_outputs_support, test_target_device)
-        if FEW_SHOT_USE_CDRM:
-            loss1 = penalty(test_outputs_support, test_target_device)
-            loss_en = FEW_SHOT_CDRM_WEIGHT * loss1 + loss2
-        else:
-            loss1 = torch.zeros((), dtype=torch.float32, device=device)
-            loss_en = loss2
+        loss_en = loss2
         optimizer.zero_grad()
         loss_en.backward()
         optimizer.step()
@@ -727,7 +722,7 @@ def run_few_shot_adaptation(base_model_path, save_path, log_tag, model_label, te
         if (i + 1) % 20 == 0:
             print(
                 f"      [{model_label}] [Epoch {i+1}/{FEW_SHOT_EPOCHS}] "
-                f"[loss_mse: {loss2.item():.6f}] [loss_cdrm: {loss1.item():.6f}]"
+                f"[loss_mse: {loss2.item():.6f}]"
             )
             writer1.add_scalar(f"loss_penalty_{log_tag}", loss1.item(), i)
             writer2.add_scalar(f"loss_mse_{log_tag}", loss2.item(), i)

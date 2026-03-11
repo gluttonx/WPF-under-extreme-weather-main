@@ -2,11 +2,11 @@
 你现在的角色是专注于 **极端天气下风电功率预测 (WPF)** 的顶尖 AI 算法研究员与资深架构师。
 你的首要目标是确保算法的严谨性、代码的高效性以及科研产出的高质量。
 
-# 🧠 Long-term Memory & Knowledge Graph
-- **会话初始化：** 开始任务前，不仅必须读取本文件中的 `Decision Log`，还必须静默调用 `memory` MCP 检索历史上下文（如：特定的气象特征清洗习惯、过去失败的实验参数）。
+# 🧠 Long-term memory & Knowledge Graph
+- **会话初始化：** 开始任务前，不仅必须读取本文件中的 `Decision Log`，还必须静默调用 `memory-keeper` MCP 检索历史上下文（如：特定的气象特征清洗习惯、过去失败的实验参数）。
 - **知识固化：** 若出现新约束、新模型架构决策或解决了一个顽固 Bug，任务结束前必须双线记录：
   1. 简要追加到本文件的 `Decision Log` 中。
-  2. 调用 `memory` MCP，将核心知识点结构化写入本地记忆图谱。
+  2. 调用 `memory-keeper` MCP，将核心知识点结构化写入本地记忆图谱。
 - 不删除旧决策；若失效，标记为 superseded。
 
 # 📋 Plan Mode Protocol
@@ -39,7 +39,7 @@
 ## 4. 文献解析与数据报告
 - **触发场景：** 啃读顶级期刊 PDF、分析实验数据表、撰写学术汇报。
 - **调度机制与工具协同：**
-  - **读论文：** 抛弃旧的 `pdftotext`，直接调用 `mineru` MCP 深度解析双栏 PDF，精准提取核心方法论的 LaTeX 公式与图表逻辑。
+  - **读论文：** 抛弃旧的 `pdftotext`，直接调用 `mineru` MCP 深度解析 PDF，精准提取核心方法论的 LaTeX 公式与图表逻辑。
   - **找文献：** 利用 `exa` MCP 并开启学术域名过滤，精准捕获最新顶刊顶会（包括arxiv.org、nature.com 和 ieee.org 等渠道）论文。
   - **处理数据：** 利用 `xlsx` / `docx` / `pptx` 技能进行格式化读取与规范排版输出。
 
@@ -95,3 +95,13 @@
 - 常见终端信息判定：
   - `torch/cuda` 初始化 warning 在无可用 CUDA 场景下可视为非致命；
   - 真正导致 CSV 生成中断的通常是严格排序校验触发的 `RuntimeError`。
+
+### 2026-03-10 - few-shot loss 口径对齐论文 step-11
+- `DemoModelTraining.py` 的 few-shot / fine-tune 阶段改为纯 `MSELoss`：
+  - `FEW_SHOT_USE_CDRM=False`
+  - `run_few_shot_adaptation(...)` 内不再叠加 `penalty(...)`
+- 论文口径确认：
+  - `pre-train` 和 `meta-train` 使用 `LCDRM`
+  - `fine-tuning` 使用 `experience loss`，不继续叠加 `CDRM penalty`
+- 影响：
+  - 现有 `.pth` 不再代表最新论文口径，需要重新训练后再看 `multi_station_performance.csv`
