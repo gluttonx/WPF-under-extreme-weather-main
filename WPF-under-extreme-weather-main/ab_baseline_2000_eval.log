@@ -1,0 +1,81 @@
+======================================================================
+生成多场站测试结果CSV
+======================================================================
+
+检测到每站结果文件。当前评估仍按极端天气类别重跑模型，不直接复用全年测试集预测。
+
+当前评估口径：严格联邦 baseline。Meta_Learning 行仅保留兼容占位，不再默认读取旧的 meta_only 模型。
+
+生成预测...
+
+场站 58:
+  ✓ Proposed(Class1) 使用默认: model_fore_station58_extreme0.pth
+  ✓ Proposed(Class2) 使用默认: model_fore_station58_extreme1.pth
+  ✓ Proposed(Class3) 使用默认: model_fore_station58_extreme2.pth
+  ✓ Proposed(Class4) 使用默认: model_fore_station58_extreme3.pth
+  ! Meta_Learning(Class1) 兼容回退到个性化预训练: model_fore_pre_station58_personalized.pth
+  ! Meta_Learning(Class2) 兼容回退到个性化预训练: model_fore_pre_station58_personalized.pth
+  ! Meta_Learning(Class3) 兼容回退到个性化预训练: model_fore_pre_station58_personalized.pth
+  ! Meta_Learning(Class4) 兼容回退到个性化预训练: model_fore_pre_station58_personalized.pth
+  ✓ Pre_Training 使用: model_fore_pre_station58_personalized.pth
+
+场站 59:
+  ✓ Proposed(Class1) 使用默认: model_fore_station59_extreme0.pth
+  ✓ Proposed(Class2) 使用默认: model_fore_station59_extreme1.pth
+  ✓ Proposed(Class3) 使用默认: model_fore_station59_extreme2.pth
+  ✓ Proposed(Class4) 使用默认: model_fore_station59_extreme3.pth
+  ! Meta_Learning(Class1) 兼容回退到个性化预训练: model_fore_pre_station59_personalized.pth
+  ! Meta_Learning(Class2) 兼容回退到个性化预训练: model_fore_pre_station59_personalized.pth
+  ! Meta_Learning(Class3) 兼容回退到个性化预训练: model_fore_pre_station59_personalized.pth
+  ! Meta_Learning(Class4) 兼容回退到个性化预训练: model_fore_pre_station59_personalized.pth
+  ✓ Pre_Training 使用: model_fore_pre_station59_personalized.pth
+
+场站 60:
+  ✓ Proposed(Class1) 使用默认: model_fore_station60_extreme0.pth
+  ✓ Proposed(Class2) 使用默认: model_fore_station60_extreme1.pth
+  ✓ Proposed(Class3) 使用默认: model_fore_station60_extreme2.pth
+  ✓ Proposed(Class4) 使用默认: model_fore_station60_extreme3.pth
+  ! Meta_Learning(Class1) 兼容回退到个性化预训练: model_fore_pre_station60_personalized.pth
+  ! Meta_Learning(Class2) 兼容回退到个性化预训练: model_fore_pre_station60_personalized.pth
+  ! Meta_Learning(Class3) 兼容回退到个性化预训练: model_fore_pre_station60_personalized.pth
+  ! Meta_Learning(Class4) 兼容回退到个性化预训练: model_fore_pre_station60_personalized.pth
+  ✓ Pre_Training 使用: model_fore_pre_station60_personalized.pth
+
+计算Overall Average（按Extreme_Class + Model跨3场站平均）...
+
+======================================================================
+✓✓✓ 多场站结果已生成（Table III/IV 风格）！
+======================================================================
+
+生成文件: multi_station_performance.csv
+总行数: 12
+  - 每场站: 3模型 = 3行
+  - 3场站: 9行
+  - Overall Average: 3行
+  - 总计: 12行
+
+======================================================================
+性能对比表格（横向展开）:
+======================================================================
+        Station         Model  HighWind_nMAE_%  HighWind_nRMSE_%  HighWind_WD_%  HighTemperature_nMAE_%  HighTemperature_nRMSE_%  HighTemperature_WD_%  ColdWave_nMAE_%  ColdWave_nRMSE_%  ColdWave_WD_%  Frost_nMAE_%  Frost_nRMSE_%  Frost_WD_%  Training_duration_s  R_p<0.05_%
+             58      Proposed          45.4860           46.9949        45.2642                 20.1507                  21.9830               19.5882          45.2393           48.7671        44.3572       19.3305        21.3957     18.9044                  NaN     78.7500
+             58 Meta_Learning          46.4427           48.1208        46.2592                 21.1588                  22.8402               20.5368          46.5041           50.3704        45.7764       21.0638        22.9667     20.5878                  NaN     81.2500
+             58  Pre_Training          46.4427           48.1208        46.2592                 21.1588                  22.8402               20.5368          46.5041           50.3704        45.7764       21.0638        22.9667     20.5878                  NaN     81.2500
+             59      Proposed          43.8167           45.7140        43.3361                 23.2405                  25.9125               21.9315          46.1964           49.4341        45.8594       25.6262        28.3641     24.6348                  NaN     71.2121
+             59 Meta_Learning          46.2646           48.3478        45.9119                 24.9328                  27.5055               23.6444          49.2448           52.5521        49.0962       26.3143        29.0725     25.1889                  NaN     72.7273
+             59  Pre_Training          46.2646           48.3478        45.9119                 24.9328                  27.5055               23.6444          49.2448           52.5521        49.0962       26.3143        29.0725     25.1889                  NaN     72.7273
+             60      Proposed          42.1394           44.1903        41.3119                 23.6130                  25.7515               22.7761          47.6602           48.6715        47.2381       26.7973        28.9410     25.9213                  NaN     76.8116
+             60 Meta_Learning          44.7890           46.9025        44.0790                 24.4788                  26.5695               23.6873          49.5886           50.6201        49.2034       28.5997        30.6536     27.6242                  NaN     79.7102
+             60  Pre_Training          44.7890           46.9025        44.0790                 24.4788                  26.5695               23.6873          49.5886           50.6201        49.2034       28.5997        30.6536     27.6242                  NaN     79.7102
+Overall_Average      Proposed          43.8140           45.6331        43.3041                 22.3347                  24.5490               21.4319          46.3653           48.9576        45.8182       23.9180        26.2336     23.1535                  NaN     74.7742
+Overall_Average Meta_Learning          45.8321           47.7904        45.4167                 23.5235                  25.6384               22.6228          48.4458           51.1809        48.0253       25.3259        27.5643     24.4670                  NaN     76.7832
+Overall_Average  Pre_Training          45.8321           47.7904        45.4167                 23.5235                  25.6384               22.6228          48.4458           51.1809        48.0253       25.3259        27.5643     24.4670                  NaN     76.7832
+
+======================================================================
+Overall Average（论文口径，横向展开）:
+======================================================================
+        Station         Model  HighWind_nMAE_%  HighWind_nRMSE_%  HighWind_WD_%  HighTemperature_nMAE_%  HighTemperature_nRMSE_%  HighTemperature_WD_%  ColdWave_nMAE_%  ColdWave_nRMSE_%  ColdWave_WD_%  Frost_nMAE_%  Frost_nRMSE_%  Frost_WD_%  Training_duration_s  R_p<0.05_%
+Overall_Average      Proposed          43.8140           45.6331        43.3041                 22.3347                  24.5490               21.4319          46.3653           48.9576        45.8182       23.9180        26.2336     23.1535                  NaN     74.7742
+Overall_Average Meta_Learning          45.8321           47.7904        45.4167                 23.5235                  25.6384               22.6228          48.4458           51.1809        48.0253       25.3259        27.5643     24.4670                  NaN     76.7832
+Overall_Average  Pre_Training          45.8321           47.7904        45.4167                 23.5235                  25.6384               22.6228          48.4458           51.1809        48.0253       25.3259        27.5643     24.4670                  NaN     76.7832
+======================================================================

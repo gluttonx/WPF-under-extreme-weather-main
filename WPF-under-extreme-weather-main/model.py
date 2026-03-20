@@ -25,6 +25,31 @@ class LWP(nn.Module):  # Lightweight Parameter Layer
         x_norm = (x - mean) / std
         return self.scale * x_norm + self.shift
 
+
+class SharedAdapter(nn.Module):
+    def __init__(self, num_features, bottleneck_features, dropout=0.0):
+        super(SharedAdapter, self).__init__()
+        self.down_proj = nn.Linear(num_features, bottleneck_features)
+        self.relu = nn.ReLU()
+        self.up_proj = nn.Linear(bottleneck_features, num_features)
+        self.dropout = nn.Dropout(dropout)
+        self.init_weights()
+
+    def init_weights(self):
+        self.down_proj.weight.data.normal_(0, 0.01)
+        self.down_proj.bias.data.zero_()
+        # Start near identity so pre-train/meta-train can opt into using the adapter.
+        self.up_proj.weight.data.zero_()
+        self.up_proj.bias.data.zero_()
+
+    def forward(self, x):
+        residual = x
+        x = self.down_proj(x)
+        x = self.relu(x)
+        x = self.up_proj(x)
+        x = self.dropout(x)
+        return residual + x
+
 class TemporalBlock_v2(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=2, stride=1, dilation=1, padding=0, dropout=0.2, mode='pre'):
         super(TemporalBlock_v2, self).__init__()

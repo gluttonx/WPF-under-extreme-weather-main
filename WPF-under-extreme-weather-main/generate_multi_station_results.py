@@ -13,7 +13,7 @@ import torch
 import scipy.io as scio
 from scipy import stats
 import model
-from torch.nn.utils import weight_norm
+
 
 class TemporalConvNet(nn.Module):
     def __init__(self, num_inputs, num_channels, mode='pre', kernel_size=2, dropout=0.2):
@@ -65,6 +65,14 @@ print("="*70)
 
 PREFER_TUNED_PROPOSED_MODELS = os.getenv("PREFER_TUNED_PROPOSED_MODELS", "0") != "0"
 STRICT_PAPER_ORDER = os.getenv("STRICT_PAPER_ORDER", "1") != "0"
+FED_PRETRAIN_MODEL_PATH = "model_fore_pre_federated.pth"
+LEGACY_PRETRAIN_MODEL_PATH = "model_fore_pre.pth"
+LOCAL_PRETRAIN_MODEL_TEMPLATE = "model_fore_pre_station{station_id}_local.pth"
+STATION_LOCAL_PROPOSED_META_MODEL_TEMPLATE = "model_fore_train_task_query_proposed_station{station_id}.pth"
+STATION_LOCAL_LOCAL_META_MODEL_TEMPLATE = "model_fore_train_task_query_local_meta_station{station_id}.pth"
+STATION_LOCAL_META_ONLY_MODEL_TEMPLATE = "model_fore_train_task_query_meta_only_station{station_id}.pth"
+LEGACY_META_ONLY_MODEL_PATH = "model_fore_train_task_query_meta_only.pth"
+STATION_RESULT_TEMPLATE = "station{station_id}_test_results.mat"
 
 def benjamini_hochberg(p_values):
     """
@@ -159,10 +167,88 @@ def resolve_proposed_model_path(station_id, class_idx):
     return None
 
 
+def resolve_local_meta_transfer_model_path(station_id, class_idx):
+    candidates = [
+        f"model_fore_station{station_id}_extreme{class_idx}_local_meta_tuned.pth",
+        f"model_fore_station{station_id}_extreme{class_idx}_local_meta.pth",
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def resolve_transfer_learning_model_path(station_id, class_idx):
+    candidates = [
+        f"model_fore_station{station_id}_extreme{class_idx}_transfer_only_tuned.pth",
+        f"model_fore_station{station_id}_extreme{class_idx}_transfer_only.pth",
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def resolve_output_model_names():
+    return [
+        'Proposed',
+        'Local_Meta_Transfer',
+        'Transfer_Learning',
+        'Meta_Learning',
+        'Local_PreTraining',
+    ]
+
+
+def ensure_expected_model_rows(wide_df, station_order, model_names):
+    existing = set(zip(wide_df['Station'].astype(str), wide_df['Model'].astype(str)))
+    filler_rows = []
+    fill_cols = [c for c in wide_df.columns if c not in {'Station', 'Model'}]
+
+    for station in station_order:
+        for model_name in model_names:
+            if (station, model_name) in existing:
+                continue
+            row = {'Station': station, 'Model': model_name}
+            for col in fill_cols:
+                row[col] = np.nan
+            filler_rows.append(row)
+
+    if not filler_rows:
+        return wide_df
+
+    return pd.concat([wide_df, pd.DataFrame(filler_rows)], ignore_index=True, sort=False)
+
+
+def resolve_station_pretrain_model_path(station_id):
+    candidates = [
+        LOCAL_PRETRAIN_MODEL_TEMPLATE.format(station_id=station_id),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def resolve_meta_learning_model_path(station_id, class_idx):
+    meta_model_candidates = [
+        f"model_fore_station{station_id}_extreme{class_idx}_meta_only_tuned.pth",
+        f"model_fore_station{station_id}_extreme{class_idx}_meta_only.pth",
+        STATION_LOCAL_META_ONLY_MODEL_TEMPLATE.format(station_id=station_id),
+        LEGACY_META_ONLY_MODEL_PATH,
+    ]
+    for cand in meta_model_candidates:
+        if os.path.exists(cand):
+            return cand
+    return None
+
+
 def validate_paper_ablation_order(wide_df, weather_order):
     """
-    论文消融排序校验（误差类指标越小越好）：
-    Proposed <= Pre_Training <= Meta_Learning
+    联邦多场站主消融排序校验（误差类指标越小越好）：
+    - Proposed <= Local_Meta_Transfer
+    - Local_Meta_Transfer <= Transfer_Learning
+    - Local_Meta_Transfer <= Meta_Learning
+    - Local_Meta_Transfer <= Local_PreTraining
     """
     metric_suffixes = ["nMAE_%", "nRMSE_%", "WD_%"]
     issues = []
@@ -173,7 +259,7 @@ def validate_paper_ablation_order(wide_df, weather_order):
             continue
 
         station_rows = wide_df[wide_df["Station"].astype(str) == station_id].set_index("Model")
-        required_models = {"Proposed", "Pre_Training", "Meta_Learning"}
+        required_models = {"Proposed", "Local_Meta_Transfer", "Transfer_Learning", "Meta_Learning", "Local_PreTraining"}
         if not required_models.issubset(set(station_rows.index)):
             continue
 
@@ -181,16 +267,26 @@ def validate_paper_ablation_order(wide_df, weather_order):
             for metric_suffix in metric_suffixes:
                 col = f"{weather}_{metric_suffix}"
                 proposed_v = float(station_rows.loc["Proposed", col])
-                pre_v = float(station_rows.loc["Pre_Training", col])
+                local_meta_v = float(station_rows.loc["Local_Meta_Transfer", col])
+                transfer_v = float(station_rows.loc["Transfer_Learning", col])
                 meta_v = float(station_rows.loc["Meta_Learning", col])
+                local_pre_v = float(station_rows.loc["Local_PreTraining", col])
 
-                if proposed_v > pre_v:
+                if not np.isnan(proposed_v) and not np.isnan(local_meta_v) and proposed_v > local_meta_v:
                     issues.append(
-                        f"Station {station_id} {col}: Proposed({proposed_v:.4f}) > Pre_Training({pre_v:.4f})"
+                        f"Station {station_id} {col}: Proposed({proposed_v:.4f}) > Local_Meta_Transfer({local_meta_v:.4f})"
                     )
-                if meta_v < pre_v:
+                if not np.isnan(local_meta_v) and not np.isnan(transfer_v) and local_meta_v > transfer_v:
                     issues.append(
-                        f"Station {station_id} {col}: Meta_Learning({meta_v:.4f}) < Pre_Training({pre_v:.4f})"
+                        f"Station {station_id} {col}: Local_Meta_Transfer({local_meta_v:.4f}) > Transfer_Learning({transfer_v:.4f})"
+                    )
+                if not np.isnan(local_meta_v) and not np.isnan(meta_v) and local_meta_v > meta_v:
+                    issues.append(
+                        f"Station {station_id} {col}: Local_Meta_Transfer({local_meta_v:.4f}) > Meta_Learning({meta_v:.4f})"
+                    )
+                if not np.isnan(local_meta_v) and not np.isnan(local_pre_v) and local_meta_v > local_pre_v:
+                    issues.append(
+                        f"Station {station_id} {col}: Local_Meta_Transfer({local_meta_v:.4f}) > Local_PreTraining({local_pre_v:.4f})"
                     )
 
     return issues
@@ -200,14 +296,18 @@ def infer_training_durations_from_tensorboard():
     """
     从最新 TensorBoard 事件文件推断训练时长（秒）。
     口径：
-    - Pre_Training = pre-train 阶段时长
-    - Meta_Learning = meta-only 阶段时长
-    - Proposed = pre-train + proposed meta-training + few-shot 适配总时长
+    - Proposed = fed pretrain + proposed meta + few-shot
+    - Local_Meta_Transfer = local pretrain + local meta + few-shot
+    - Transfer_Learning = local pretrain + few-shot
+    - Meta_Learning = meta-only + few-shot
+    - Local_PreTraining = local pretrain
     """
     duration_map = {
         'Proposed': np.nan,
+        'Local_Meta_Transfer': np.nan,
+        'Transfer_Learning': np.nan,
         'Meta_Learning': np.nan,
-        'Pre_Training': np.nan
+        'Local_PreTraining': np.nan,
     }
 
     try:
@@ -236,33 +336,101 @@ def infer_training_durations_from_tensorboard():
         valid = [v for v in vals if not np.isnan(v)]
         return float(max(valid)) if valid else np.nan
 
-    pretrain_sec = tag_span_seconds('loss_mse_pre')
-    proposed_meta_sec = max_valid(
-        tag_span_seconds('loss_mse_train_task_support_proposed'),
-        tag_span_seconds('loss_mse_train_task_query_proposed')
-    )
-    meta_only_sec = max_valid(
-        tag_span_seconds('loss_mse_train_task_support_meta_only'),
-        tag_span_seconds('loss_mse_train_task_query_meta_only')
-    )
-
-    few_shot_tags = sorted([t for t in scalar_tags if t.startswith('loss_mse_station')])
-    few_shot_sec = np.nan
-    if few_shot_tags:
+    def span_for_tags(tags):
         starts = []
         ends = []
-        for t in few_shot_tags:
+        for tag in tags:
+            if tag not in scalar_tags:
+                continue
+            events = ea.Scalars(tag)
+            if events:
+                starts.append(events[0].wall_time)
+                ends.append(events[-1].wall_time)
+        if starts and ends:
+            return float(max(ends) - min(starts))
+        return np.nan
+
+    pretrain_sec = tag_span_seconds('loss_mse_pre')
+    station_ids = ['58', '59', '60']
+    local_pretrain_sec = span_for_tags([
+        f'loss_mse_pre_local_station{station_id}'
+        for station_id in station_ids
+    ])
+    proposed_meta_sec = span_for_tags([
+        tag
+        for station_id in station_ids
+        for tag in [
+            f'loss_mse_train_task_support_proposed_station{station_id}',
+            f'loss_mse_train_task_query_proposed_station{station_id}',
+        ]
+    ])
+    local_meta_sec = span_for_tags([
+        tag
+        for station_id in station_ids
+        for tag in [
+            f'loss_mse_train_task_support_local_meta_station{station_id}',
+            f'loss_mse_train_task_query_local_meta_station{station_id}',
+        ]
+    ])
+    meta_only_sec = span_for_tags([
+        tag
+        for station_id in station_ids
+        for tag in [
+            f'loss_mse_train_task_support_meta_only_station{station_id}',
+            f'loss_mse_train_task_query_meta_only_station{station_id}',
+        ]
+    ])
+
+    proposed_few_shot_tags = sorted(
+        [
+            t for t in scalar_tags
+            if t.startswith('loss_mse_station') and 'meta_only' not in t
+        ]
+    )
+    proposed_few_shot_sec = np.nan
+    if proposed_few_shot_tags:
+        starts = []
+        ends = []
+        for t in proposed_few_shot_tags:
             events = ea.Scalars(t)
             if events:
                 starts.append(events[0].wall_time)
                 ends.append(events[-1].wall_time)
         if starts and ends:
-            few_shot_sec = float(max(ends) - min(starts))
+            proposed_few_shot_sec = float(max(ends) - min(starts))
 
-    duration_map['Pre_Training'] = pretrain_sec
-    duration_map['Meta_Learning'] = meta_only_sec
+    local_meta_few_shot_sec = span_for_tags(
+        [t for t in scalar_tags if t.startswith('loss_mse_local_meta_station')]
+    )
+    transfer_few_shot_sec = span_for_tags(
+        [t for t in scalar_tags if t.startswith('loss_mse_transfer_station')]
+    )
+    meta_only_few_shot_tags = sorted(
+        [t for t in scalar_tags if t.startswith('loss_mse_meta_only_station')]
+    )
+    meta_only_few_shot_sec = np.nan
+    if meta_only_few_shot_tags:
+        starts = []
+        ends = []
+        for t in meta_only_few_shot_tags:
+            events = ea.Scalars(t)
+            if events:
+                starts.append(events[0].wall_time)
+                ends.append(events[-1].wall_time)
+        if starts and ends:
+            meta_only_few_shot_sec = float(max(ends) - min(starts))
+
+    duration_map['Local_PreTraining'] = local_pretrain_sec
+    if not np.isnan(local_pretrain_sec) and not np.isnan(local_meta_sec):
+        duration_map['Local_Meta_Transfer'] = local_pretrain_sec + local_meta_sec + (0.0 if np.isnan(local_meta_few_shot_sec) else local_meta_few_shot_sec)
+    if not np.isnan(local_pretrain_sec):
+        duration_map['Transfer_Learning'] = local_pretrain_sec + (0.0 if np.isnan(transfer_few_shot_sec) else transfer_few_shot_sec)
+    if not np.isnan(meta_only_sec):
+        duration_map['Meta_Learning'] = meta_only_sec + (0.0 if np.isnan(meta_only_few_shot_sec) else meta_only_few_shot_sec)
     if not np.isnan(pretrain_sec) and not np.isnan(proposed_meta_sec):
-        duration_map['Proposed'] = pretrain_sec + proposed_meta_sec + (0.0 if np.isnan(few_shot_sec) else few_shot_sec)
+        duration_map['Proposed'] = pretrain_sec + proposed_meta_sec + (0.0 if np.isnan(proposed_few_shot_sec) else proposed_few_shot_sec)
+    elif not np.isnan(pretrain_sec):
+        duration_map['Proposed'] = pretrain_sec + (0.0 if np.isnan(proposed_few_shot_sec) else proposed_few_shot_sec)
 
     return duration_map
 
@@ -275,25 +443,33 @@ len_realp = 12
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device0 = torch.device("cpu")
 
-# 检查是否已有保存的测试结果
-if os.path.exists('all_stations_test_results.mat'):
-    print("\n从已保存的结果加载...")
-    results_mat = scio.loadmat('all_stations_test_results.mat')
-    # 这里简化处理，直接重新加载模型生成
-    print("（跳过，直接重新生成）")
-
 # 场站列表
 station_ids = ['58', '59', '60']
+meta_learning_available = all(
+    resolve_meta_learning_model_path(station_id, class_idx) is not None
+    for station_id in station_ids
+    for class_idx in range(4)
+)
+
+station_result_files = [
+    STATION_RESULT_TEMPLATE.format(station_id=station_id)
+    for station_id in station_ids
+]
+if any(os.path.exists(path) for path in station_result_files):
+    print("\n检测到每站结果文件。当前评估仍按极端天气类别重跑模型，不直接复用全年测试集预测。")
+print("\n当前评估口径：主表固定为 Proposed / Local_Meta_Transfer / Transfer_Learning / Meta_Learning / Local_PreTraining。")
+if not meta_learning_available:
+    print("注意：当前目录缺少完整 Meta_Learning 产物，对应行将以 NaN 导出。")
 
 # 输出到表格的模型名称（按论文表风格）
-model_names = [
-    'Proposed',
-    'Meta_Learning',
-    'Pre_Training'
-]
+model_names = resolve_output_model_names()
 
 # 创建模型
-model_test = model_fore(input_channel_fore=dem_realc, output_channel_fore=[128, 96, 64, 48, 32, 16, 8], mode='test_task_support')
+model_test = model_fore(
+    input_channel_fore=dem_realc,
+    output_channel_fore=[128, 96, 64, 48, 32, 16, 8],
+    mode='test_task_support',
+)
 model_test = model_test.to(device)
 model_test.eval()  # 推理必须eval，否则dropout会导致结果随机漂移
 
@@ -321,52 +497,48 @@ for station_id in station_ids:
         else:
             P_nwp = np.concatenate((P_nwp,P_nwp1[:,nwp_index[i]].reshape(np.size(P_nwp1,axis=0),-1)),axis=1)
     
-    # 生成该场站模型文件映射
-    # Proposed 在各天气类别上使用对应的 class 模型
     proposed_model_files = {}
+    local_meta_model_files = {}
+    transfer_model_files = {}
+    meta_model_files = {}
 
-    # 1-4: 类别对应的 Proposed 子模型（优先 tuned）
     for i_class in range(4):
-        model_file = resolve_proposed_model_path(station_id, i_class)
-        proposed_model_files[i_class] = model_file
-        if model_file is not None:
-            if model_file.endswith("_tuned.pth"):
-                print(f"  ✓ Proposed(Class{i_class+1}) 使用 tuned: {model_file}")
+        proposed_file = resolve_proposed_model_path(station_id, i_class)
+        proposed_model_files[i_class] = proposed_file
+        if proposed_file is not None:
+            if proposed_file.endswith("_tuned.pth"):
+                print(f"  ✓ Proposed(Class{i_class+1}) 使用 tuned: {proposed_file}")
             else:
-                print(f"  ✓ Proposed(Class{i_class+1}) 使用默认: {model_file}")
+                print(f"  ✓ Proposed(Class{i_class+1}) 使用默认: {proposed_file}")
         else:
             print(f"  ✗ Proposed(Class{i_class+1}) 模型不存在（默认/调优均缺失）")
 
-    baseline_model_files = {}
+        local_meta_file = resolve_local_meta_transfer_model_path(station_id, i_class)
+        local_meta_model_files[i_class] = local_meta_file
+        if local_meta_file is not None:
+            print(f"  ✓ Local_Meta_Transfer(Class{i_class+1}) 使用: {local_meta_file}")
+        else:
+            print(f"  ✗ Local_Meta_Transfer(Class{i_class+1}) 无可用模型")
 
-    # Meta-learning（论文 Table IV: meta-learning only + step-11 fine-tune）
-    meta_model_files = {}
-    for i_class in range(4):
-        meta_model_candidates = [
-            f"model_fore_station{station_id}_extreme{i_class}_meta_only_tuned.pth",
-            f"model_fore_station{station_id}_extreme{i_class}_meta_only.pth",
-            'model_fore_train_task_query_meta_only.pth',
-            'model_fore_meta_only.pth',
-            'model_fore_train_task_query.pth'
-        ]
-        meta_model_file = None
-        for cand in meta_model_candidates:
-            if os.path.exists(cand):
-                meta_model_file = cand
-                break
+        transfer_file = resolve_transfer_learning_model_path(station_id, i_class)
+        transfer_model_files[i_class] = transfer_file
+        if transfer_file is not None:
+            print(f"  ✓ Transfer_Learning(Class{i_class+1}) 使用: {transfer_file}")
+        else:
+            print(f"  ✗ Transfer_Learning(Class{i_class+1}) 无可用模型")
+
+        meta_model_file = resolve_meta_learning_model_path(station_id, i_class)
         meta_model_files[i_class] = meta_model_file
         if meta_model_file is not None:
             print(f"  ✓ Meta_Learning(Class{i_class+1}) 使用: {meta_model_file}")
         else:
-            print(f"  ✗ Meta_Learning(Class{i_class+1}) 模型不存在（尝试: {meta_model_candidates}）")
+            print(f"  ✗ Meta_Learning(Class{i_class+1}) 无可用模型")
 
-    # Pre-training
-    pre_model_file = 'model_fore_pre_federated.pth' if os.path.exists('model_fore_pre_federated.pth') else 'model_fore_pre.pth'
-    baseline_model_files['Pre_Training'] = pre_model_file if os.path.exists(pre_model_file) else None
-    if baseline_model_files['Pre_Training'] is None:
-        print(f"  ✗ {pre_model_file} 不存在")
+    local_pretrain_file = resolve_station_pretrain_model_path(station_id)
+    if local_pretrain_file is None:
+        print(f"  ✗ 场站{station_id} 的 Local_PreTraining 模型不存在")
     else:
-        print("  ✓ Pre_Training")
+        print(f"  ✓ Local_PreTraining 使用: {local_pretrain_file}")
 
     # 论文口径：在每个极端天气类别子集上评估各方法
     for eval_class in range(4):
@@ -392,12 +564,26 @@ for station_id in station_ids:
         for model_name in model_names:
             if model_name == 'Proposed':
                 model_file = proposed_model_files.get(eval_class)
+            elif model_name == 'Local_Meta_Transfer':
+                model_file = local_meta_model_files.get(eval_class)
+            elif model_name == 'Transfer_Learning':
+                model_file = transfer_model_files.get(eval_class)
             elif model_name == 'Meta_Learning':
                 model_file = meta_model_files.get(eval_class)
             else:
-                model_file = baseline_model_files.get(model_name)
+                model_file = local_pretrain_file
             if model_file is None:
-                pred_events = np.zeros_like(true_events)
+                all_results.append({
+                    'Station': station_id,
+                    'Extreme_Class': f'Extreme_Weather_Class{eval_class+1}',
+                    'Model': model_name,
+                    'Samples': int(num_samples),
+                    'nMAE_%': np.nan,
+                    'nRMSE_%': np.nan,
+                    'WD_%': np.nan,
+                    'R_p<0.05_%': np.nan
+                })
+                continue
             else:
                 model_test.load_state_dict(torch.load(model_file, map_location=device))
                 model_test.eval()
@@ -474,6 +660,7 @@ wide_df = wide_df.merge(rp_all_class_df, on=['Station', 'Model'], how='left')
 duration_map = infer_training_durations_from_tensorboard()
 wide_df['Training_duration_s'] = wide_df['Model'].map(duration_map)
 wide_df = wide_df.rename(columns={'AllClasses_R_p<0.05_%': 'R_p<0.05_%'})
+wide_df = ensure_expected_model_rows(wide_df, ['58', '59', '60', 'Overall_Average'], model_names)
 
 # 排序
 station_order = ['58', '59', '60', 'Overall_Average']
@@ -490,10 +677,13 @@ output_cols.extend(['Training_duration_s', 'R_p<0.05_%'])
 wide_df = wide_df[output_cols]
 
 # 论文消融关系一致性检查
-paper_order_issues = validate_paper_ablation_order(wide_df, weather_order)
+paper_order_issues = validate_paper_ablation_order(
+    wide_df,
+    weather_order,
+)
 if paper_order_issues:
     print("\n" + "=" * 70)
-    print("WARNING: 论文消融排序校验未通过（Proposed <= Pre <= Meta）")
+    print("WARNING: 5组主表消融排序校验未通过（Proposed <= Local_Meta_Transfer <= {Transfer_Learning, Meta_Learning, Local_PreTraining}）")
     print("=" * 70)
     for issue in paper_order_issues[:30]:
         print(" - " + issue)
@@ -517,10 +707,10 @@ print("✓✓✓ 多场站结果已生成（Table III/IV 风格）！")
 print("="*70)
 print(f"\n生成文件: multi_station_performance.csv")
 print(f"总行数: {len(wide_df)}")
-print(f"  - 每场站: 3模型 = 3行")
-print(f"  - 3场站: 9行")
-print(f"  - Overall Average: 3行")
-print(f"  - 总计: 12行")
+print(f"  - 每场站: {len(model_names)}模型 = {len(model_names)}行")
+print(f"  - 3场站: {len(model_names) * 3}行")
+print(f"  - Overall Average: {len(model_names)}行")
+print(f"  - 总计: {len(model_names) * 4}行")
 
 print("\n" + "="*70)
 print("性能对比表格（横向展开）:")

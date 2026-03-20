@@ -10,7 +10,7 @@ TRAIN_FILE = ROOT / "DemoModelTraining.py"
 class FewShotLossConfigTest(unittest.TestCase):
     def test_few_shot_uses_pure_mse_only(self):
         text = TRAIN_FILE.read_text(encoding="utf-8")
-        self.assertIn("FEW_SHOT_USE_CDRM = False", text)
+        self.assertIn('FEW_SHOT_USE_CDRM = env_flag("FEW_SHOT_USE_CDRM", False)', text)
 
         match = re.search(
             r"def run_few_shot_adaptation\(.*?\n(.*?)\n\s*all_personalized_models",

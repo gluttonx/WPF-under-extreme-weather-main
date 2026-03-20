@@ -1,0 +1,11 @@
+- [x] Add AST tests for `SFML-lite` flags and no-global-pool constraints.
+- [x] Add env-driven config overrides for training flags and budgets.
+- [x] Switch default mainline away from `FedRep-lite` and back to strict FL pre-train.
+- [x] Demote legacy global-task-pool meta-training to an explicitly legacy path.
+- [x] Implement `client_local_meta_round(...)` and `run_strict_federated_meta_training(...)`.
+- [x] Save per-station strict-meta checkpoints for Proposed few-shot initialization.
+- [x] Run AST tests and syntax checks.
+- [x] Run isolated `1/1/1` smoke training for `SFML-lite`.
+- [x] Run isolated smoke evaluation with `STRICT_PAPER_ORDER=0`.
+- [ ] Hand off formal 4090 `20/5` commands for `strict baseline` vs `SFML-lite`.
+- [ ] If first-order `SFML-lite` wins on 4090, implement full second-order MAML.
