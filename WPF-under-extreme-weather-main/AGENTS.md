@@ -1119,3 +1119,42 @@
   - 固定 `Phase 1` 在 `alpha=1.0, gamma=0.5`；
   - 继续围绕 `anchor_beta` 和 `shared_lr_scale` 做 `Phase 2` 的细调；
   - 重点继续观察 `Frost` 与 `station60` 是否改善。
+
+### 2026-03-21 - conventional-ratio 必要性实验基础设施已接通
+- 新增 `CONVENTIONAL_RATIO` 开关，当前只支持 `1.0 / 0.7 / 0.5 / 0.3`，目的不是改主方法，而是验证“当单站 conventional source knowledge 不足时，联邦共享先验是否变得必要”。
+- 这次实现只缩减 `conventional` 数据，不动 `extreme few-shot` 与 `test`：
+  - `pretrain` 侧缩减 `clients_train_data`；
+  - `meta-train` 侧缩减 `all_stations_full_data[*]['p_conven_class'/'nwp_conven_class']`；
+  - `p_extre / nwp_extre / test_input / test_target` 保持完整。
+- pretrain 缩减策略不是“所有场站统一缺同一段时间”，而是：
+  - 每个场站把 conventional 样本按时间顺序分成 `10` 个连续 bin；
+  - 每个 bin 内按相同比例独立随机抽样；
+  - 各站遵循同一规则、同一 ratio，但具体缺失片段不同，从而保留“跨站互补”的必要性检验。
+- meta-train 缩减策略是按 class 分层抽样，并强制每类至少保留 `20` 个样本段，以兼容当前 `10 support + 10 query` 的 episodic protocol；因此首轮必要性实验建议只做 `100% / 70% / 50% / 30%`，不直接做 `20% / 10%`。
+- 已完成验证：
+  - AST 测试通过：`test_conventional_ratio_necessity_ast.py`
+  - `py_compile` 通过
+  - `CONVENTIONAL_RATIO=0.3` 的 `1/1/1/1` CPU smoke 跑通，训练与 `generate_multi_station_results.py` 链路均未被破坏。
+- smoke 结果本身不用于性能判断；它只确认：后续可以在 4090 上系统跑 `ratio ∈ {1.0, 0.7, 0.5, 0.3}` 的必要性实验矩阵，重点比较 `Proposed` 与 `Local_Meta_Transfer`。
+
+### 2026-03-21 - conventional-ratio 必要性实验首轮结果：联邦必要性得到正向支持
+- 以 `T3` 作为 `R100` 基线后，`R70 / R50 / R30` 的 `Overall_Average` 上，`Proposed` 对 `Local_Meta_Transfer` 的 8 主指标平均边差分别为：
+  - `R100 = -1.9873`
+  - `R70 = -2.6114`
+  - `R50 = -2.3560`
+  - `R30 = -2.7728`
+- 也就是说，三个低资源设定都比全数据设定更有利于 `Proposed > Local_Meta_Transfer`；其中 `R30` 最强，说明当单站 conventional source knowledge 明显缩减时，跨站联邦共享先验的价值在增强。
+- 逐项胜负在 `Overall_Average` 上始终维持 `6胜2负`，尚未翻成 `7胜1负/8胜0负`；但结构性短板 `Frost` 在 `R50/R30` 下明显缩小，且 `station60` 从 `R100` 的 `4胜4负` 改善到 `R30` 的 `5胜3负`，说明必要性信号已经开始从总体均值扩展到更难站点。
+- 需要谨慎表述的点：
+  - 当前每个 ratio 只有单次 subsampling，不足以作为最终论文级证据；
+  - `R70/R30` 的绝对误差优于 `R100`，说明缩减不仅制造了“低资源”，也可能剔除了部分负迁移的 conventional segments；因此目前更适合表述为“联邦共享先验在 local conventional knowledge 不完整时更有价值”，而不是简单写成“数据越少联邦越必要”的严格单调定律。
+- 当前更合理的下一步不是继续加 ratio，而是对 `R100 / R50 / R30` 做 2-3 个不同 subsampling seed 的复验，确认该必要性趋势不是单次抽样偶然。
+
+### 2026-03-21 - conventional-ratio 多 seed 复验开关已接通
+- 新增 `CONVENTIONAL_SUBSAMPLE_SEED_OFFSET` 环境变量，用于控制 conventional-ratio 实验中的 subsampling 随机种子偏移。
+- 该开关只影响 `CONVENTIONAL_RATIO < 1.0` 的缩减实验：
+  - `R100` 不做 subsampling，因此不需要 multi-seed；
+  - `R70 / R50 / R30` 可通过改变 `CONVENTIONAL_SUBSAMPLE_SEED_OFFSET` 做复验。
+- 当前实现中：
+  - pretrain 的时间分箱抽样和 meta 的 class 分层抽样都共享这一 seed offset；
+  - 训练主随机种子未改动，因此该开关专门用于验证“subsampling 偶然性”，不混入额外训练随机性。

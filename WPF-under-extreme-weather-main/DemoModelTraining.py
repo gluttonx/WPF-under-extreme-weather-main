@@ -50,6 +50,115 @@ FED_PRETRAIN_REGIME_ALPHA = env_float("FED_PRETRAIN_REGIME_ALPHA", 1.0)
 FED_PRETRAIN_AGGREGATION_GAMMA = env_float("FED_PRETRAIN_AGGREGATION_GAMMA", 0.5)
 PROPOSED_META_SHARED_ANCHOR_BETA = env_float("PROPOSED_META_SHARED_ANCHOR_BETA", 0.01)
 PROPOSED_META_SHARED_LR_SCALE = env_float("PROPOSED_META_SHARED_LR_SCALE", 0.3)
+SUPPORTED_CONVENTIONAL_RATIOS = (1.0, 0.7, 0.5, 0.3)
+CONVENTIONAL_RATIO = env_float("CONVENTIONAL_RATIO", 1.0)
+CONVENTIONAL_SUBSAMPLE_BINS = 10
+CONVENTIONAL_SUBSAMPLE_SEED_OFFSET = env_int("CONVENTIONAL_SUBSAMPLE_SEED_OFFSET", 0)
+META_MIN_EPISODE_SAMPLES = 20
+
+
+def validate_conventional_ratio(ratio):
+    if not any(abs(ratio - supported_ratio) < 1e-8 for supported_ratio in SUPPORTED_CONVENTIONAL_RATIOS):
+        raise ValueError(
+            f"CONVENTIONAL_RATIO={ratio} 不受支持，仅支持 {SUPPORTED_CONVENTIONAL_RATIOS}"
+        )
+    return ratio
+
+
+def make_station_rng(station_id, offset=0, subsample_seed_offset=0):
+    return random.Random(1029 + int(station_id) * 1000 + offset + subsample_seed_offset * 100000)
+
+
+def subsample_time_binned_indices(total_samples, ratio, station_id, num_bins=CONVENTIONAL_SUBSAMPLE_BINS, subsample_seed_offset=0):
+    if ratio >= 1.0 or total_samples <= 0:
+        return np.arange(total_samples, dtype=int)
+
+    rng = make_station_rng(station_id, offset=total_samples, subsample_seed_offset=subsample_seed_offset)
+    selected_indices = []
+    bin_edges = np.linspace(0, total_samples, num_bins + 1, dtype=int)
+
+    for i_bin in range(num_bins):
+        start = int(bin_edges[i_bin])
+        end = int(bin_edges[i_bin + 1])
+        if end <= start:
+            continue
+        bin_indices = list(range(start, end))
+        keep_count = int(np.ceil(len(bin_indices) * ratio))
+        keep_count = min(len(bin_indices), max(1, keep_count))
+        if keep_count == len(bin_indices):
+            selected_indices.extend(bin_indices)
+        else:
+            selected_indices.extend(sorted(rng.sample(bin_indices, keep_count)))
+
+    return np.array(sorted(selected_indices), dtype=int)
+
+
+def subsample_pretrain_conventional_data(clients_train_data, ratio, subsample_seed_offset=0):
+    if ratio >= 1.0:
+        return clients_train_data
+
+    reduced_clients_train_data = {}
+    for station_id, train_data in clients_train_data.items():
+        sample_axis = 1 if train_data['input'].ndim == 3 and train_data['input'].shape[0] == 1 else 0
+        total_samples = train_data['input'].shape[sample_axis]
+        selected_indices = subsample_time_binned_indices(
+            total_samples,
+            ratio,
+            station_id,
+            subsample_seed_offset=subsample_seed_offset
+        )
+        if sample_axis == 1:
+            reduced_input = train_data['input'][:, selected_indices, :]
+            reduced_target = train_data['target'][:, selected_indices, :]
+        else:
+            reduced_input = train_data['input'][selected_indices, :, :]
+            reduced_target = train_data['target'][selected_indices, :, :]
+        reduced_clients_train_data[station_id] = {
+            'input': reduced_input,
+            'target': reduced_target
+        }
+        print(
+            f"    场站 {station_id} conventional pretrain 缩减: "
+            f"{total_samples} -> {reduced_clients_train_data[station_id]['input'].shape[sample_axis]} "
+            f"(ratio={ratio})"
+        )
+    return reduced_clients_train_data
+
+
+def subsample_meta_conventional_data(all_stations_full_data, ratio, subsample_seed_offset=0):
+    if ratio >= 1.0:
+        return all_stations_full_data
+
+    reduced_all_stations_full_data = copy.deepcopy(all_stations_full_data)
+    for station_id, station_payload in reduced_all_stations_full_data.items():
+        p_conven_class_st = station_payload['p_conven_class']
+        nwp_conven_class_st = station_payload['nwp_conven_class']
+        total_classes = np.size(p_conven_class_st, axis=1)
+
+        for i_class in range(total_classes):
+            p_data = p_conven_class_st[0, i_class]
+            num_samples = p_data.shape[0] // len_realp
+            keep_samples = min(num_samples, max(20, int(np.ceil(num_samples * ratio))))
+            rng = make_station_rng(station_id, offset=100 + i_class, subsample_seed_offset=subsample_seed_offset)
+            selected_segments = sorted(rng.sample(range(num_samples), keep_samples))
+
+            p_segments = p_data[:num_samples * len_realp].reshape(num_samples, len_realp)
+            p_conven_class_st[0, i_class] = p_segments[selected_segments, :].reshape(-1, 1)
+
+            for i_nwp in range(np.size(nwp_conven_class_st, axis=1)):
+                nwp_data = nwp_conven_class_st[0, i_nwp][0, i_class]
+                nwp_segments = nwp_data[:num_samples * len_realp].reshape(num_samples, len_realp)
+                nwp_conven_class_st[0, i_nwp][0, i_class] = nwp_segments[selected_segments, :].reshape(-1, 1)
+
+        min_class_segments = min(
+            station_payload['p_conven_class'][0, i_class].shape[0] // len_realp
+            for i_class in range(total_classes)
+        )
+        print(
+            f"    场站 {station_id} conventional meta 缩减完成: "
+            f"最小类别样本段数={min_class_segments} (ratio={ratio})"
+        )
+    return reduced_all_stations_full_data
 
 class TemporalConvNet(nn.Module):
     def __init__(self, num_inputs, num_channels, mode='pre', kernel_size=2, dropout=0.2):
@@ -77,6 +186,15 @@ def seed_torch(seed=1029):
 
 ## data processing
 seed_torch(seed=1029)
+CONVENTIONAL_RATIO = validate_conventional_ratio(CONVENTIONAL_RATIO)
+if CONVENTIONAL_RATIO < 1.0:
+    print("=" * 70)
+    print(f"启用 conventional-ratio 必要性实验: ratio={CONVENTIONAL_RATIO}")
+    print(
+        f"支持比例: {SUPPORTED_CONVENTIONAL_RATIOS}, 时间分箱数={CONVENTIONAL_SUBSAMPLE_BINS}, "
+        f"subsample_seed_offset={CONVENTIONAL_SUBSAMPLE_SEED_OFFSET}"
+    )
+    print("=" * 70)
 
 # ========== [联邦修改] 多场站数据加载 ==========
 if USE_FEDERATION:
@@ -254,6 +372,11 @@ if USE_FEDERATION:
         }
         print(f"    shape: {nwp_conven_1_st.shape} → {p_conven_1_st.shape}")
     
+    clients_train_data = subsample_pretrain_conventional_data(
+        clients_train_data,
+        CONVENTIONAL_RATIO,
+        subsample_seed_offset=CONVENTIONAL_SUBSAMPLE_SEED_OFFSET
+    )
     print(f"  总数据量: {sum([clients_train_data[s]['input'].shape[1] for s in station_ids])} 样本")
 # ========== [联邦新增] 结束 ==========
 
@@ -323,6 +446,12 @@ for station_id in station_ids:
     print(f"    极端天气: 4类")
 
 print(f"\n✓ 所有场站数据准备完成！")
+
+all_stations_full_data = subsample_meta_conventional_data(
+    all_stations_full_data,
+    CONVENTIONAL_RATIO,
+    subsample_seed_offset=CONVENTIONAL_SUBSAMPLE_SEED_OFFSET
+)
 
 # [保留] 为了兼容部分原代码，保留变量
 test_target_p = all_stations_full_data[station_ids[0]]['test_target']
