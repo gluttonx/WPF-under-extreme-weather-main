@@ -1063,3 +1063,59 @@
   - `PRETRAIN_EPOCHS=4000` 比 `8000` 更像当前结构下的甜点区；
   - 继续单纯拉长 federated pretrain 并不是单调有益，反而会把优势进一步集中到 `ColdWave`，同时恶化 `HighWind / HighTemperature / Frost` 的多项指标。
 - 若后续继续推进正式实验，当前优先候选应仍是 `Pilot C` 配置，而不是 `Pilot D`。
+
+### 2026-03-20 - 两主创新点第一版骨架已落地：工况感知联邦预训练 + 先验保持型本地元训练
+- `DemoModelTraining.py` 已新增 `Phase 1` 的工况感知联邦预训练骨架：
+  - 新增 `env_float(...)` 与 4 个关键超参：`FED_PRETRAIN_REGIME_ALPHA`、`FED_PRETRAIN_AGGREGATION_GAMMA`、`PROPOSED_META_SHARED_ANCHOR_BETA`、`PROPOSED_META_SHARED_LR_SCALE`；
+  - 新增 `compute_regime_sample_weights(...)` 与 `weighted_mse_loss(...)`；
+  - `client_local_pretrain_update(...)` 现在会对 federated pretrain 客户端样本按 conventional-weather 的波动/稀有/边界程度加权，并输出 `regime_factor` 与 `aggregation_weight`；
+  - `server_aggregate_client_states(...)` 已从纯样本数加权切到 `aggregation_weight` 聚合。
+- `DemoModelTraining.py` 已新增 `Phase 2` 的先验保持型本地元训练骨架：
+  - 新增 `build_meta_optimizer(...)`，将 `fore_baselearner` 视为共享参数、`LWP` 视为本地元适配参数；
+  - 新增 `compute_shared_anchor_loss(...)`；
+  - `run_local_meta_training(...)` 已支持 `shared_anchor_beta` 与 `shared_lr_scale`；
+  - 仅 `Proposed` 分支启用 `shared_anchor_beta=PROPOSED_META_SHARED_ANCHOR_BETA` 与 `shared_lr_scale=PROPOSED_META_SHARED_LR_SCALE`，`Local_Meta_Transfer / Meta_Learning` 保持原语义。
+- 已补新 AST 测试 `tests/test_regime_prior_coupling_ast.py`，并通过：
+  - `python -m unittest WPF-under-extreme-weather-main.tests.test_regime_prior_coupling_ast -v`
+- 已通过静态验证：
+  - `python -m unittest WPF-under-extreme-weather-main.tests.test_regime_prior_coupling_ast WPF-under-extreme-weather-main.tests.test_local_ablation_matrix_ast WPF-under-extreme-weather-main.tests.test_runtime_env_config_ast -v`
+  - `python -m py_compile WPF-under-extreme-weather-main/DemoModelTraining.py WPF-under-extreme-weather-main/generate_multi_station_results.py`
+- 已在 `/tmp/wpf_regime_smoke` 做 `1/1/1/1` CPU smoke：
+  - `USE_FEDERATION=1 TRAIN_META_ONLY_BASELINE=1 PRETRAIN_EPOCHS=1 PROPOSED_META_EPOCHS=1 META_ONLY_META_EPOCHS=1 FEW_SHOT_EPOCHS=1 python DemoModelTraining.py`
+  - `STRICT_PAPER_ORDER=0 python generate_multi_station_results.py`
+  - 训练链路与 5 组主表生成均跑通；但 smoke 结果上 `Proposed` 仍未压过 `Local_Meta_Transfer`，这只说明结构正确，不代表中预算/正式预算性能结论。
+
+### 2026-03-20 - 两主创新点首轮 4090 结果：`Proposed` 继续压过 `Local_Meta_Transfer`，平均边差优于旧 `Pilot C`
+- 在 `Pilot C` 预算上引入两主创新点（工况感知联邦预训练 + 先验保持型本地元训练）后，当前 `multi_station_performance.csv` 的 `Overall_Average` 主指标显示：
+  - `Proposed` 对 `Local_Meta_Transfer` 维持 `6胜2负`；
+  - `Proposed` 对 `Transfer_Learning` 为 `8胜0负`；
+  - `Local_Meta_Transfer` 对 `Transfer_Learning / Meta_Learning / Local_PreTraining` 仍分别为 `7胜1负 / 8胜0负 / 8胜0负`。
+- 8 个主指标均值上：
+  - `Proposed = 30.2474`
+  - `Local_Meta_Transfer = 32.1132`
+  - `Transfer_Learning = 33.9817`
+  - `Meta_Learning = 36.8420`
+  - `Local_PreTraining = 38.4174`
+- 相比旧 `Pilot C`：
+  - `Proposed` 的均值由 `30.2506` 轻微改善到 `30.2474`；
+  - `Proposed - Local_Meta_Transfer` 的平均边差由 `-1.5496` 扩大到 `-1.8658`；
+  - 说明新两主创新点至少在总体均值上是正向的。
+- 结构性结论：
+  - 优势仍主要集中在 `HighWind / HighTemperature / ColdWave`；
+  - `Frost_nMAE / Frost_nRMSE` 仍落后于 `Local_Meta_Transfer`，说明新机制尚未补齐 `Frost` 这一顽固短板；
+  - 分站看 `station58=6胜2负, station59=5胜3负, station60=4胜4负`，`station60` 仍是最难站点。
+- 当前更合理的下一步不是继续大改 epoch，而是围绕 4 个新超参做有针对性的 4090 中预算调参，优先观察 `Frost` 与 `station60` 是否改善。
+
+### 2026-03-20 - `T3 -> T5` 调参结果：应继续围绕 `Phase 2` 调，而不是软化 `Phase 1`
+- 在固定主预算 `PRETRAIN=4000, PROPOSED_META=500, META_ONLY_META=500, FEW_SHOT=20` 下：
+  - `T3 = (alpha=1.0, gamma=0.5, anchor_beta=0.005, shared_lr_scale=0.5)`；
+  - `T5 = (alpha=0.5, gamma=0.25, anchor_beta=0.005, shared_lr_scale=0.5)`。
+- 当前结果显示：
+  - `T3` 的 `Overall_Average` 上，`Proposed vs Local_Meta_Transfer` 仍为 `6胜2负`，但 8 指标均值边差扩大到 `-1.9873`，优于此前首轮 4090 结果的 `-1.8658`；
+  - `T3` 的 `Frost_nMAE / Frost_nRMSE` 差值从此前的 `+2.1090 / +1.7011` 缩小到 `+1.6956 / +1.1942`；
+  - `station59` 的 `Proposed vs Local_Meta_Transfer` 由 `5胜3负` 提升到 `6胜2负`，`station60` 仍为 `4胜4负`。
+- `T5` 虽然同样维持 `6胜2负`，但均值边差仅为 `-1.6026`，明显劣于 `T3`；说明在当前阶段同时软化 `Phase 1`（降低 `alpha/gamma`）并没有带来额外收益，反而削弱了 `Proposed` 对 `Local_Meta_Transfer` 的整体优势。
+- 因而下一步更合理的调参方向是：
+  - 固定 `Phase 1` 在 `alpha=1.0, gamma=0.5`；
+  - 继续围绕 `anchor_beta` 和 `shared_lr_scale` 做 `Phase 2` 的细调；
+  - 重点继续观察 `Frost` 与 `station60` 是否改善。

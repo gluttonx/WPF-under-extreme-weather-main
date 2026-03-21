@@ -23,6 +23,11 @@ def env_int(name, default):
     return default if value is None else int(value)
 
 
+def env_float(name, default):
+    value = os.getenv(name)
+    return default if value is None else float(value)
+
+
 # ========== [联邦新增] 联邦学习开关 ==========
 USE_FEDERATION = env_flag("USE_FEDERATION", True)  # True=联邦多场站, False=单场站原方法
 # 说明：设为False时完全退化为原始单场站元学习方法
@@ -41,6 +46,10 @@ META_ONLY_META_EPOCHS = env_int("META_ONLY_META_EPOCHS", 30000)
 META_ONLY_USE_CDRM = env_flag("META_ONLY_USE_CDRM", True)
 META_ONLY_TRAIN_ALL_PARAMS = env_flag("META_ONLY_TRAIN_ALL_PARAMS", False)
 META_ONLY_DISABLE_LWP = env_flag("META_ONLY_DISABLE_LWP", False)
+FED_PRETRAIN_REGIME_ALPHA = env_float("FED_PRETRAIN_REGIME_ALPHA", 1.0)
+FED_PRETRAIN_AGGREGATION_GAMMA = env_float("FED_PRETRAIN_AGGREGATION_GAMMA", 0.5)
+PROPOSED_META_SHARED_ANCHOR_BETA = env_float("PROPOSED_META_SHARED_ANCHOR_BETA", 0.01)
+PROPOSED_META_SHARED_LR_SCALE = env_float("PROPOSED_META_SHARED_LR_SCALE", 0.3)
 
 class TemporalConvNet(nn.Module):
     def __init__(self, num_inputs, num_channels, mode='pre', kernel_size=2, dropout=0.2):
@@ -428,6 +437,33 @@ def average_state_dicts(weighted_states):
     return averaged_state
 
 
+def weighted_mse_loss(predictions, targets, sample_weights):
+    per_sample_mse = torch.mean((predictions - targets) ** 2, dim=(1, 2))
+    return torch.sum(per_sample_mse * sample_weights) / torch.sum(sample_weights).clamp_min(1e-6)
+
+
+def compute_regime_sample_weights(train_input, train_target, alpha=1.0):
+    target_flat = train_target.squeeze(-1)
+    ramp_score = torch.mean(torch.abs(target_flat[:, 1:] - target_flat[:, :-1]), dim=1) if target_flat.shape[1] > 1 else torch.zeros(
+        target_flat.shape[0], device=train_target.device
+    )
+    volatility_score = torch.std(target_flat, dim=1, unbiased=False)
+
+    input_flat = train_input.reshape(train_input.shape[0], -1)
+    input_center = input_flat.mean(dim=0, keepdim=True)
+    input_scale = input_flat.std(dim=0, keepdim=True, unbiased=False).clamp_min(1e-6)
+    rarity_score = torch.mean(torch.abs((input_flat - input_center) / input_scale), dim=1)
+
+    raw_score = ramp_score + volatility_score + rarity_score
+    normalized_score = raw_score - raw_score.min()
+    normalized_score = normalized_score / normalized_score.mean().clamp_min(1e-6)
+    sample_weights = 1.0 + alpha * normalized_score
+
+    topk = max(1, int(normalized_score.shape[0] * 0.2))
+    regime_factor = torch.topk(normalized_score, k=topk).values.mean().item()
+    return sample_weights.detach(), float(regime_factor)
+
+
 def get_pretrain_penalty_weight(epoch_idx):
     if epoch_idx < 10000:
         return 0
@@ -445,11 +481,16 @@ def client_local_pretrain_update(global_state_dict, station_id, penalty_weight):
 
     train_target = clients_train_tensor[station_id]['target'].to(device)
     train_input = clients_train_tensor[station_id]['input'].to(device)
+    sample_weights, regime_factor = compute_regime_sample_weights(
+        train_input,
+        train_target,
+        alpha=FED_PRETRAIN_REGIME_ALPHA
+    )
 
     client_model.train()
     train_outputs = client_model(train_input)
     loss_penalty = penalty(train_outputs, train_target)
-    loss_mse = loss_fn_1(train_outputs, train_target)
+    loss_mse = weighted_mse_loss(train_outputs, train_target, sample_weights)
     loss_total = penalty_weight * loss_penalty + loss_mse
 
     client_optimizer.zero_grad()
@@ -457,9 +498,15 @@ def client_local_pretrain_update(global_state_dict, station_id, penalty_weight):
     client_optimizer.step()
 
     updated_state = clone_state_dict(client_model.state_dict())
+    aggregation_weight = int(train_input.shape[0]) * max(
+        0.5,
+        min(2.0, 1.0 + FED_PRETRAIN_AGGREGATION_GAMMA * (regime_factor - 1.0))
+    )
     return {
         'state_dict': updated_state,
         'num_samples': int(train_input.shape[0]),
+        'regime_factor': regime_factor,
+        'aggregation_weight': float(aggregation_weight),
         'loss_penalty': float(loss_penalty.item()),
         'loss_mse': float(loss_mse.item()),
     }
@@ -506,7 +553,7 @@ def run_local_pretrain(station_id, save_path, epoch1_pre=35000):
 
 def server_aggregate_client_states(client_updates):
     weighted_states = [
-        (client_update['state_dict'], client_update['num_samples'])
+        (client_update['state_dict'], client_update['aggregation_weight'])
         for client_update in client_updates
     ]
     return average_state_dicts(weighted_states)
@@ -679,6 +726,49 @@ def get_meta_trainable_params(model_instance, train_all_params=False, disable_lw
     return list(model_instance.get_trainable_params())
 
 
+def build_meta_optimizer(model_instance, train_all_params=False, disable_lwp=False, shared_lr_scale=1.0):
+    local_params = []
+    shared_params = []
+
+    for name, parameter in model_instance.named_parameters():
+        if not parameter.requires_grad:
+            continue
+        if train_all_params:
+            if disable_lwp and "lwp" in name:
+                continue
+            if "fore_baselearner" in name:
+                shared_params.append(parameter)
+            else:
+                local_params.append(parameter)
+            continue
+
+        if "lwp" in name and not disable_lwp:
+            local_params.append(parameter)
+        elif "fore_baselearner" in name:
+            shared_params.append(parameter)
+
+    parameter_groups = []
+    if local_params:
+        parameter_groups.append({'params': local_params, 'lr': 0.0002})
+    if shared_params:
+        parameter_groups.append({'params': shared_params, 'lr': 0.0002 * shared_lr_scale})
+    return torch.optim.Adam(parameter_groups, betas=(0.5, 0.999))
+
+
+def compute_shared_anchor_loss(model_instance, anchor_state_dict):
+    anchor_loss = torch.zeros((), dtype=torch.float32, device=device)
+    shared_param_count = 0
+    for name, parameter in model_instance.named_parameters():
+        if "fore_baselearner" not in name:
+            continue
+        anchor_tensor = anchor_state_dict[name].to(parameter.device)
+        anchor_loss = anchor_loss + torch.mean((parameter - anchor_tensor) ** 2)
+        shared_param_count += 1
+    if shared_param_count == 0:
+        return anchor_loss
+    return anchor_loss / shared_param_count
+
+
 def run_local_meta_training(
     station_id,
     meta_tag,
@@ -688,7 +778,9 @@ def run_local_meta_training(
     epoch_train_task=70000,
     use_cdrm=True,
     train_all_params=False,
-    disable_lwp=False
+    disable_lwp=False,
+    shared_anchor_beta=0.0,
+    shared_lr_scale=1.0
 ):
     """
     单场站本地元训练过程：
@@ -697,24 +789,38 @@ def run_local_meta_training(
     """
     print("\n" + "=" * 70)
     print(f"开始场站 {station_id} 的本地元训练: {meta_tag}")
-    print(f"  use_cdrm={use_cdrm}, train_all_params={train_all_params}, disable_lwp={disable_lwp}")
+    print(
+        f"  use_cdrm={use_cdrm}, train_all_params={train_all_params}, "
+        f"disable_lwp={disable_lwp}, shared_anchor_beta={shared_anchor_beta}, "
+        f"shared_lr_scale={shared_lr_scale}"
+    )
     total_task_pool = np.size(all_stations_full_data[station_id]['p_conven_class'], axis=1)
     print(f"  tasks_per_epoch={min(META_TASKS_PER_EPOCH, total_task_pool)}, station_task_pool={total_task_pool}")
     print("=" * 70)
 
-    support_params = get_meta_trainable_params(
+    get_meta_trainable_params(
         model_fore_train_task_support,
         train_all_params=train_all_params,
         disable_lwp=disable_lwp
     )
-    query_params = get_meta_trainable_params(
+    get_meta_trainable_params(
         model_fore_train_task_query,
         train_all_params=train_all_params,
         disable_lwp=disable_lwp
     )
-
-    optimizer_support = torch.optim.Adam(support_params, lr=0.0002, betas=(0.5, 0.999))
-    optimizer_query = torch.optim.Adam(query_params, lr=0.0002, betas=(0.5, 0.999))
+    optimizer_support = build_meta_optimizer(
+        model_fore_train_task_support,
+        train_all_params=train_all_params,
+        disable_lwp=disable_lwp,
+        shared_lr_scale=shared_lr_scale
+    )
+    optimizer_query = build_meta_optimizer(
+        model_fore_train_task_query,
+        train_all_params=train_all_params,
+        disable_lwp=disable_lwp,
+        shared_lr_scale=shared_lr_scale
+    )
+    prior_anchor_state = clone_state_dict(init_state_dict)
 
     for i_t in range(epoch_train_task):
         Train_target_support, Train_input_support, Train_target_query, Train_input_query = sample_station_meta_batch(station_id)
@@ -744,6 +850,10 @@ def run_local_meta_training(
             loss1 = torch.zeros((), dtype=torch.float32, device=device)
         loss2 = loss_fn_1(Train_outputs_support, Train_target_support)
         loss_en = 10 * loss1 + loss2 if use_cdrm else loss2
+        anchor_loss_support = torch.zeros((), dtype=torch.float32, device=device)
+        if shared_anchor_beta > 0:
+            anchor_loss_support = compute_shared_anchor_loss(model_fore_train_task_support, prior_anchor_state)
+            loss_en = loss_en + shared_anchor_beta * anchor_loss_support
         optimizer_support.zero_grad()
         loss_en.backward()
         optimizer_support.step()
@@ -753,6 +863,7 @@ def run_local_meta_training(
 
         writer1.add_scalar(f"loss_penalty_train_task_support_{meta_tag}", loss1.item(), i_t)
         writer2.add_scalar(f"loss_mse_train_task_support_{meta_tag}", loss2.item(), i_t)
+        writer2.add_scalar(f"loss_anchor_train_task_support_{meta_tag}", anchor_loss_support.item(), i_t)
 
         print(
             "[##################################################################"
@@ -775,6 +886,10 @@ def run_local_meta_training(
             loss1_q = torch.zeros((), dtype=torch.float32, device=device)
         loss2_q = loss_fn_1(Train_outputs_query_, Train_target_query)
         loss_en_q = 10 * loss1_q + loss2_q if use_cdrm else loss2_q
+        anchor_loss_q = torch.zeros((), dtype=torch.float32, device=device)
+        if shared_anchor_beta > 0:
+            anchor_loss_q = compute_shared_anchor_loss(model_fore_train_task_query, prior_anchor_state)
+            loss_en_q = loss_en_q + shared_anchor_beta * anchor_loss_q
         optimizer_query.zero_grad()
         loss_en_q.backward()
         optimizer_query.step()
@@ -783,6 +898,7 @@ def run_local_meta_training(
 
         writer1.add_scalar(f"loss_penalty_train_task_query_{meta_tag}", loss1_q.item(), i_t)
         writer2.add_scalar(f"loss_mse_train_task_query_{meta_tag}", loss2_q.item(), i_t)
+        writer2.add_scalar(f"loss_anchor_train_task_query_{meta_tag}", anchor_loss_q.item(), i_t)
 
     print(f"✓ 场站 {station_id} 元训练完成: {query_model_path}")
 
@@ -799,7 +915,9 @@ for station_id in station_ids:
         epoch_train_task=PROPOSED_META_EPOCHS,
         use_cdrm=True,
         train_all_params=False,
-        disable_lwp=False
+        disable_lwp=False,
+        shared_anchor_beta=PROPOSED_META_SHARED_ANCHOR_BETA,
+        shared_lr_scale=PROPOSED_META_SHARED_LR_SCALE
     )
 
 # 2) Local_Meta_Transfer: 本地 conventional pretrain 初始化后，各场站独立 local meta-training
@@ -813,7 +931,9 @@ for station_id in station_ids:
         epoch_train_task=PROPOSED_META_EPOCHS,
         use_cdrm=True,
         train_all_params=False,
-        disable_lwp=False
+        disable_lwp=False,
+        shared_anchor_beta=0.0,
+        shared_lr_scale=1.0
     )
 
 # 3) Meta-only: 随机初始化后各场站独立 local meta-training
@@ -828,7 +948,9 @@ if TRAIN_META_ONLY_BASELINE:
             epoch_train_task=META_ONLY_META_EPOCHS,
             use_cdrm=META_ONLY_USE_CDRM,
             train_all_params=META_ONLY_TRAIN_ALL_PARAMS,
-            disable_lwp=META_ONLY_DISABLE_LWP
+            disable_lwp=META_ONLY_DISABLE_LWP,
+            shared_anchor_beta=0.0,
+            shared_lr_scale=1.0
         )
 
 
