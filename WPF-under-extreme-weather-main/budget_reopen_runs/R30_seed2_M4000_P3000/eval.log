@@ -1,0 +1,131 @@
+======================================================================
+生成多场站测试结果CSV
+======================================================================
+
+检测到每站结果文件。当前评估仍按极端天气类别重跑模型，不直接复用全年测试集预测。
+
+当前评估口径：主表固定为 Proposed / Local_Meta_Transfer / Transfer_Learning / Meta_Learning / Local_PreTraining。
+
+生成预测...
+
+场站 58:
+  ✓ Proposed(Class1) 使用默认: model_fore_station58_extreme0.pth
+  ✓ Local_Meta_Transfer(Class1) 使用: model_fore_station58_extreme0_local_meta.pth
+  ✓ Transfer_Learning(Class1) 使用: model_fore_station58_extreme0_transfer_only.pth
+  ✓ Meta_Learning(Class1) 使用: model_fore_station58_extreme0_meta_only.pth
+  ✓ Proposed(Class2) 使用默认: model_fore_station58_extreme1.pth
+  ✓ Local_Meta_Transfer(Class2) 使用: model_fore_station58_extreme1_local_meta.pth
+  ✓ Transfer_Learning(Class2) 使用: model_fore_station58_extreme1_transfer_only.pth
+  ✓ Meta_Learning(Class2) 使用: model_fore_station58_extreme1_meta_only.pth
+  ✓ Proposed(Class3) 使用默认: model_fore_station58_extreme2.pth
+  ✓ Local_Meta_Transfer(Class3) 使用: model_fore_station58_extreme2_local_meta.pth
+  ✓ Transfer_Learning(Class3) 使用: model_fore_station58_extreme2_transfer_only.pth
+  ✓ Meta_Learning(Class3) 使用: model_fore_station58_extreme2_meta_only.pth
+  ✓ Proposed(Class4) 使用默认: model_fore_station58_extreme3.pth
+  ✓ Local_Meta_Transfer(Class4) 使用: model_fore_station58_extreme3_local_meta.pth
+  ✓ Transfer_Learning(Class4) 使用: model_fore_station58_extreme3_transfer_only.pth
+  ✓ Meta_Learning(Class4) 使用: model_fore_station58_extreme3_meta_only.pth
+  ✓ Local_PreTraining 使用: model_fore_pre_station58_local.pth
+
+场站 59:
+  ✓ Proposed(Class1) 使用默认: model_fore_station59_extreme0.pth
+  ✓ Local_Meta_Transfer(Class1) 使用: model_fore_station59_extreme0_local_meta.pth
+  ✓ Transfer_Learning(Class1) 使用: model_fore_station59_extreme0_transfer_only.pth
+  ✓ Meta_Learning(Class1) 使用: model_fore_station59_extreme0_meta_only.pth
+  ✓ Proposed(Class2) 使用默认: model_fore_station59_extreme1.pth
+  ✓ Local_Meta_Transfer(Class2) 使用: model_fore_station59_extreme1_local_meta.pth
+  ✓ Transfer_Learning(Class2) 使用: model_fore_station59_extreme1_transfer_only.pth
+  ✓ Meta_Learning(Class2) 使用: model_fore_station59_extreme1_meta_only.pth
+  ✓ Proposed(Class3) 使用默认: model_fore_station59_extreme2.pth
+  ✓ Local_Meta_Transfer(Class3) 使用: model_fore_station59_extreme2_local_meta.pth
+  ✓ Transfer_Learning(Class3) 使用: model_fore_station59_extreme2_transfer_only.pth
+  ✓ Meta_Learning(Class3) 使用: model_fore_station59_extreme2_meta_only.pth
+  ✓ Proposed(Class4) 使用默认: model_fore_station59_extreme3.pth
+  ✓ Local_Meta_Transfer(Class4) 使用: model_fore_station59_extreme3_local_meta.pth
+  ✓ Transfer_Learning(Class4) 使用: model_fore_station59_extreme3_transfer_only.pth
+  ✓ Meta_Learning(Class4) 使用: model_fore_station59_extreme3_meta_only.pth
+  ✓ Local_PreTraining 使用: model_fore_pre_station59_local.pth
+
+场站 60:
+  ✓ Proposed(Class1) 使用默认: model_fore_station60_extreme0.pth
+  ✓ Local_Meta_Transfer(Class1) 使用: model_fore_station60_extreme0_local_meta.pth
+  ✓ Transfer_Learning(Class1) 使用: model_fore_station60_extreme0_transfer_only.pth
+  ✓ Meta_Learning(Class1) 使用: model_fore_station60_extreme0_meta_only.pth
+  ✓ Proposed(Class2) 使用默认: model_fore_station60_extreme1.pth
+  ✓ Local_Meta_Transfer(Class2) 使用: model_fore_station60_extreme1_local_meta.pth
+  ✓ Transfer_Learning(Class2) 使用: model_fore_station60_extreme1_transfer_only.pth
+  ✓ Meta_Learning(Class2) 使用: model_fore_station60_extreme1_meta_only.pth
+  ✓ Proposed(Class3) 使用默认: model_fore_station60_extreme2.pth
+  ✓ Local_Meta_Transfer(Class3) 使用: model_fore_station60_extreme2_local_meta.pth
+  ✓ Transfer_Learning(Class3) 使用: model_fore_station60_extreme2_transfer_only.pth
+  ✓ Meta_Learning(Class3) 使用: model_fore_station60_extreme2_meta_only.pth
+  ✓ Proposed(Class4) 使用默认: model_fore_station60_extreme3.pth
+  ✓ Local_Meta_Transfer(Class4) 使用: model_fore_station60_extreme3_local_meta.pth
+  ✓ Transfer_Learning(Class4) 使用: model_fore_station60_extreme3_transfer_only.pth
+  ✓ Meta_Learning(Class4) 使用: model_fore_station60_extreme3_meta_only.pth
+  ✓ Local_PreTraining 使用: model_fore_pre_station60_local.pth
+
+计算Overall Average（按Extreme_Class + Model跨3场站平均）...
+
+======================================================================
+WARNING: 5组主表消融排序校验未通过（Proposed <= Local_Meta_Transfer <= {Transfer_Learning, Meta_Learning, Local_PreTraining}）
+======================================================================
+ - Station 58 HighTemperature_nMAE_%: Local_Meta_Transfer(17.8199) > Transfer_Learning(15.1362)
+ - Station 58 HighTemperature_WD_%: Local_Meta_Transfer(16.4770) > Transfer_Learning(10.9506)
+ - Station 58 HighTemperature_WD_%: Local_Meta_Transfer(16.4770) > Local_PreTraining(14.3387)
+ - Station 58 Frost_WD_%: Local_Meta_Transfer(16.6966) > Transfer_Learning(15.1895)
+ - Station 59 HighTemperature_WD_%: Local_Meta_Transfer(16.2222) > Transfer_Learning(14.8546)
+ - Station 59 Frost_nMAE_%: Local_Meta_Transfer(22.3074) > Transfer_Learning(21.6636)
+ - Station 59 Frost_WD_%: Local_Meta_Transfer(21.0088) > Transfer_Learning(19.1806)
+ - Station 60 HighTemperature_WD_%: Local_Meta_Transfer(19.2682) > Transfer_Learning(18.6901)
+ - Station 60 Frost_nMAE_%: Proposed(22.6690) > Local_Meta_Transfer(20.9671)
+ - Station 60 Frost_nRMSE_%: Proposed(25.3403) > Local_Meta_Transfer(23.5442)
+ - Station 60 Frost_WD_%: Proposed(21.8845) > Local_Meta_Transfer(20.2419)
+ - Station 60 Frost_WD_%: Local_Meta_Transfer(20.2419) > Transfer_Learning(19.7602)
+
+======================================================================
+✓✓✓ 多场站结果已生成（Table III/IV 风格）！
+======================================================================
+
+生成文件: multi_station_performance.csv
+总行数: 20
+  - 每场站: 5模型 = 5行
+  - 3场站: 15行
+  - Overall Average: 5行
+  - 总计: 20行
+
+======================================================================
+性能对比表格（横向展开）:
+======================================================================
+        Station               Model  HighWind_nMAE_%  HighWind_nRMSE_%  HighWind_WD_%  HighTemperature_nMAE_%  HighTemperature_nRMSE_%  HighTemperature_WD_%  ColdWave_nMAE_%  ColdWave_nRMSE_%  ColdWave_WD_%  Frost_nMAE_%  Frost_nRMSE_%  Frost_WD_%  Training_duration_s  R_p<0.05_%
+             58            Proposed          39.6497           43.0638        37.3752                 15.5486                  18.6590               13.2025          38.4026           40.8110        32.7080       15.7406        18.1791     15.1451              1198.39     75.0000
+             58 Local_Meta_Transfer          40.4331           44.6255        38.0663                 17.8199                  19.7862               16.4770          41.2583           44.1894        34.0100       17.2047        19.3888     16.6966               941.12     76.2500
+             58   Transfer_Learning          43.9427           53.0008        38.7669                 15.1362                  19.8490               10.9506          45.4006           52.2458        35.5656       17.4351        22.6192     15.1895               277.51     71.2500
+             58       Meta_Learning          45.6188           47.1647        45.1414                 21.4342                  22.7965               19.8472          44.9524           48.4711        43.6034       20.7703        22.7355     20.1016               674.95     81.2500
+             58   Local_PreTraining          44.6810           52.6166        40.5086                 18.7396                  24.4738               14.3387          47.6512           52.6816        38.9097       24.5358        32.1814     21.4785               262.67     72.5000
+             59            Proposed          30.8479           35.5238        26.4995                 16.4036                  18.9272               14.4536          25.0695           28.5442        22.8704       22.2442        24.8679     20.7976              1198.39     69.6970
+             59 Local_Meta_Transfer          36.1355           40.6131        32.2741                 17.6963                  20.1858               16.2222          34.1796           37.3049        33.2002       22.3074        24.9934     21.0088               941.12     72.7273
+             59   Transfer_Learning          43.5437           51.4578        35.6378                 18.0020                  22.2684               14.8546          36.8524           44.6003        35.5390       21.6636        26.8433     19.1806               277.51     60.6061
+             59       Meta_Learning          44.0014           46.2061        43.4060                 23.3087                  25.9715               21.6961          47.1641           50.6602        46.5755       26.2039        29.0525     23.7214               674.95     72.7273
+             59   Local_PreTraining          45.2003           52.7802        39.7625                 24.4656                  30.9894               20.3023          42.9585           49.6295        42.2252       25.5272        32.6002     22.0826               262.67     75.7576
+             60            Proposed          32.5556           37.9723        23.5911                 20.6573                  23.2972               18.6576          33.4641           38.1648        28.4895       22.6690        25.3403     21.8845              1198.39     69.5652
+             60 Local_Meta_Transfer          33.8206           39.3848        26.3534                 20.8832                  23.4771               19.2682          41.2249           45.5305        38.1657       20.9671        23.5442     20.2419               941.12     72.4638
+             60   Transfer_Learning          46.6537           54.0689        34.7326                 22.6559                  27.4743               18.6901          47.9621           56.8527        41.9900       22.6091        28.2184     19.7602               277.51     52.1739
+             60       Meta_Learning          44.5648           47.1370        43.1319                 24.0360                  26.3616               21.6529          50.0339           51.1932        48.9568       26.1817        28.6555     24.9849               674.95     75.3623
+             60   Local_PreTraining          45.4542           54.0868        35.7591                 26.0868                  33.6211               22.1806          48.5277           57.3135        44.3956       29.6201        38.0545     26.7643               262.67     65.2174
+Overall_Average            Proposed          34.3511           38.8533        29.1553                 17.5365                  20.2945               15.4379          32.3121           35.8400        28.0226       20.2179        22.7958     19.2757              1198.39     70.5548
+Overall_Average Local_Meta_Transfer          36.7964           41.5411        32.2313                 18.7998                  21.1497               17.3225          38.8876           42.3416        35.1253       20.1597        22.6421     19.3158               941.12     73.4806
+Overall_Average   Transfer_Learning          44.7134           52.8425        36.3791                 18.5980                  23.1972               14.8318          43.4050           51.2329        37.6982       20.5693        25.8936     18.0434               277.51     60.1165
+Overall_Average       Meta_Learning          44.7283           46.8359        43.8931                 22.9263                  25.0432               21.0654          47.3835           50.1082        46.3786       24.3853        26.8145     22.9360               674.95     75.4164
+Overall_Average   Local_PreTraining          45.1118           53.1612        38.6767                 23.0973                  29.6948               18.9405          46.3791           53.2082        41.8435       26.5610        34.2787     23.4418               262.67     70.7413
+
+======================================================================
+Overall Average（论文口径，横向展开）:
+======================================================================
+        Station               Model  HighWind_nMAE_%  HighWind_nRMSE_%  HighWind_WD_%  HighTemperature_nMAE_%  HighTemperature_nRMSE_%  HighTemperature_WD_%  ColdWave_nMAE_%  ColdWave_nRMSE_%  ColdWave_WD_%  Frost_nMAE_%  Frost_nRMSE_%  Frost_WD_%  Training_duration_s  R_p<0.05_%
+Overall_Average            Proposed          34.3511           38.8533        29.1553                 17.5365                  20.2945               15.4379          32.3121           35.8400        28.0226       20.2179        22.7958     19.2757              1198.39     70.5548
+Overall_Average Local_Meta_Transfer          36.7964           41.5411        32.2313                 18.7998                  21.1497               17.3225          38.8876           42.3416        35.1253       20.1597        22.6421     19.3158               941.12     73.4806
+Overall_Average   Transfer_Learning          44.7134           52.8425        36.3791                 18.5980                  23.1972               14.8318          43.4050           51.2329        37.6982       20.5693        25.8936     18.0434               277.51     60.1165
+Overall_Average       Meta_Learning          44.7283           46.8359        43.8931                 22.9263                  25.0432               21.0654          47.3835           50.1082        46.3786       24.3853        26.8145     22.9360               674.95     75.4164
+Overall_Average   Local_PreTraining          45.1118           53.1612        38.6767                 23.0973                  29.6948               18.9405          46.3791           53.2082        41.8435       26.5610        34.2787     23.4418               262.67     70.7413
+======================================================================

@@ -34,6 +34,11 @@
   1. `CPU smoke / debug validation`
   2. `4090 formal run`
 - **默认行为**：当前会话若检测到无 CUDA，可继续做小步验证；但进入正式训练前，必须提醒用户切回 4090 环境。
+- **算力优先级约束**：
+  - 算力等价于时间和金钱；实验设计默认优先复用已有结果，避免重复跑已存在的等价配置。
+  - 对 subsampling 类实验，若未显式设置 `CONVENTIONAL_SUBSAMPLE_SEED_OFFSET`，默认视为 `seed0`；此前已跑过的 `R70 / R50 / R30` 就是各自的 `seed0`，不应重复执行。
+  - `R100` 在 `CONVENTIONAL_RATIO=1.0` 下不发生 subsampling，因此不需要做 subsampling multi-seed 复验；multi-seed 仅用于 `R70 / R50 / R30` 这类实际发生抽样的设定。
+  - 在未证明“更多实验能改变决策”的前提下，默认先跑最小区分度矩阵，而不是全因子穷举。
 
 # 🐙 技能与工具联合调度矩阵 (Skills & MCP Dispatcher)
 当前环境中已安装高级工作流技能 (Skills) 与外部工具引擎 (MCPs)。遇到对应场景时，必须严格遵循以下联合工作流：
@@ -1158,3 +1163,128 @@
 - 当前实现中：
   - pretrain 的时间分箱抽样和 meta 的 class 分层抽样都共享这一 seed offset；
   - 训练主随机种子未改动，因此该开关专门用于验证“subsampling 偶然性”，不混入额外训练随机性。
+
+### 2026-03-21 - R30 多 seed 结果：必要性趋势基本稳住，但仍不是“全面稳压”
+- `R30` 的 `seed0 / seed1 / seed2` 在 `Overall_Average` 上，`Proposed - Local_Meta_Transfer` 的 8 主指标平均边差分别为：
+  - `seed0 = -2.7728`
+  - `seed1 = -2.1473`
+  - `seed2 = -3.9652`
+  - 均值约 `-2.9618`，三个 seed 全部优于 `R100` 的 `-1.9873`。
+- 三个 seed 的共同结构：
+  - `Overall_Average` 上均维持 `6胜2负`；
+  - `Frost_nMAE / Frost_nRMSE` 依然没有翻正，但都明显优于 `R100`；
+  - `station59` 始终强势，`station60` 从 `seed1` 的 `4胜4负` 到 `seed2` 的 `6胜2负`，说明困难站点的联邦受益方向是正的，但强度存在抽样敏感性。
+- 这组结果已经足以支撑更稳的必要性表述：
+  - 当 local conventional knowledge 明显不完整时，联邦共享先验的价值会稳定增强；
+  - 但该增强目前更多体现为总体边差扩大，而不是所有天气/所有站点都全面翻盘，因此不宜夸大为“全面稳压 LMT”。
+- 若继续节省算力，当前比起把 `R50` 也做满多 seed，更优先的做法是：
+  - 先把 `R30` 作为低资源必要性的核心证据；
+  - 视需要再补 `R50` 的 `seed1/seed2`，作为中度低资源的辅助稳健性验证。
+
+### 2026-03-21 - R30-seed2 的 budget reopen（M4000/P3000）：Frost 明显改善，但整体边差缩小
+- 在 `R30-seed2` 下将 `PRETRAIN_EPOCHS=4000` 保持不变，并把 `PROPOSED_META_EPOCHS/META_ONLY_META_EPOCHS` 从 `500` 拉到 `3000` 后：
+  - `Overall_Average` 上 `Proposed - Local_Meta_Transfer` 的 8 主指标平均边差从 `-3.9652` 收缩到 `-2.5146`；
+  - 逐项胜负仍为 `6胜2负`，但两项 `Frost` 差值从 `+1.3319 / +0.6075` 显著缩小到 `+0.0582 / +0.1537`，几乎翻正；
+  - `station58` 与 `station59` 都从原来的 `6胜2负` 提升为 `8胜0负`，`station60` 为 `6胜2负`。
+- 关键解释：这次 reopen 并不能直接证明“Proposed 单边 under-budget”，因为当前代码里 `Local_Meta_Transfer` 也共享 `PROPOSED_META_EPOCHS`（见 `DemoModelTraining.py:1054-1060`），所以把 meta 预算从 `500` 拉到 `3000` 会同时强化 `Proposed` 和 `LMT`。
+- 因此，该实验更准确的结论是：增加 meta budget 会明显改善剩余短板（尤其是 `Frost`），但同时也会显著增强 `LMT`，导致总体平均边差缩小。若下一步要判断 `Proposed` 是否单边 under-budget，需要将 `Proposed` 与 `LMT` 的 meta epoch 控制解耦，再做针对性实验。
+- 节省算力原则下，不建议继续在当前“耦合 epoch”设定上盲目拉长；更优先的改动是：增加独立的 `LOCAL_META_TRANSFER_EPOCHS` 配置，再用最小矩阵验证 `Proposed` 专属 budget 是否还能把 `Frost` 翻正而不同时放大 `LMT`。
+
+### 2026-03-21 - R30-seed2 下的“合成最小矩阵”已经基本回答了 Proposed 单边 meta budget 问题
+- 由于当前代码固定了全局训练随机种子 `1029`，且 `R30-seed2` 的 subsampling 条件也固定（`CONVENTIONAL_RATIO=0.3, CONVENTIONAL_SUBSAMPLE_SEED_OFFSET=2`），因此可用两次运行构造一个近似受控的“合成最小矩阵”：
+  - `Proposed(meta=3000)` 取自 `budget_reopen_runs/R30_seed2_M4000_P3000/multi_station_performance.csv`
+  - `Local_Meta_Transfer(meta=500)` 取自 `necessity_runs/R30_seed2/multi_station_performance.csv`
+- 该合成比较在 `Overall_Average` 上得到：
+  - 8 主指标平均边差 `-4.0237`（优于原始 `R30-seed2` 的 `-3.9652`），但逐项胜负仍为 `6胜2负`，并没有变成 `7胜1负/8胜0负`；
+  - 两项剩余短板仍是 `Frost_nMAE=+0.9348`、`Frost_nRMSE=+0.1398`。
+- 这说明：
+  - “上次 reopen 之所以没扩大总体优势，仅仅因为 LMT 也被一起强化”并不是全部解释；
+  - 即使只看 `Proposed` 单边把 meta budget 从 `500` 拉到 `3000`，在当前算法结构下也仍然不能实现对 `LMT` 的全面翻盘。
+- 因此，若目标是 `Proposed vs LMT` 达到全赢状态，继续单纯增加 `Proposed` 的 meta 轮数已经不够有把握；更合理的后续方向应是：
+  - 继续提升 pre-train 阶段对 `Frost`/困难工况的针对性，或
+  - 修改 local meta 的 task/更新设计，而不是仅依赖当前 budget 扩张。
+
+### 2026-03-22 - 修正：当前 3 场站数据中的 Frost 并不像根基论文 Table II 那样占 7.30%
+- 先前基于根基论文 Table II（单场站）曾推断 `Frost` 在当前数据中“没那么 few-shot”，这一外推不严谨，现已纠正。
+- 直接按当前项目的 `.mat` 数据统计 12-step segment 占比：
+  - `station58`: `Frost = 50 / 1460 = 3.4247%`
+  - `station59`: `Frost = 32 / 1460 = 2.1918%`
+  - `station60`: `Frost = 38 / 1460 = 2.6027%`
+- 这说明在当前 3 场站设定下，`Frost` 仍然属于低占比事件，并不能简单用根基论文中的 `7.30%` 来解释“为什么 Frost 上 LMT 更强”。
+- 因而当前更合理的解释应转向：
+  - `station60` 的 Frost 构造/分布特性更特殊，或
+  - 当前联邦先验/元训练对该站 `Frost` 的迁移仍不足，或
+  - 预算不足仍在起作用；
+  而不能再用“Frost 在当前数据里并不稀缺”作为主要论据。
+
+### 2026-03-22 - Frost 诊断：当前剩余问题更像 station60 特异性，而不是 Frost 类别本身
+- 直接按当前项目 `.mat` 数据统计的 12-step segment 占比：
+  - `station58`: `Frost = 50/1460 = 3.4247%`
+  - `station59`: `Frost = 32/1460 = 2.1918%`
+  - `station60`: `Frost = 38/1460 = 2.6027%`
+- 这说明在当前 3 场站设定下，`Frost` 仍然是低占比事件；同时 `station59` 的 Frost 比 `station60` 更少，却没有成为剩余瓶颈，因此“Frost 样本不够多/不够 few-shot”并不能解释当前问题。
+- 进一步的分布诊断表明：
+  - `station60` 的 Frost 相对本站 conventional 的整体偏移（基于扁平化 NWP+power 的平均绝对 z-score）略高于 `58/59`：`1.0603` vs `1.0382 / 1.0077`，但差异不算大；
+  - `station60` 的 Frost 到其最近 conventional class 的距离并不最差（best distance `1.1249`），但该最近类的样本池较小（`82` segments），可能削弱 local meta 对 Frost 邻域的建模稳定性。
+- 更关键的是，在 `R30-seed2 -> R30-seed2_M4000_P3000` 的 budget reopen 中：
+  - `station58/59` 的 Proposed-Frost 明显改善；
+  - `station60` 的 Proposed-Frost 反而轻微恶化（`nMAE +0.3284`, `nRMSE +0.1901`）。
+- 因而当前更合理的判断是：剩余难点主要集中在 `station60-Frost` 的站点特异性/数据构造/分布问题，而不是 `Frost` 这一天气类别本身必须做专门算法。预算不足仍可能存在，但已不再是唯一或最直接的解释。
+
+### 2026-03-22 - Proposed 专用 balanced meta sampler 已接通
+- 按最小正确方案，不修改根基论文的 `k=10` 与 `k*=5` 协议，只修改 `Proposed` 在 `Phase 2` 中“这 5 个 conventional tasks 怎么抽”。
+- 新实现要点：
+  - 新增 `PROPOSED_META_SAMPLER_MODE`，默认 `balanced`；
+  - `Local_Meta_Transfer` 与 `Meta-only` 保持 `uniform` 抽样，不改变基线定义；
+  - `balanced` 抽样使用固定化规则：`weight = size_bonus * coverage_bonus`，其中
+    - `size_bonus = sqrt(mean_class_size / class_size)`，避免小类长期被大类淹没；
+    - `coverage_bonus = 1 / (1 + exposure_c)`，其中 `exposure_c` 统计最近 `4` 个 meta epoch 是否已抽中过该类，避免短窗口覆盖不足。
+- 这样做的目的不是针对 `Frost` 特化，而是在不改变 task 数与 episodic budget 的前提下，提高 `station60` 这类“小邻域 class”在 Proposed 元训练中的覆盖效率。
+- 验证结果：
+  - 新增 AST 测试 `tests/test_balanced_meta_sampler_ast.py`，先红后绿；
+  - 相关 AST 集合与 `py_compile` 均通过；
+  - 在 `/tmp/wpf_sampler_smoke` 做 `1/1/1/1 + R30-seed2 + balanced sampler` smoke 后，训练与结果生成链路均跑通。
+
+### 2026-03-22 - R30-seed2 + balanced Proposed meta sampler + meta=3000 达成 Overall_Average 上 Proposed 对 LMT 的 8胜0负
+- 运行配置：
+  - `CONVENTIONAL_RATIO=0.3`
+  - `CONVENTIONAL_SUBSAMPLE_SEED_OFFSET=2`
+  - `PRETRAIN_EPOCHS=4000`
+  - `PROPOSED_META_EPOCHS=3000`
+  - `META_ONLY_META_EPOCHS=3000`
+  - `FED_PRETRAIN_REGIME_ALPHA=1.0`
+  - `FED_PRETRAIN_AGGREGATION_GAMMA=0.5`
+  - `PROPOSED_META_SHARED_ANCHOR_BETA=0.005`
+  - `PROPOSED_META_SHARED_LR_SCALE=0.5`
+  - `PROPOSED_META_SAMPLER_MODE=balanced`
+- 结果文件：`sampler_runs/R30_seed2_balanced_M3000/multi_station_performance.csv`
+- 与同 budget 的 uniform sampler 对照 `budget_reopen_runs/R30_seed2_M4000_P3000/multi_station_performance.csv` 相比：
+  - `Overall_Average` 8 主指标均值边差（`Proposed - LMT`）从 `-2.5146` 扩大到 `-4.2729`；
+  - 逐项胜负从 `6胜2负` 提升为 `8胜0负`；
+  - `Frost_nMAE / Frost_nRMSE` 从 `+0.0582 / +0.1537` 翻为 `-0.2237 / -0.3405`。
+- 分站结果：
+  - `station58 = 8胜0负`
+  - `station59 = 7胜1负`
+  - `station60 = 8胜0负`
+- 关键解释：这强烈支持“剩余瓶颈主要在 Proposed 的 Phase-2 task coverage / neighborhood quality，而不是 Frost 专用算法缺失”。在保持 `k=10, k*=5` 不变的前提下，仅通过 Proposed 专用的 balanced meta sampler（`size_bonus * coverage_bonus`）就把 low-resource `R30-seed2` 场景下的 `Overall_Average` 推到了对 LMT 的全面占优。
+- 后续判断：
+  - 对 low-resource 论文主叙事，当前最强配置应优先采用 `balanced sampler + meta=3000`；
+  - 不再优先考虑继续盲目增加 epoch；如需追加算力，优先做该配置的复验而不是先改大结构。
+
+### 2026-03-22 - R30-seed2 + balanced sampler 在 M8000/P8000 下发生全面反转，不宜直接把 high-budget 当最终版
+- 运行配置：`CONVENTIONAL_RATIO=0.3, CONVENTIONAL_SUBSAMPLE_SEED_OFFSET=2, PRETRAIN_EPOCHS=8000, PROPOSED_META_EPOCHS=8000, META_ONLY_META_EPOCHS=8000, FED_PRETRAIN_REGIME_ALPHA=1.0, FED_PRETRAIN_AGGREGATION_GAMMA=0.5, PROPOSED_META_SHARED_ANCHOR_BETA=0.005, PROPOSED_META_SHARED_LR_SCALE=0.5, PROPOSED_META_SAMPLER_MODE=balanced`。
+- 结果文件：`final_runs/R30_seed2_balanced_M8000_P8000/multi_station_performance.csv`。
+- 与当前最强的 `sampler_runs/R30_seed2_balanced_M3000/multi_station_performance.csv` 相比：
+  - `Overall_Average` 上 `Proposed - LMT` 8 主指标均值边差从 `-4.2729` 反转为 `+4.3742`；
+  - 逐项胜负从 `8胜0负` 反转为 `0胜8负`；
+  - `station58 = 0胜8负`，`station59 = 0胜8负`，`station60 = 2胜6负`。
+- 根因拆解：
+  - `Proposed` 自身相对 `M3000` 只中等幅度变差（8 主指标均值 `+1.0854`，越小越好）；
+  - `Local_Meta_Transfer` 却大幅变强（8 主指标均值 `-7.5617`）。
+- 当前最合理解释不是“balanced sampler 失效”，而是：
+  - 在当前耦合设定下，同时把 `PRETRAIN` 和两条 meta 分支都拉到 `8000`，会让 `LMT` 获得更强的本地常规知识+本地元训练收益；
+  - `Proposed` 则可能受到更强 federated prior、anchor 约束以及 balanced task exposure 的共同影响，出现非单调退化。
+- 结论：
+  - 不能再假设“高预算一定更好”；
+  - 当前 low-resource 最强点仍是 `balanced sampler + PRETRAIN=4000 + META=3000`；
+  - 后续若要继续诊断 high-budget 失效，应优先做“单变量 reopen”（只增 pretrain 或只增 meta），不要再一次性同步拉高两者。

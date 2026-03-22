@@ -28,6 +28,11 @@ def env_float(name, default):
     return default if value is None else float(value)
 
 
+def env_str(name, default):
+    value = os.getenv(name)
+    return default if value is None else value.strip()
+
+
 # ========== [联邦新增] 联邦学习开关 ==========
 USE_FEDERATION = env_flag("USE_FEDERATION", True)  # True=联邦多场站, False=单场站原方法
 # 说明：设为False时完全退化为原始单场站元学习方法
@@ -42,6 +47,7 @@ META_TASKS_PER_EPOCH = env_int("META_TASKS_PER_EPOCH", 5)
 PRETRAIN_EPOCHS = env_int("PRETRAIN_EPOCHS", 35000)
 PROPOSED_META_EPOCHS = env_int("PROPOSED_META_EPOCHS", 30000)
 META_ONLY_META_EPOCHS = env_int("META_ONLY_META_EPOCHS", 30000)
+PROPOSED_META_SAMPLER_MODE = env_str("PROPOSED_META_SAMPLER_MODE", "balanced").lower()
 # 论文消融口径：Meta-only = 去掉 pre-training，其余训练机制保持一致
 META_ONLY_USE_CDRM = env_flag("META_ONLY_USE_CDRM", True)
 META_ONLY_TRAIN_ALL_PARAMS = env_flag("META_ONLY_TRAIN_ALL_PARAMS", False)
@@ -55,6 +61,7 @@ CONVENTIONAL_RATIO = env_float("CONVENTIONAL_RATIO", 1.0)
 CONVENTIONAL_SUBSAMPLE_BINS = 10
 CONVENTIONAL_SUBSAMPLE_SEED_OFFSET = env_int("CONVENTIONAL_SUBSAMPLE_SEED_OFFSET", 0)
 META_MIN_EPISODE_SAMPLES = 20
+PROPOSED_META_COVERAGE_WINDOW_FIXED = 4
 
 
 def validate_conventional_ratio(ratio):
@@ -63,6 +70,15 @@ def validate_conventional_ratio(ratio):
             f"CONVENTIONAL_RATIO={ratio} 不受支持，仅支持 {SUPPORTED_CONVENTIONAL_RATIOS}"
         )
     return ratio
+
+
+def validate_sampler_mode(sampler_mode):
+    supported_modes = {"uniform", "balanced"}
+    if sampler_mode not in supported_modes:
+        raise ValueError(
+            f"PROPOSED_META_SAMPLER_MODE={sampler_mode} 不受支持，仅支持 {sorted(supported_modes)}"
+        )
+    return sampler_mode
 
 
 def make_station_rng(station_id, offset=0, subsample_seed_offset=0):
@@ -187,6 +203,7 @@ def seed_torch(seed=1029):
 ## data processing
 seed_torch(seed=1029)
 CONVENTIONAL_RATIO = validate_conventional_ratio(CONVENTIONAL_RATIO)
+PROPOSED_META_SAMPLER_MODE = validate_sampler_mode(PROPOSED_META_SAMPLER_MODE)
 if CONVENTIONAL_RATIO < 1.0:
     print("=" * 70)
     print(f"启用 conventional-ratio 必要性实验: ratio={CONVENTIONAL_RATIO}")
@@ -195,6 +212,7 @@ if CONVENTIONAL_RATIO < 1.0:
         f"subsample_seed_offset={CONVENTIONAL_SUBSAMPLE_SEED_OFFSET}"
     )
     print("=" * 70)
+print(f"Phase 2 Proposed sampler mode: {PROPOSED_META_SAMPLER_MODE}")
 
 # ========== [联邦修改] 多场站数据加载 ==========
 if USE_FEDERATION:
@@ -688,7 +706,7 @@ def server_aggregate_client_states(client_updates):
     return average_state_dicts(weighted_states)
 
 
-def sample_station_meta_batch(station_id):
+def build_station_meta_tasks(station_id):
     station_tasks = []
     nwp_conven_class_st = all_stations_full_data[station_id]['nwp_conven_class']
     p_conven_class_st = all_stations_full_data[station_id]['p_conven_class']
@@ -708,13 +726,39 @@ def sample_station_meta_batch(station_id):
         num_samples = p_data.shape[0] // len_realp
         p_conven_class_1 = p_data[:num_samples * len_realp].reshape(num_samples, len_realp, 1)
         station_tasks.append({
+            'class_index': i_class,
+            'class_size': num_samples,
             'nwp': nwp_conven_class_1,
             'p': p_conven_class_1,
         })
 
-    tasks_per_epoch = min(META_TASKS_PER_EPOCH, len(station_tasks))
-    selected_tasks = random.sample(station_tasks, tasks_per_epoch)
+    return station_tasks
 
+
+def sample_task_indices_weighted_without_replacement(candidate_indices, candidate_weights, sample_count):
+    # weighted random without replacement
+    selected_indices = []
+    remaining_indices = list(candidate_indices)
+    remaining_weights = [float(max(weight, 1e-8)) for weight in candidate_weights]
+    sample_count = min(sample_count, len(remaining_indices))
+
+    for _ in range(sample_count):
+        weight_sum = sum(remaining_weights)
+        threshold = random.random() * weight_sum
+        cumulative_weight = 0.0
+        selected_position = len(remaining_indices) - 1
+        for i_weight, weight in enumerate(remaining_weights):
+            cumulative_weight += weight
+            if cumulative_weight >= threshold:
+                selected_position = i_weight
+                break
+        selected_indices.append(remaining_indices.pop(selected_position))
+        remaining_weights.pop(selected_position)
+
+    return selected_indices
+
+
+def build_meta_batch_from_tasks(selected_tasks):
     for i_task, task in enumerate(selected_tasks):
         index_shot = random.sample(range(0, np.size(task['nwp'], axis=0)), 20)
         train_input_support_ = task['nwp'][index_shot[0:10], :, :]
@@ -738,6 +782,42 @@ def sample_station_meta_batch(station_id):
         torch.tensor(train_target_query, dtype=torch.float32),
         torch.tensor(train_input_query, dtype=torch.float32)
     )
+
+
+def sample_station_meta_batch_uniform(station_id, tasks_per_epoch=META_TASKS_PER_EPOCH):
+    station_tasks = build_station_meta_tasks(station_id)
+    tasks_per_epoch = min(tasks_per_epoch, len(station_tasks))
+    selected_tasks = random.sample(station_tasks, tasks_per_epoch)
+    return build_meta_batch_from_tasks(selected_tasks), [task['class_index'] for task in selected_tasks]
+
+
+def sample_station_meta_batch_balanced(
+    station_id,
+    recent_selected_classes,
+    tasks_per_epoch=META_TASKS_PER_EPOCH,
+    coverage_window=PROPOSED_META_COVERAGE_WINDOW_FIXED
+):
+    station_tasks = build_station_meta_tasks(station_id)
+    tasks_per_epoch = min(tasks_per_epoch, len(station_tasks))
+    mean_class_size = np.mean([task['class_size'] for task in station_tasks])
+    recent_window = recent_selected_classes[-coverage_window:] if coverage_window > 0 else []
+
+    candidate_indices = []
+    candidate_weights = []
+    for task in station_tasks:
+        exposure_c = sum(task['class_index'] in selected_class_set for selected_class_set in recent_window)
+        coverage_bonus = 1.0 / (1.0 + exposure_c)
+        size_bonus = np.sqrt(mean_class_size / max(task['class_size'], 1))
+        candidate_indices.append(task['class_index'])
+        candidate_weights.append(float(size_bonus * coverage_bonus))
+
+    selected_class_indices = sample_task_indices_weighted_without_replacement(
+        candidate_indices,
+        candidate_weights,
+        tasks_per_epoch
+    )
+    selected_tasks = [station_tasks[class_index] for class_index in selected_class_indices]
+    return build_meta_batch_from_tasks(selected_tasks), selected_class_indices
 
 
 ## pre-train
@@ -909,7 +989,8 @@ def run_local_meta_training(
     train_all_params=False,
     disable_lwp=False,
     shared_anchor_beta=0.0,
-    shared_lr_scale=1.0
+    shared_lr_scale=1.0,
+    sampler_mode="uniform"
 ):
     """
     单场站本地元训练过程：
@@ -921,7 +1002,7 @@ def run_local_meta_training(
     print(
         f"  use_cdrm={use_cdrm}, train_all_params={train_all_params}, "
         f"disable_lwp={disable_lwp}, shared_anchor_beta={shared_anchor_beta}, "
-        f"shared_lr_scale={shared_lr_scale}"
+        f"shared_lr_scale={shared_lr_scale}, sampler_mode={sampler_mode}"
     )
     total_task_pool = np.size(all_stations_full_data[station_id]['p_conven_class'], axis=1)
     print(f"  tasks_per_epoch={min(META_TASKS_PER_EPOCH, total_task_pool)}, station_task_pool={total_task_pool}")
@@ -950,9 +1031,27 @@ def run_local_meta_training(
         shared_lr_scale=shared_lr_scale
     )
     prior_anchor_state = clone_state_dict(init_state_dict)
+    recent_selected_classes = []
 
     for i_t in range(epoch_train_task):
-        Train_target_support, Train_input_support, Train_target_query, Train_input_query = sample_station_meta_batch(station_id)
+        if sampler_mode == "balanced":
+            (
+                (Train_target_support, Train_input_support, Train_target_query, Train_input_query),
+                selected_class_indices
+            ) = sample_station_meta_batch_balanced(
+                station_id,
+                recent_selected_classes,
+                tasks_per_epoch=META_TASKS_PER_EPOCH
+            )
+            recent_selected_classes.append(set(selected_class_indices))
+        else:
+            (
+                (Train_target_support, Train_input_support, Train_target_query, Train_input_query),
+                _
+            ) = sample_station_meta_batch_uniform(
+                station_id,
+                tasks_per_epoch=META_TASKS_PER_EPOCH
+            )
 
         print(
             "[##################################################################"
@@ -1046,7 +1145,8 @@ for station_id in station_ids:
         train_all_params=False,
         disable_lwp=False,
         shared_anchor_beta=PROPOSED_META_SHARED_ANCHOR_BETA,
-        shared_lr_scale=PROPOSED_META_SHARED_LR_SCALE
+        shared_lr_scale=PROPOSED_META_SHARED_LR_SCALE,
+        sampler_mode=PROPOSED_META_SAMPLER_MODE
     )
 
 # 2) Local_Meta_Transfer: 本地 conventional pretrain 初始化后，各场站独立 local meta-training
@@ -1062,7 +1162,8 @@ for station_id in station_ids:
         train_all_params=False,
         disable_lwp=False,
         shared_anchor_beta=0.0,
-        shared_lr_scale=1.0
+        shared_lr_scale=1.0,
+        sampler_mode="uniform"
     )
 
 # 3) Meta-only: 随机初始化后各场站独立 local meta-training
@@ -1079,7 +1180,8 @@ if TRAIN_META_ONLY_BASELINE:
             train_all_params=META_ONLY_TRAIN_ALL_PARAMS,
             disable_lwp=META_ONLY_DISABLE_LWP,
             shared_anchor_beta=0.0,
-            shared_lr_scale=1.0
+            shared_lr_scale=1.0,
+            sampler_mode="uniform"
         )
 
 
