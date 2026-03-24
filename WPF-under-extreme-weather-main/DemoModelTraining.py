@@ -48,6 +48,7 @@ PRETRAIN_EPOCHS = env_int("PRETRAIN_EPOCHS", 35000)
 PROPOSED_META_EPOCHS = env_int("PROPOSED_META_EPOCHS", 30000)
 META_ONLY_META_EPOCHS = env_int("META_ONLY_META_EPOCHS", 30000)
 PROPOSED_META_SAMPLER_MODE = env_str("PROPOSED_META_SAMPLER_MODE", "balanced").lower()
+REGIME_MISSING_MODE = env_str("REGIME_MISSING_MODE", "none").lower()
 # 论文消融口径：Meta-only = 去掉 pre-training，其余训练机制保持一致
 META_ONLY_USE_CDRM = env_flag("META_ONLY_USE_CDRM", True)
 META_ONLY_TRAIN_ALL_PARAMS = env_flag("META_ONLY_TRAIN_ALL_PARAMS", False)
@@ -62,6 +63,11 @@ CONVENTIONAL_SUBSAMPLE_BINS = 10
 CONVENTIONAL_SUBSAMPLE_SEED_OFFSET = env_int("CONVENTIONAL_SUBSAMPLE_SEED_OFFSET", 0)
 META_MIN_EPISODE_SAMPLES = 20
 PROPOSED_META_COVERAGE_WINDOW_FIXED = 4
+DEFAULT_REGIME_MISSING_CLASS_MAP = {
+    '58': (1, 2, 3, 4),
+    '59': (4, 5, 6, 7),
+    '60': (7, 8, 9, 10),
+}
 
 
 def validate_conventional_ratio(ratio):
@@ -79,6 +85,32 @@ def validate_sampler_mode(sampler_mode):
             f"PROPOSED_META_SAMPLER_MODE={sampler_mode} 不受支持，仅支持 {sorted(supported_modes)}"
         )
     return sampler_mode
+
+
+def validate_regime_missing_mode(regime_missing_mode):
+    supported_modes = {"none", "class_dropout"}
+    if regime_missing_mode not in supported_modes:
+        raise ValueError(
+            f"REGIME_MISSING_MODE={regime_missing_mode} 不受支持，仅支持 {sorted(supported_modes)}"
+        )
+    return regime_missing_mode
+
+
+def validate_regime_missing_class_map(class_map, total_classes=10):
+    class_presence = {class_idx: 0 for class_idx in range(1, total_classes + 1)}
+    for station_id, dropped_classes in class_map.items():
+        if len(dropped_classes) != 4:
+            raise ValueError(f"场站 {station_id} 必须固定 drop 4 个 classes，当前为 {dropped_classes}")
+        if len(set(dropped_classes)) != len(dropped_classes):
+            raise ValueError(f"场站 {station_id} 的 drop classes 存在重复: {dropped_classes}")
+        for class_idx in dropped_classes:
+            if class_idx < 1 or class_idx > total_classes:
+                raise ValueError(f"场站 {station_id} 的 class {class_idx} 超出有效范围 1..{total_classes}")
+            class_presence[class_idx] += 1
+    globally_missing = [class_idx for class_idx, dropped_count in class_presence.items() if dropped_count >= len(class_map)]
+    if globally_missing:
+        raise ValueError(f"存在在所有场站同时缺失的 classes: {globally_missing}")
+    return class_map
 
 
 def make_station_rng(station_id, offset=0, subsample_seed_offset=0):
@@ -176,6 +208,81 @@ def subsample_meta_conventional_data(all_stations_full_data, ratio, subsample_se
         )
     return reduced_all_stations_full_data
 
+
+def build_retained_class_indices(total_classes, dropped_classes_one_based):
+    dropped_class_indices = {class_idx - 1 for class_idx in dropped_classes_one_based}
+    return [class_idx for class_idx in range(total_classes) if class_idx not in dropped_class_indices]
+
+
+def apply_regime_missing_to_meta_data(all_stations_full_data, regime_missing_mode):
+    if regime_missing_mode != "class_dropout":
+        return all_stations_full_data
+
+    reduced_all_stations_full_data = copy.deepcopy(all_stations_full_data)
+    for station_id, station_payload in reduced_all_stations_full_data.items():
+        dropped_classes = DEFAULT_REGIME_MISSING_CLASS_MAP.get(station_id, ())
+        p_conven_class_st = station_payload['p_conven_class']
+        nwp_conven_class_st = station_payload['nwp_conven_class']
+        total_classes = np.size(p_conven_class_st, axis=1)
+        retained_class_indices = build_retained_class_indices(total_classes, dropped_classes)
+
+        p_conven_class_new = np.empty([1, len(retained_class_indices)], dtype=object)
+        for new_class_idx, old_class_idx in enumerate(retained_class_indices):
+            p_conven_class_new[0, new_class_idx] = p_conven_class_st[0, old_class_idx]
+
+        nwp_conven_class_new = np.empty([1, np.size(nwp_conven_class_st, axis=1)], dtype=object)
+        for i_nwp in range(np.size(nwp_conven_class_st, axis=1)):
+            nwp_conven_class_new[0, i_nwp] = np.empty([1, len(retained_class_indices)], dtype=object)
+            for new_class_idx, old_class_idx in enumerate(retained_class_indices):
+                nwp_conven_class_new[0, i_nwp][0, new_class_idx] = nwp_conven_class_st[0, i_nwp][0, old_class_idx]
+
+        station_payload['p_conven_class'] = p_conven_class_new
+        station_payload['nwp_conven_class'] = nwp_conven_class_new
+        station_payload['retained_class_ids'] = [class_idx + 1 for class_idx in retained_class_indices]
+        print(
+            f"    场站 {station_id} regime-missing: drop={list(dropped_classes)}, "
+            f"retain={station_payload['retained_class_ids']}"
+        )
+    return reduced_all_stations_full_data
+
+
+def apply_regime_missing_to_pretrain_data(clients_train_data, all_stations_full_data, regime_missing_mode):
+    if regime_missing_mode != "class_dropout":
+        return clients_train_data
+
+    reduced_clients_train_data = {}
+    for station_id, station_payload in all_stations_full_data.items():
+        p_conven_class_st = station_payload['p_conven_class']
+        nwp_conven_class_st = station_payload['nwp_conven_class']
+        class_inputs = []
+        class_targets = []
+
+        for i_class in range(np.size(p_conven_class_st, axis=1)):
+            for i_nwp in range(np.size(nwp_conven_class_st, axis=1)):
+                nwp_data = nwp_conven_class_st[0, i_nwp][0, i_class]
+                num_samples = nwp_data.shape[0] // len_realp
+                nwp_reshaped = nwp_data[:num_samples * len_realp].reshape(num_samples, len_realp, 1)
+                if i_nwp == 0:
+                    nwp_conven_class_1 = nwp_reshaped
+                else:
+                    nwp_conven_class_1 = np.concatenate((nwp_conven_class_1, nwp_reshaped), axis=2)
+
+            p_data = p_conven_class_st[0, i_class]
+            num_samples = p_data.shape[0] // len_realp
+            p_conven_class_1 = p_data[:num_samples * len_realp].reshape(num_samples, len_realp, 1)
+            class_inputs.append(nwp_conven_class_1)
+            class_targets.append(p_conven_class_1)
+
+        reduced_clients_train_data[station_id] = {
+            'input': np.concatenate(class_inputs, axis=0),
+            'target': np.concatenate(class_targets, axis=0)
+        }
+        print(
+            f"    场站 {station_id} pretrain pool 经 regime-missing 重建: "
+            f"{reduced_clients_train_data[station_id]['input'].shape}"
+        )
+    return reduced_clients_train_data
+
 class TemporalConvNet(nn.Module):
     def __init__(self, num_inputs, num_channels, mode='pre', kernel_size=2, dropout=0.2):
         super(TemporalConvNet, self).__init__()
@@ -204,6 +311,8 @@ def seed_torch(seed=1029):
 seed_torch(seed=1029)
 CONVENTIONAL_RATIO = validate_conventional_ratio(CONVENTIONAL_RATIO)
 PROPOSED_META_SAMPLER_MODE = validate_sampler_mode(PROPOSED_META_SAMPLER_MODE)
+REGIME_MISSING_MODE = validate_regime_missing_mode(REGIME_MISSING_MODE)
+validate_regime_missing_class_map(DEFAULT_REGIME_MISSING_CLASS_MAP)
 if CONVENTIONAL_RATIO < 1.0:
     print("=" * 70)
     print(f"启用 conventional-ratio 必要性实验: ratio={CONVENTIONAL_RATIO}")
@@ -213,6 +322,7 @@ if CONVENTIONAL_RATIO < 1.0:
     )
     print("=" * 70)
 print(f"Phase 2 Proposed sampler mode: {PROPOSED_META_SAMPLER_MODE}")
+print(f"Regime-missing mode: {REGIME_MISSING_MODE}")
 
 # ========== [联邦修改] 多场站数据加载 ==========
 if USE_FEDERATION:
@@ -470,6 +580,16 @@ all_stations_full_data = subsample_meta_conventional_data(
     CONVENTIONAL_RATIO,
     subsample_seed_offset=CONVENTIONAL_SUBSAMPLE_SEED_OFFSET
 )
+all_stations_full_data = apply_regime_missing_to_meta_data(
+    all_stations_full_data,
+    REGIME_MISSING_MODE
+)
+if USE_FEDERATION:
+    clients_train_data = apply_regime_missing_to_pretrain_data(
+        clients_train_data,
+        all_stations_full_data,
+        REGIME_MISSING_MODE
+    )
 
 # [保留] 为了兼容部分原代码，保留变量
 test_target_p = all_stations_full_data[station_ids[0]]['test_target']
@@ -735,6 +855,12 @@ def build_station_meta_tasks(station_id):
     return station_tasks
 
 
+def resolve_local_meta_tasks_per_epoch(station_tasks, requested_tasks_per_epoch=META_TASKS_PER_EPOCH):
+    if REGIME_MISSING_MODE == "class_dropout":
+        return min(len(station_tasks), max(1, len(station_tasks) // 2))
+    return min(requested_tasks_per_epoch, len(station_tasks))
+
+
 def sample_task_indices_weighted_without_replacement(candidate_indices, candidate_weights, sample_count):
     # weighted random without replacement
     selected_indices = []
@@ -786,7 +912,7 @@ def build_meta_batch_from_tasks(selected_tasks):
 
 def sample_station_meta_batch_uniform(station_id, tasks_per_epoch=META_TASKS_PER_EPOCH):
     station_tasks = build_station_meta_tasks(station_id)
-    tasks_per_epoch = min(tasks_per_epoch, len(station_tasks))
+    tasks_per_epoch = resolve_local_meta_tasks_per_epoch(station_tasks, requested_tasks_per_epoch=tasks_per_epoch)
     selected_tasks = random.sample(station_tasks, tasks_per_epoch)
     return build_meta_batch_from_tasks(selected_tasks), [task['class_index'] for task in selected_tasks]
 
@@ -798,7 +924,7 @@ def sample_station_meta_batch_balanced(
     coverage_window=PROPOSED_META_COVERAGE_WINDOW_FIXED
 ):
     station_tasks = build_station_meta_tasks(station_id)
-    tasks_per_epoch = min(tasks_per_epoch, len(station_tasks))
+    tasks_per_epoch = resolve_local_meta_tasks_per_epoch(station_tasks, requested_tasks_per_epoch=tasks_per_epoch)
     mean_class_size = np.mean([task['class_size'] for task in station_tasks])
     recent_window = recent_selected_classes[-coverage_window:] if coverage_window > 0 else []
 
@@ -1005,7 +1131,11 @@ def run_local_meta_training(
         f"shared_lr_scale={shared_lr_scale}, sampler_mode={sampler_mode}"
     )
     total_task_pool = np.size(all_stations_full_data[station_id]['p_conven_class'], axis=1)
-    print(f"  tasks_per_epoch={min(META_TASKS_PER_EPOCH, total_task_pool)}, station_task_pool={total_task_pool}")
+    local_tasks_per_epoch = resolve_local_meta_tasks_per_epoch(
+        [None] * total_task_pool,
+        requested_tasks_per_epoch=META_TASKS_PER_EPOCH
+    )
+    print(f"  tasks_per_epoch={local_tasks_per_epoch}, station_task_pool={total_task_pool}")
     print("=" * 70)
 
     get_meta_trainable_params(
@@ -1041,7 +1171,7 @@ def run_local_meta_training(
             ) = sample_station_meta_batch_balanced(
                 station_id,
                 recent_selected_classes,
-                tasks_per_epoch=META_TASKS_PER_EPOCH
+                tasks_per_epoch=local_tasks_per_epoch
             )
             recent_selected_classes.append(set(selected_class_indices))
         else:
@@ -1050,7 +1180,7 @@ def run_local_meta_training(
                 _
             ) = sample_station_meta_batch_uniform(
                 station_id,
-                tasks_per_epoch=META_TASKS_PER_EPOCH
+                tasks_per_epoch=local_tasks_per_epoch
             )
 
         print(

@@ -1288,3 +1288,167 @@
   - 不能再假设“高预算一定更好”；
   - 当前 low-resource 最强点仍是 `balanced sampler + PRETRAIN=4000 + META=3000`；
   - 后续若要继续诊断 high-budget 失效，应优先做“单变量 reopen”（只增 pretrain 或只增 meta），不要再一次性同步拉高两者。
+
+### 2026-03-22 - 已实现 full-conventional-data 下的 regime-missing / class-dropout stress protocol
+- 目标：在不改主算法的前提下，用更对症的 necessity stress test 替代单纯 `CONVENTIONAL_RATIO` 压样本密度的协议。
+- 新协议要点：
+  - `CONVENTIONAL_RATIO=1.0` 恢复全 conventional 数据；
+  - 新增 `REGIME_MISSING_MODE=class_dropout`；
+  - 固定互补 drop map：
+    - `station58`: drop `{1,2,3,4}`
+    - `station59`: drop `{4,5,6,7}`
+    - `station60`: drop `{7,8,9,10}`
+  - 约束：不存在任何一个 class 在三个场站同时缺失；
+  - regime-missing 同时作用于：
+    - `Phase 1` 的本地 conventional pretrain pool（通过保留类重建 pretrain pool）
+    - `Phase 2` 的本地 conventional meta task pool；
+  - extreme few-shot 和 test 数据保持不变。
+- 采样协议：
+  - 4-class dropout 后每站剩 `6` 类；
+  - 新增 `resolve_local_meta_tasks_per_epoch(...)`，在 regime-missing 模式下采用“每轮半覆盖”逻辑，因此本地 `k*=3`；
+  - `Proposed` 仍走 balanced sampler，`LMT`/`Meta-only` 仍走 uniform sampler。
+- 实现文件：`DemoModelTraining.py`，设计文档：`docs/plans/2026-03-22-regime-missing-design.md`。
+- 测试与验证：
+  - 新增 `tests/test_regime_missing_stress_ast.py`；
+  - 相关 AST 套件与 `py_compile` 全部通过；
+  - 在 `/tmp/wpf_regime_missing_smoke` 完成 `CONVENTIONAL_RATIO=1.0 + REGIME_MISSING_MODE=class_dropout + 1/1/1/1` CPU smoke，训练与结果生成链路均跑通。
+
+### 2026-03-22 - full conventional + complementary 4-class dropout 并未支持联邦必要性，反而进一步削弱 Proposed 必要性
+- 运行配置：`CONVENTIONAL_RATIO=1.0, REGIME_MISSING_MODE=class_dropout, PRETRAIN_EPOCHS=4000, PROPOSED_META_EPOCHS=3000, META_ONLY_META_EPOCHS=3000, PROPOSED_META_SAMPLER_MODE=balanced`。
+- 结果文件：`regime_missing_runs/fullconv_classdrop_m3000/multi_station_performance.csv`。
+- `Overall_Average` 上：
+  - `Proposed = 23.2814`
+  - `Local_Meta_Transfer = 21.0303`
+  - 边差 `Proposed - LMT = +2.2512`，即 `Proposed vs LMT = 2胜6负`。
+- 分站：
+  - `station58 = 1胜7负`
+  - `station59 = 2胜6负`
+  - `station60 = 4胜4负`
+- 与全数据无 dropout 的当前强基线 `tune_runs/T3/multi_station_performance.csv` 相比，二者绝对值都显著改善，但 `LMT` 改善更大；与 `R30-seed2 balanced M3000` 相比，更是从 `8胜0负` 反转为 `2胜6负`。
+- 当前最合理解释：
+  - 这组固定互补 4-class dropout 协议并没有激发出“联邦补齐缺失 regime”的优势；
+  - 相反，它更像是同时简化了本地 conventional task pool（每站 10 类降到 6 类，k*=3），而 `LMT` 比 `Proposed` 更能从这种更干净的本地任务空间中获益；
+  - 因此，按当前这版 stress test，联邦必要性没有被支持，反而被进一步削弱。
+- 结论：
+  - 不能把这组 regime-missing 结果作为联邦必要性证据；
+  - 若继续推进 necessity 叙事，需要重新审视协议是否真正制造了“单站缺失、跨站可补”的条件，而不是先简化了本地任务空间。
+
+### 2026-03-23 - 长会话总括索引
+- 本次长会话的完整整理文档见：`docs/plans/2026-03-23-session-summary.md`。
+- 需要优先记住的三件事：
+  1. 两个主创新点已形成并实现：
+     - `Phase 1`: regime-aware federated pre-training；
+     - `Phase 2`: prior-preserving local meta-training。
+  2. Proposed-only balanced Phase-2 sampler 是本次最关键的结构性改进，其公式为：
+     - `coverage_bonus(c) = 1 / (1 + exposure_c)`
+     - `size_bonus(c) = sqrt(mean_class_size / class_size_c)`
+     - `weight_c = coverage_bonus(c) * size_bonus(c)`
+     - 固定短窗 `W=4`。
+  3. 当前结论是分裂的：
+     - 在 `R30-seed2 + balanced sampler + PRETRAIN=4000 + META=3000` 下，`Proposed vs LMT = 8胜0负`，这是最强正结果；
+     - 但 full-conventional complementary 4-class dropout stress test 给出 `2胜6负`，削弱了“联邦必要性”的总体主张。
+- 新窗口续接时，应先读 `docs/plans/2026-03-23-session-summary.md`，再读本文件最近几段实验记录。
+
+### 2026-03-23 - 方法核心公式与理论解释（优先记忆）
+- 这次会话真正需要优先保留的不是某一组跑分，而是 Proposed 的两条主创新线及其数学动机。
+
+#### 主创新点 1：Regime-Aware Federated Pre-Training（Phase 1）
+- 目标：让 federated prior 不再是对所有 conventional segments 一视同仁的平均结果，而更偏向 hard / rare / boundary conventional regimes。
+- 样本级权重：
+  - 对每个 conventional segment `i`，先构造 regime score：
+    - `ramp_score_i`：功率序列相邻步长平均绝对变化；
+    - `volatility_score_i`：功率序列标准差；
+    - `rarity_score_i`：输入特征相对站内均值方差归一化后的平均绝对偏离。
+  - 原始分数：`s_i = ramp_score_i + volatility_score_i + rarity_score_i`
+  - 归一化后：`s_i_tilde`
+  - 最终 sample weight：`w_i = 1 + alpha * s_i_tilde`
+  - 其中 `alpha = FED_PRETRAIN_REGIME_ALPHA`。
+- 客户端预训练损失可写成加权 MSE：
+  - `L_pre_client = sum_i w_i * ||f_theta(x_i) - y_i||^2 / sum_i w_i`
+- 服务器聚合不再是 plain FedAvg，而是 regime-aware client weighting：
+  - 先从客户端得到 `regime_factor_s`；
+  - 聚合权重：`rho_s ∝ n_s * clip(1 + gamma * (regime_factor_s - 1), 0.5, 2.0)`
+  - 其中 `gamma = FED_PRETRAIN_AGGREGATION_GAMMA`。
+- 理论解释：
+  - 如果直接 FedAvg，就等于默认所有 station 的所有 conventional segments 对 future extreme few-shot 同等重要；
+  - 这和之前 Pilot A/B/C/D 的非单调现象不符；
+  - 因而需要让联邦 prior 更偏向“对 downstream adaptation 更有价值”的 conventional regimes。
+
+#### 主创新点 2：Prior-Preserving Local Meta-Training（Phase 2）
+- 目标：解决 local meta-training 覆盖/洗掉 federated prior 的问题。
+- 诊断来源：早期 pilot 已表明 meta 轮数拉长时，旧 Proposed 容易从相对优势退化，说明本地元训练会冲掉联邦共享先验。
+- 新目标函数：
+  - `L_meta = L_query + beta * ||theta_shared - theta_fed||_2^2`
+  - 其中：
+    - `theta_fed`：Phase 1 输出的 federated shared prior；
+    - `theta_shared`：当前 local meta 中共享参数；
+    - `beta = PROPOSED_META_SHARED_ANCHOR_BETA`。
+- 优化器层面的配套约束：
+  - 共享参数学习率缩放：`lr_shared = shared_lr_scale * lr_base`
+  - 其中 `shared_lr_scale = PROPOSED_META_SHARED_LR_SCALE`。
+- 理论解释：
+  - Proposed 与 LMT 的差别不应只停留在“初始化来源不同”；
+  - 如果 Phase 2 不显式保护 federated prior，那么 local meta 最终会把 Proposed 拉回接近 LMT 的本地解；
+  - 因此，Phase 2 必须让“联邦先验被消费且不被轻易覆盖”。
+
+#### 次级但关键的结构改进：Proposed-only balanced Phase-2 sampler
+- 这是后续把 low-resource `R30-seed2` 推到 `Overall_Average 8胜0负` 的直接原因。
+- 对每个 local conventional class `c` 定义：
+  - `coverage_bonus(c) = 1 / (1 + exposure_c)`
+  - `size_bonus(c) = sqrt(mean_class_size / class_size_c)`
+  - `weight_c = coverage_bonus(c) * size_bonus(c)`
+- 其中 `exposure_c` 统计最近 `W=4` 个 meta epochs 中该类出现的次数。
+- `W=4` 的解释：原协议 `k=10, k*=5`，均匀抽样下某类连续 4 轮不被抽中的概率约为 `(1-0.5)^4 = 0.0625`，因此可把 `W=4` 看成短期持续欠覆盖的检测窗口，而不是对一轮随机波动的过度反应。
+- 理论解释：
+  - 该 sampler 不是 Frost 特化；
+  - 它解决的是 local task coverage / neighborhood quality 问题，尤其是在 station60 这类局部邻域不稳的场景下。
+
+#### 当前最诚实的总体判断
+- 上述三部分共同构成了本次会话的算法主线；
+- 其中 Phase 1 和 Phase 2 是主创新点，balanced sampler 是后续关键改进；
+- 低资源 `R30` 协议下，这套设计能把 Proposed 推到对 LMT 的强优势；
+- 但 broader federated necessity claim 仍未被最终证明，因为 full-conventional complementary 4-class dropout stress test 结果为 `2胜6负`。
+
+### 2026-03-23 - CDRM 与两主创新点的结合方式（重要）
+- 根基论文明确指出：`CDRM` 应同时作用于 pre-train 和 meta-train，见 `(19)(20)(21)`；因此在当前多场站方法中，更合理的理解不是“CDRM 被替代了”，而是“两个主创新点建立在 CDRM 底座之上”。
+- 更干净的公式化写法应为：
+  - `Phase 1`: `L_s^pre = L_s^{weighted-pred} + lambda_pre * L_{CDRM,s}^{pre}`
+    - 其中 `L_s^{weighted-pred} = (1 / sum_t w_{s,t}) * sum_t w_{s,t} * l(f_theta(x_{s,t}), y_{s,t})`
+    - `w_{s,t} = 1 + alpha * r_{s,t}`
+    - `L_{CDRM,s}^{pre}` 对应根基论文 (18) 的跨 task / minibatch gradient consistency 正则；当前代码实现上由 `penalty(...)` 近似承载。
+  - `Phase 2 support`: `L_s^{SS} = L_s^{support} + lambda_meta * L_{CDRM,s}^{SS}`
+  - `Phase 2 query`: `L_s^{SQ} = L_s^{query} + lambda_meta * L_{CDRM,s}^{SQ} + beta * ||theta_sh - theta_fed||_2^2`
+- 理论解释：
+  - `CDRM` 负责跨 task 不变性 / cross-task generalization；
+  - `regime-aware pretrain` 负责强调哪些 conventional segments 对 downstream extreme adaptation 更重要；
+  - `prior-preserving meta` 负责避免本地元训练洗掉 federated prior；
+  - 三者是正交的，不应互相替代。
+- 重要实现现状：
+  - 当前代码里 `Phase 2` 已经在 `use_cdrm=True` 时把 `penalty(...)` 加进 support/query 损失；
+  - 但 `Phase 1` 的 CDRM 系数来自 `get_pretrain_penalty_weight(...)`，其 warmup 要到 `epoch >= 10000` 才非零；
+  - 因此，在本次会话大多数实验预算（`PRETRAIN_EPOCHS=4000` 或 `8000`）下，`Phase 1 CDRM` 实际上是关闭的。
+- 这意味着：
+  - 当前很多关于“regime-aware federated pretraining”的实验，并没有真正测试“Regime-aware + CDRM”联合设计；
+  - 若后续要重新评估方法本体，应优先重构 `Phase 1` 的 `CDRM` 权重调度，而不是简单再加一个新损失名词。
+
+### 2026-03-23 - 最早期 git 版本中的 CDRM 实现是否与论文公式完全一致（重要）
+- 已核查最早期 `git` 历史：从 `first commit 80e6266` 开始，代码中的 `CDRM` 就不是对论文 `(18)(19)(20)(21)` 的逐字实现，而是一个代理实现。
+- 最早期实现与当前核心结构一致：
+  - `penalty(logits, y)` 定义为：
+    - 先引入辅助标量 `scale = 1.0`；
+    - 再把一个 batch 划分为奇偶两半，分别计算 `loss1` 和 `loss2`；
+    - 对 `scale` 求两半 loss 的梯度，并返回二者点积：`sum(grad_batch1 * grad_batch2)`。
+  - 预训练和元训练都采用 `loss_en = k * penalty(...) + mse(...)` 的写法。
+- 因此，代码从一开始就是“梯度一致性 penalty 的工程代理”，而不是论文符号层面的原式翻译。
+- 为什么只能说“作用机理对应”，而不能说“公式写法完全一样”：
+  - 论文 `(18)` 的对象是抽象的 base learner `eta`，并写成 `\nabla_{eta | eta = 1.0}`；代码并没有显式单独建模论文式 `eta`，而是用辅助标量 `scale` 作为代理变量。
+  - 论文 `(18)` 写的是 sampled tasks 中两个 mini-batches `m,n` 的梯度点积；代码则是在当前张量 batch 内直接按奇偶索引拆成两半。
+  - 论文 `(19)(20)(21)` 写的是参数更新规则；代码实现时落成了一个可反传的代理损失 `loss_en = k * penalty + mse`。
+- 因此，更准确的表述应为：
+  - 代码与论文 `CDRM` 在“通过二阶/梯度一致性促进 invariant features 与 cross-task generalization”的优化机理上对齐；
+  - 但在变量定义、task/minibatch 组织方式、以及最终损失写法上，都不是论文原式的严格同构实现。
+- 另一个已确认事实：`pre-train` 阶段 `k` 的 warm-up（`<10000 -> 0, <20000 -> 1, <30000 -> 5, else 10`）在最早 `first commit` 就已经存在，并不是后期引入的改动。
+- 关于“为什么代码不严格按论文公式写”：目前只能给出合理推断，不能表述为已确认事实：
+  - 论文本身已经从原始双层约束化简到 `(17)` 与 `(18)`；
+  - Appendix A 又进一步通过固定 `eta=1.0`、线性假设和无偏估计解释，为“可计算代理化”留出了空间；
+  - 代码选择 `scale`-gradient 点积，大概率是作者在可计算性、训练稳定性和实现复杂度之间做的工程折中。
