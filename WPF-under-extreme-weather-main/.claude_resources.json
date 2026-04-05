@@ -1,0 +1,27 @@
+{
+  "os": {
+    "system": "Linux",
+    "release": "5.15.0-97-generic",
+    "machine": "x86_64",
+    "python_version": "3.8.10"
+  },
+  "cpu": {
+    "logical_cores": 128
+  },
+  "memory": {
+    "total_gb": 1007.52,
+    "available_gb": 940.7
+  },
+  "disk": {
+    "total_gb": 30.0,
+    "available_gb": 21.65
+  },
+  "nvidia": {
+    "available": false,
+    "output": "Failed to initialize NVML: Unknown Error"
+  },
+  "amd": {
+    "available": false,
+    "error": "[Errno 2] No such file or directory: 'rocm-smi'"
+  }
+}

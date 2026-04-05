@@ -1,5 +1,8 @@
 import os
+import sys
 import time
+import json
+import math
 import numpy as np
 import torch.nn as nn
 import torch
@@ -33,6 +36,30 @@ def env_str(name, default):
     return default if value is None else value.strip()
 
 
+def configure_runtime_output_streams():
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(line_buffering=True, write_through=True)
+        except AttributeError:
+            continue
+
+
+def progress_log(message=""):
+    print(message, flush=True)
+
+
+def should_log_epoch(epoch_index, total_epochs, interval, warmup_epochs=10):
+    current_epoch = int(epoch_index) + 1
+    if current_epoch <= max(1, int(warmup_epochs)):
+        return True
+    if current_epoch >= int(total_epochs):
+        return True
+    return current_epoch % max(1, int(interval)) == 0
+
+
+configure_runtime_output_streams()
+
+
 # ========== [联邦新增] 联邦学习开关 ==========
 USE_FEDERATION = env_flag("USE_FEDERATION", True)  # True=联邦多场站, False=单场站原方法
 # 说明：设为False时完全退化为原始单场站元学习方法
@@ -57,11 +84,25 @@ FED_PRETRAIN_REGIME_ALPHA = env_float("FED_PRETRAIN_REGIME_ALPHA", 1.0)
 FED_PRETRAIN_AGGREGATION_GAMMA = env_float("FED_PRETRAIN_AGGREGATION_GAMMA", 0.5)
 PROPOSED_META_SHARED_ANCHOR_BETA = env_float("PROPOSED_META_SHARED_ANCHOR_BETA", 0.01)
 PROPOSED_META_SHARED_LR_SCALE = env_float("PROPOSED_META_SHARED_LR_SCALE", 0.3)
+SEASONAL_PROTOCOL_ENABLED = env_flag("SEASONAL_PROTOCOL_ENABLED", False)
+SEASONAL_PROTOCOL_METADATA_PATH = env_str(
+    "SEASONAL_PROTOCOL_METADATA_PATH",
+    "seasonal_protocol_data/seasonal_protocol_metadata.json"
+)
+ENABLE_CONVERGENCE_MONITOR = env_flag("ENABLE_CONVERGENCE_MONITOR", True)
+CONVERGENCE_REPORT_PATH = env_str("CONVERGENCE_REPORT_PATH", "training_convergence_report.json")
+CONVERGENCE_MIN_DELTA = env_float("CONVERGENCE_MIN_DELTA", 1e-4)
+CONVERGENCE_MIN_EPOCHS = env_int("CONVERGENCE_MIN_EPOCHS", 5)
+CONVERGENCE_PATIENCE_PRETRAIN = env_int("CONVERGENCE_PATIENCE_PRETRAIN", 200)
+CONVERGENCE_PATIENCE_META = env_int("CONVERGENCE_PATIENCE_META", 100)
+CONVERGENCE_PATIENCE_FEW_SHOT = env_int("CONVERGENCE_PATIENCE_FEW_SHOT", 5)
+META_SUPPORT_SHOTS = env_int("META_SUPPORT_SHOTS", 10)
+META_QUERY_SHOTS = env_int("META_QUERY_SHOTS", 10)
 SUPPORTED_CONVENTIONAL_RATIOS = (1.0, 0.7, 0.5, 0.3)
 CONVENTIONAL_RATIO = env_float("CONVENTIONAL_RATIO", 1.0)
 CONVENTIONAL_SUBSAMPLE_BINS = 10
 CONVENTIONAL_SUBSAMPLE_SEED_OFFSET = env_int("CONVENTIONAL_SUBSAMPLE_SEED_OFFSET", 0)
-META_MIN_EPISODE_SAMPLES = 20
+META_MIN_EPISODE_SAMPLES = META_SUPPORT_SHOTS + META_QUERY_SHOTS
 PROPOSED_META_COVERAGE_WINDOW_FIXED = 4
 DEFAULT_REGIME_MISSING_CLASS_MAP = {
     '58': (1, 2, 3, 4),
@@ -111,6 +152,134 @@ def validate_regime_missing_class_map(class_map, total_classes=10):
     if globally_missing:
         raise ValueError(f"存在在所有场站同时缺失的 classes: {globally_missing}")
     return class_map
+
+
+def load_seasonal_protocol_metadata(metadata_path):
+    with open(metadata_path, "r", encoding="utf-8") as metadata_file:
+        metadata = json.load(metadata_file)
+    client_map = {}
+    for client in metadata.get("clients", []):
+        client_copy = copy.deepcopy(client)
+        client_copy["asset_path"] = os.path.join(
+            os.path.dirname(metadata_path),
+            client_copy["asset_path"]
+        )
+        client_copy["valid_class_index_set"] = set(client_copy.get("valid_class_indices", []))
+        client_map[str(client_copy["client_id"])] = client_copy
+    metadata["client_map"] = client_map
+    return metadata
+
+
+def resolve_station_sampler_tasks_per_epoch(station_id, station_tasks, requested_tasks_per_epoch=META_TASKS_PER_EPOCH):
+    if SEASONAL_PROTOCOL_ENABLED and seasonal_protocol_metadata is not None:
+        station_meta = seasonal_protocol_metadata["client_map"][str(station_id)]
+        sampler_task_count = int(station_meta["sampler_task_count"])
+        return min(len(station_tasks), max(1, sampler_task_count))
+    return resolve_local_meta_tasks_per_epoch(
+        station_tasks,
+        requested_tasks_per_epoch=requested_tasks_per_epoch
+    )
+
+
+def resolve_station_extreme_class_indices(station_id):
+    if SEASONAL_PROTOCOL_ENABLED and seasonal_protocol_metadata is not None:
+        return list(seasonal_protocol_metadata["client_map"][str(station_id)]["valid_class_indices"])
+    return list(range(4))
+
+
+seasonal_protocol_metadata = load_seasonal_protocol_metadata(SEASONAL_PROTOCOL_METADATA_PATH) if SEASONAL_PROTOCOL_ENABLED else None
+convergence_records = []
+
+
+def initialize_convergence_record(stage_type, stage_id, total_epochs, patience, min_delta=CONVERGENCE_MIN_DELTA, min_epochs=CONVERGENCE_MIN_EPOCHS):
+    return {
+        "stage_type": stage_type,
+        "stage_id": stage_id,
+        "total_epochs": int(total_epochs),
+        "patience": int(patience),
+        "min_delta": float(min_delta),
+        "min_epochs": int(min_epochs),
+        "converged": False,
+        "convergence_epoch": None,
+        "best_epoch": None,
+        "best_loss": None,
+        "final_loss": None,
+        "_last_improved_epoch": None,
+    }
+
+
+def update_convergence_record(record, epoch, loss_value):
+    if not ENABLE_CONVERGENCE_MONITOR or record is None:
+        return
+
+    current_epoch = int(epoch) + 1
+    loss_value = float(loss_value)
+    record["final_loss"] = loss_value
+
+    if record["best_loss"] is None or loss_value < (record["best_loss"] - record["min_delta"]):
+        record["best_loss"] = loss_value
+        record["best_epoch"] = current_epoch
+        record["_last_improved_epoch"] = current_epoch
+        record["converged"] = False
+        record["convergence_epoch"] = None
+        return
+
+    last_improved_epoch = record["_last_improved_epoch"]
+    if (
+        current_epoch >= record["min_epochs"]
+        and record["convergence_epoch"] is None
+        and last_improved_epoch is not None
+        and (current_epoch - last_improved_epoch) >= record["patience"]
+    ):
+        record["converged"] = True
+        record["convergence_epoch"] = current_epoch
+
+
+def finalize_convergence_record(record):
+    if record is None:
+        return None
+    finalized_record = copy.deepcopy(record)
+    finalized_record.pop("_last_improved_epoch", None)
+    return finalized_record
+
+
+def format_convergence_loss(loss_value):
+    return "nan" if loss_value is None else f"{float(loss_value):.6f}"
+
+
+def register_convergence_record(record):
+    if not ENABLE_CONVERGENCE_MONITOR or record is None:
+        return None
+    finalized_record = finalize_convergence_record(record)
+    convergence_records.append(finalized_record)
+    if finalized_record["converged"]:
+        progress_log(
+            f"  收敛检测[{finalized_record['stage_type']}:{finalized_record['stage_id']}]: "
+            f"已收敛 @ epoch {finalized_record['convergence_epoch']} "
+            f"(best_epoch={finalized_record['best_epoch']}, best_loss={format_convergence_loss(finalized_record['best_loss'])}, "
+            f"final_loss={format_convergence_loss(finalized_record['final_loss'])})"
+        )
+    else:
+        progress_log(
+            f"  收敛检测[{finalized_record['stage_type']}:{finalized_record['stage_id']}]: "
+            f"未收敛 (best_epoch={finalized_record['best_epoch']}, "
+            f"best_loss={format_convergence_loss(finalized_record['best_loss'])}, "
+            f"final_loss={format_convergence_loss(finalized_record['final_loss'])})"
+        )
+    return finalized_record
+
+
+def export_convergence_report(report_path, records, run_config):
+    if not ENABLE_CONVERGENCE_MONITOR:
+        return
+    report_payload = {
+        "generated_at_unix": float(time.time()),
+        "run_config": run_config,
+        "records": records,
+    }
+    with open(report_path, "w", encoding="utf-8") as report_file:
+        json.dump(report_payload, report_file, indent=2, ensure_ascii=False)
+    progress_log(f"✓ 收敛检测报告已保存: {report_path}")
 
 
 def make_station_rng(station_id, offset=0, subsample_seed_offset=0):
@@ -186,7 +355,7 @@ def subsample_meta_conventional_data(all_stations_full_data, ratio, subsample_se
         for i_class in range(total_classes):
             p_data = p_conven_class_st[0, i_class]
             num_samples = p_data.shape[0] // len_realp
-            keep_samples = min(num_samples, max(20, int(np.ceil(num_samples * ratio))))
+            keep_samples = min(num_samples, max(META_MIN_EPISODE_SAMPLES, int(np.ceil(num_samples * ratio))))
             rng = make_station_rng(station_id, offset=100 + i_class, subsample_seed_offset=subsample_seed_offset)
             selected_segments = sorted(rng.sample(range(num_samples), keep_samples))
 
@@ -320,12 +489,20 @@ if CONVENTIONAL_RATIO < 1.0:
         f"支持比例: {SUPPORTED_CONVENTIONAL_RATIOS}, 时间分箱数={CONVENTIONAL_SUBSAMPLE_BINS}, "
         f"subsample_seed_offset={CONVENTIONAL_SUBSAMPLE_SEED_OFFSET}"
     )
-    print("=" * 70)
+print("=" * 70)
 print(f"Phase 2 Proposed sampler mode: {PROPOSED_META_SAMPLER_MODE}")
 print(f"Regime-missing mode: {REGIME_MISSING_MODE}")
+if SEASONAL_PROTOCOL_ENABLED:
+    print(f"Seasonal protocol enabled: {SEASONAL_PROTOCOL_METADATA_PATH}")
+    print(f"META_SUPPORT_SHOTS={META_SUPPORT_SHOTS}, META_QUERY_SHOTS={META_QUERY_SHOTS}")
 
 # ========== [联邦修改] 多场站数据加载 ==========
-if USE_FEDERATION:
+if SEASONAL_PROTOCOL_ENABLED:
+    print("="*70)
+    print("季节稀缺协议模式：加载6个实验客户端")
+    print("="*70)
+    station_ids = [str(client["client_id"]) for client in seasonal_protocol_metadata["clients"]]
+elif USE_FEDERATION:
     print("="*70)
     print("联邦模式：加载3个场站数据（58/59/60）")
     print("="*70)
@@ -339,7 +516,10 @@ else:
 # [联邦修改] 循环加载所有场站数据
 station_data = {}
 for station_id in station_ids:
-    dataFile = f'{station_id}wf_4_train'
+    if SEASONAL_PROTOCOL_ENABLED:
+        dataFile = seasonal_protocol_metadata["client_map"][str(station_id)]["asset_path"].replace(".mat", "")
+    else:
+        dataFile = f'{station_id}wf_4_train'
     print(f"  加载 {dataFile}.mat...")
     wf_1 = scio.loadmat(dataFile)
     
@@ -358,7 +538,17 @@ for station_id in station_ids:
         'nwp_extre_class1_00': wf_1['nwp_extre_class1_'],
         'nwp_extre_class2_00': wf_1['nwp_extre_class2_'],
         'nwp_extre_class3_00': wf_1['nwp_extre_class3_'],
-        'nwp_extre_class4_00': wf_1['nwp_extre_class4_']
+        'nwp_extre_class4_00': wf_1['nwp_extre_class4_'],
+        'p_test_00': wf_1['p_test'] if 'p_test' in wf_1 else None,
+        'nwp_test_00': wf_1['nwp_test'] if 'nwp_test' in wf_1 else None,
+        'p_test_extre_class1_00': wf_1['p_test_extre_class1'] if 'p_test_extre_class1' in wf_1 else None,
+        'p_test_extre_class2_00': wf_1['p_test_extre_class2'] if 'p_test_extre_class2' in wf_1 else None,
+        'p_test_extre_class3_00': wf_1['p_test_extre_class3'] if 'p_test_extre_class3' in wf_1 else None,
+        'p_test_extre_class4_00': wf_1['p_test_extre_class4'] if 'p_test_extre_class4' in wf_1 else None,
+        'nwp_test_extre_class1_00': wf_1['nwp_test_extre_class1_'] if 'nwp_test_extre_class1_' in wf_1 else None,
+        'nwp_test_extre_class2_00': wf_1['nwp_test_extre_class2_'] if 'nwp_test_extre_class2_' in wf_1 else None,
+        'nwp_test_extre_class3_00': wf_1['nwp_test_extre_class3_'] if 'nwp_test_extre_class3_' in wf_1 else None,
+        'nwp_test_extre_class4_00': wf_1['nwp_test_extre_class4_'] if 'nwp_test_extre_class4_' in wf_1 else None,
     }
 
 # ========== [联邦修改] 删除"主场站"概念，3场站一视同仁 ==========
@@ -532,11 +722,30 @@ for station_id in station_ids:
     Series_day_st = P_load_st.reshape(-1,dem_realp)
     nwp_day_st = (P_nwp_st/np.max(abs(P_nwp_st),axis=0)).reshape(-1,dem_realp*np.size(P_nwp_st,axis=1))
     
-    # 测试集（2023年）
-    test_target_p_st = Series_day_st[m*d//dem_realp:(m*d+ooo*d)//dem_realp,:]
-    test_target_p_st = test_target_p_st.reshape(-1,len_realp,dem_realp)
-    test_input_c_st = nwp_day_st[m*d//dem_realp:(m*d+ooo*d)//dem_realp,:]
-    test_input_c_st = test_input_c_st.reshape(-1,len_realp,dem_realc)
+    # 测试集
+    if SEASONAL_PROTOCOL_ENABLED and station_data[station_id]['p_test_00'] is not None:
+        p_test_st = station_data[station_id]['p_test_00']
+        nwp_test_st = station_data[station_id]['nwp_test_00']
+        p_test_st_ = p_test_st
+        nwp_test_st_ = np.empty([1,5],dtype=object)
+        for i in range(np.size(nwp_test_st, axis=1)):
+            nwp_test_st_[0, i] = nwp_test_st[:, i].reshape(-1, 1) / np.max(abs(P_nwp_st[:, i]), axis=0)
+        for i_nwp in range(np.size(nwp_test_st_, axis=1)):
+            if i_nwp == 0:
+                test_input_c_st = nwp_test_st_[0, i_nwp].transpose(1, 0)
+                test_input_c_st = test_input_c_st[:, :, np.newaxis]
+            else:
+                nwp_test_0 = nwp_test_st_[0, i_nwp].transpose(1, 0)
+                test_input_c_st = np.concatenate((test_input_c_st, nwp_test_0[:, :, np.newaxis]), axis=2)
+        test_target_p_st = p_test_st_.transpose(1, 0)
+        test_target_p_st = test_target_p_st[:, :, np.newaxis]
+        test_target_p_st = test_target_p_st.reshape(-1, len_realp, dem_realp)
+        test_input_c_st = test_input_c_st.reshape(-1, len_realp, dem_realc)
+    else:
+        test_target_p_st = Series_day_st[m*d//dem_realp:(m*d+ooo*d)//dem_realp,:]
+        test_target_p_st = test_target_p_st.reshape(-1,len_realp,dem_realp)
+        test_input_c_st = nwp_day_st[m*d//dem_realp:(m*d+ooo*d)//dem_realp,:]
+        test_input_c_st = test_input_c_st.reshape(-1,len_realp,dem_realc)
     
     # 聚类类别（用于元训练）
     p_conven_class_st = station_data[station_id]['p_conven_class_00']
@@ -567,10 +776,12 @@ for station_id in station_ids:
         'p_conven_class': p_conven_class_st,
         'nwp_conven_class': nwp_conven_class_st,
         'p_extre': p_extre_st,
-        'nwp_extre': nwp_extre_st
+        'nwp_extre': nwp_extre_st,
+        'valid_class_indices': resolve_station_extreme_class_indices(station_id),
+        'sampler_task_count': seasonal_protocol_metadata["client_map"][str(station_id)]["sampler_task_count"] if SEASONAL_PROTOCOL_ENABLED else None
     }
     print(f"    测试集2023: {test_target_p_st.shape}")
-    print(f"    聚类类别: 10类")
+    print(f"    聚类类别: {np.size(p_conven_class_st, axis=1)}类")
     print(f"    极端天气: 4类")
 
 print(f"\n✓ 所有场站数据准备完成！")
@@ -780,10 +991,10 @@ def client_local_pretrain_update(global_state_dict, station_id, penalty_weight):
 
 
 def run_local_pretrain(station_id, save_path, epoch1_pre=35000):
-    print("\n" + "=" * 70)
-    print(f"开始场站 {station_id} 的本地 conventional pretrain")
-    print(f"  epochs={epoch1_pre}")
-    print("=" * 70)
+    progress_log("\n" + "=" * 70)
+    progress_log(f"开始场站 {station_id} 的本地 conventional pretrain")
+    progress_log(f"  epochs={epoch1_pre}")
+    progress_log("=" * 70)
 
     local_model = model_fore(
         input_channel_fore=dem_realc,
@@ -791,6 +1002,12 @@ def run_local_pretrain(station_id, save_path, epoch1_pre=35000):
         mode='pre'
     ).to(device)
     local_optimizer = torch.optim.Adam(local_model.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999))
+    convergence_record = initialize_convergence_record(
+        stage_type="local_pretrain",
+        stage_id=f"station{station_id}",
+        total_epochs=epoch1_pre,
+        patience=CONVERGENCE_PATIENCE_PRETRAIN,
+    )
 
     train_target = clients_train_tensor[station_id]['target'].to(device)
     train_input = clients_train_tensor[station_id]['input'].to(device)
@@ -806,15 +1023,21 @@ def run_local_pretrain(station_id, save_path, epoch1_pre=35000):
         local_optimizer.zero_grad()
         loss_total.backward()
         local_optimizer.step()
+        update_convergence_record(convergence_record, i, loss_mse.item())
 
-        if (i + 1) % 100 == 0:
+        if should_log_epoch(i, epoch1_pre, interval=100):
+            progress_log(
+                f"  [local_pretrain:station{station_id}] "
+                f"[Epoch {i + 1}/{epoch1_pre}] [loss_mse: {loss_mse.item():.6f}]"
+            )
             writer1.add_scalar(f"loss_penalty_pre_local_station{station_id}", loss_penalty.item(), i)
             writer2.add_scalar(f"loss_mse_pre_local_station{station_id}", loss_mse.item(), i)
 
     local_model.eval()
     local_state = clone_state_dict(local_model.state_dict())
     torch.save(local_state, save_path)
-    print(f"✓ 场站 {station_id} 本地 conventional pretrain 完成: {save_path}")
+    register_convergence_record(convergence_record)
+    progress_log(f"✓ 场站 {station_id} 本地 conventional pretrain 完成: {save_path}")
     return local_state
 
 
@@ -886,11 +1109,11 @@ def sample_task_indices_weighted_without_replacement(candidate_indices, candidat
 
 def build_meta_batch_from_tasks(selected_tasks):
     for i_task, task in enumerate(selected_tasks):
-        index_shot = random.sample(range(0, np.size(task['nwp'], axis=0)), 20)
-        train_input_support_ = task['nwp'][index_shot[0:10], :, :]
-        train_input_query_ = task['nwp'][index_shot[10:20], :, :]
-        train_target_support_ = task['p'][index_shot[0:10], :, :]
-        train_target_query_ = task['p'][index_shot[10:20], :, :]
+        index_shot = random.sample(range(0, np.size(task['nwp'], axis=0)), META_SUPPORT_SHOTS + META_QUERY_SHOTS)
+        train_input_support_ = task['nwp'][index_shot[0:META_SUPPORT_SHOTS], :, :]
+        train_input_query_ = task['nwp'][index_shot[META_SUPPORT_SHOTS:META_SUPPORT_SHOTS + META_QUERY_SHOTS], :, :]
+        train_target_support_ = task['p'][index_shot[0:META_SUPPORT_SHOTS], :, :]
+        train_target_query_ = task['p'][index_shot[META_SUPPORT_SHOTS:META_SUPPORT_SHOTS + META_QUERY_SHOTS], :, :]
         if i_task == 0:
             train_input_support = train_input_support_
             train_input_query = train_input_query_
@@ -948,10 +1171,10 @@ def sample_station_meta_batch_balanced(
 
 ## pre-train
 if USE_FEDERATION:
-    print("#########################################################################——————————联邦预训练（Federation Pre-train）——————————############################################################")
-    print(f"客户端数量: {task_num}, 场站: {', '.join(station_ids)}")
+    progress_log("#########################################################################——————————联邦预训练（Federation Pre-train）——————————############################################################")
+    progress_log(f"客户端数量: {task_num}, 场站: {', '.join(station_ids)}")
 else:
-    print( "#########################################################################——————————预训练（Pre-train）——————————############################################################")
+    progress_log("#########################################################################——————————预训练（Pre-train）——————————############################################################")
 
 total_train_step=0
 total_test_step=0
@@ -962,6 +1185,12 @@ start_time=time.time()
 
 if USE_FEDERATION:
     global_pretrain_state = clone_state_dict(model_fore_pre.state_dict())
+    pretrain_convergence_record = initialize_convergence_record(
+        stage_type="federated_pretrain",
+        stage_id="global",
+        total_epochs=epoch1_pre,
+        patience=CONVERGENCE_PATIENCE_PRETRAIN,
+    )
     for i in range(epoch1_pre):
         k = get_pretrain_penalty_weight(i)
 
@@ -980,14 +1209,21 @@ if USE_FEDERATION:
 
         loss1_display = total_loss1 / task_num
         loss2_display = total_loss2 / task_num
+        update_convergence_record(pretrain_convergence_record, i, loss2_display)
 
-        if (i + 1) % 100 == 0:
+        if should_log_epoch(i, epoch1_pre, interval=100):
             end_time = time.time()
-            print(end_time - start_time)
-            print("[Epoch %d/%d] [loss_mse: %f] " % (i, epoch1_pre, loss2_display))
+            progress_log(f"{end_time - start_time:.6f}")
+            progress_log("[Epoch %d/%d] [loss_mse: %f] " % (i + 1, epoch1_pre, loss2_display))
             writer1.add_scalar("loss_mse_pre", loss1_display, i)
             writer2.add_scalar("loss_mse_pre", loss2_display, i)
 else:
+    pretrain_convergence_record = initialize_convergence_record(
+        stage_type="standalone_pretrain",
+        stage_id="single_station",
+        total_epochs=epoch1_pre,
+        patience=CONVERGENCE_PATIENCE_PRETRAIN,
+    )
     for i in range(epoch1_pre):
         k = get_pretrain_penalty_weight(i)
 
@@ -1006,20 +1242,22 @@ else:
 
         loss1_display = loss1.item()
         loss2_display = loss2.item()
+        update_convergence_record(pretrain_convergence_record, i, loss2_display)
 
-        if (i + 1) % 100 == 0:
+        if should_log_epoch(i, epoch1_pre, interval=100):
             end_time = time.time()
-            print(end_time - start_time)
-            print("[Epoch %d/%d] [loss_mse: %f] " % (i, epoch1_pre, loss2_display))
+            progress_log(f"{end_time - start_time:.6f}")
+            progress_log("[Epoch %d/%d] [loss_mse: %f] " % (i + 1, epoch1_pre, loss2_display))
             writer1.add_scalar("loss_mse_pre", loss1_display, i)
             writer2.add_scalar("loss_mse_pre", loss2_display, i)
 
 model_fore_pre.eval()
 torch.save(model_fore_pre.state_dict(), PRETRAIN_MODEL_PATH)
+register_convergence_record(pretrain_convergence_record)
 if USE_FEDERATION:
-    print(f"\n✓ 联邦预训练完成: {PRETRAIN_MODEL_PATH}")
+    progress_log(f"\n✓ 联邦预训练完成: {PRETRAIN_MODEL_PATH}")
 else:
-    print(f"\n✓ 预训练完成: {PRETRAIN_MODEL_PATH}")
+    progress_log(f"\n✓ 预训练完成: {PRETRAIN_MODEL_PATH}")
 
 
 local_pretrain_state_dicts = {}
@@ -1123,20 +1361,21 @@ def run_local_meta_training(
     - proposed: init_state_dict 为 federated pre-train 权重
     - meta_only: init_state_dict 为随机初始化
     """
-    print("\n" + "=" * 70)
-    print(f"开始场站 {station_id} 的本地元训练: {meta_tag}")
-    print(
+    progress_log("\n" + "=" * 70)
+    progress_log(f"开始场站 {station_id} 的本地元训练: {meta_tag}")
+    progress_log(
         f"  use_cdrm={use_cdrm}, train_all_params={train_all_params}, "
         f"disable_lwp={disable_lwp}, shared_anchor_beta={shared_anchor_beta}, "
         f"shared_lr_scale={shared_lr_scale}, sampler_mode={sampler_mode}"
     )
     total_task_pool = np.size(all_stations_full_data[station_id]['p_conven_class'], axis=1)
-    local_tasks_per_epoch = resolve_local_meta_tasks_per_epoch(
+    local_tasks_per_epoch = resolve_station_sampler_tasks_per_epoch(
+        station_id,
         [None] * total_task_pool,
         requested_tasks_per_epoch=META_TASKS_PER_EPOCH
     )
-    print(f"  tasks_per_epoch={local_tasks_per_epoch}, station_task_pool={total_task_pool}")
-    print("=" * 70)
+    progress_log(f"  tasks_per_epoch={local_tasks_per_epoch}, station_task_pool={total_task_pool}")
+    progress_log("=" * 70)
 
     get_meta_trainable_params(
         model_fore_train_task_support,
@@ -1162,6 +1401,12 @@ def run_local_meta_training(
     )
     prior_anchor_state = clone_state_dict(init_state_dict)
     recent_selected_classes = []
+    convergence_record = initialize_convergence_record(
+        stage_type="local_meta",
+        stage_id=meta_tag,
+        total_epochs=epoch_train_task,
+        patience=CONVERGENCE_PATIENCE_META,
+    )
 
     for i_t in range(epoch_train_task):
         if sampler_mode == "balanced":
@@ -1182,12 +1427,6 @@ def run_local_meta_training(
                 station_id,
                 tasks_per_epoch=local_tasks_per_epoch
             )
-
-        print(
-            "[##################################################################"
-            f"——{meta_tag}:train_task_support_Epoch {i_t}/{epoch_train_task}——"
-            "############################################################]"
-        )
 
         if i_t == 0:
             base_state = copy.deepcopy(init_state_dict)
@@ -1223,12 +1462,6 @@ def run_local_meta_training(
         writer2.add_scalar(f"loss_mse_train_task_support_{meta_tag}", loss2.item(), i_t)
         writer2.add_scalar(f"loss_anchor_train_task_support_{meta_tag}", anchor_loss_support.item(), i_t)
 
-        print(
-            "[##################################################################"
-            f"——{meta_tag}:train_task_query_Epoch {i_t}/{epoch_train_task}——"
-            "############################################################]"
-        )
-
         model_fore_train_task_query.load_state_dict(copy.deepcopy(support_state))
 
         if disable_lwp:
@@ -1257,8 +1490,16 @@ def run_local_meta_training(
         writer1.add_scalar(f"loss_penalty_train_task_query_{meta_tag}", loss1_q.item(), i_t)
         writer2.add_scalar(f"loss_mse_train_task_query_{meta_tag}", loss2_q.item(), i_t)
         writer2.add_scalar(f"loss_anchor_train_task_query_{meta_tag}", anchor_loss_q.item(), i_t)
+        update_convergence_record(convergence_record, i_t, loss2_q.item())
+        if should_log_epoch(i_t, epoch_train_task, interval=100):
+            progress_log(
+                f"  [{meta_tag}] [Epoch {i_t + 1}/{epoch_train_task}] "
+                f"[support_mse: {loss2.item():.6f}] [query_mse: {loss2_q.item():.6f}] "
+                f"[support_anchor: {anchor_loss_support.item():.6f}] [query_anchor: {anchor_loss_q.item():.6f}]"
+            )
 
-    print(f"✓ 场站 {station_id} 元训练完成: {query_model_path}")
+    register_convergence_record(convergence_record)
+    progress_log(f"✓ 场站 {station_id} 元训练完成: {query_model_path}")
 
 
 # 1) Proposed: Federated pre-train 初始化后，各场站独立做 local meta-training
@@ -1316,7 +1557,8 @@ if TRAIN_META_ONLY_BASELINE:
 
 
 ## test_task_support
-few_shot_model_count = len(station_ids) * 4 * (2 if TRAIN_META_ONLY_BASELINE else 1)
+few_shot_class_total = sum(len(resolve_station_extreme_class_indices(station_id)) for station_id in station_ids)
+few_shot_model_count = few_shot_class_total * (4 if TRAIN_META_ONLY_BASELINE else 3)
 print(f"##################################################################——————————test_task_support（Few-shot适应：共{few_shot_model_count}个模型）——————————############################################################")
 
 # ========== [联邦修改] 为所有场站的所有极端天气类别训练个性化模型 ==========
@@ -1327,6 +1569,12 @@ def run_few_shot_adaptation(base_model_path, save_path, log_tag, model_label, te
     model_fore_test_task_support.load_state_dict(torch.load(base_model_path))
     optimizer = torch.optim.Adam(
         model_fore_test_task_support.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999)
+    )
+    convergence_record = initialize_convergence_record(
+        stage_type="few_shot",
+        stage_id=f"{model_label}:{log_tag}",
+        total_epochs=FEW_SHOT_EPOCHS,
+        patience=CONVERGENCE_PATIENCE_FEW_SHOT,
     )
 
     test_input_device = test_input_tensor.to(device)
@@ -1340,9 +1588,10 @@ def run_few_shot_adaptation(base_model_path, save_path, log_tag, model_label, te
         optimizer.zero_grad()
         loss_en.backward()
         optimizer.step()
+        update_convergence_record(convergence_record, i, loss2.item())
 
-        if (i + 1) % 20 == 0:
-            print(
+        if should_log_epoch(i, FEW_SHOT_EPOCHS, interval=1, warmup_epochs=FEW_SHOT_EPOCHS):
+            progress_log(
                 f"      [{model_label}] [Epoch {i+1}/{FEW_SHOT_EPOCHS}] "
                 f"[loss_mse: {loss2.item():.6f}]"
             )
@@ -1351,15 +1600,16 @@ def run_few_shot_adaptation(base_model_path, save_path, log_tag, model_label, te
 
     model_fore_test_task_support.eval()
     torch.save(model_fore_test_task_support.state_dict(), save_path)
-    print(f"    ✓ 保存({model_label}): {save_path}")
+    register_convergence_record(convergence_record)
+    progress_log(f"    ✓ 保存({model_label}): {save_path}")
 
 for station_id in station_ids:
-    print(f"\n{'='*70}")
-    print(f"场站 {station_id} 的Few-shot适应")
-    print(f"{'='*70}")
+    progress_log(f"\n{'='*70}")
+    progress_log(f"场站 {station_id} 的Few-shot适应")
+    progress_log(f"{'='*70}")
     
-    for i_class in range(4):
-        print(f"\n  极端天气类别 {i_class+1}:")
+    for i_class in resolve_station_extreme_class_indices(station_id):
+        progress_log(f"\n  极端天气类别 {i_class+1}:")
 
         # [联邦修改] 获取该场站该类的极端天气数据
         nwp_extre_st = all_stations_full_data[station_id]['nwp_extre']
@@ -1386,8 +1636,8 @@ for station_id in station_ids:
         Test_target_support = torch.tensor(p_extre_class, dtype=torch.float32)
         Test_input_support = torch.tensor(nwp_extre_class, dtype=torch.float32)
 
-        print(f"    样本数: {num_samples}")
-        print(
+        progress_log(f"    样本数: {num_samples}")
+        progress_log(
             f"    训练轮数: {FEW_SHOT_EPOCHS}, "
             f"few-shot loss={'CDRM+MSE' if FEW_SHOT_USE_CDRM else 'MSE'}"
         )
@@ -1461,11 +1711,12 @@ for station_id in station_ids:
     all_test_results[station_id] = {
         'test_input': Test_input_c_st,
         'test_target': Test_target_p_st,
-        'predictions': {}
+        'predictions': {},
+        'valid_class_indices': resolve_station_extreme_class_indices(station_id),
     }
     
-    # 预测：该场站的4个极端天气模型
-    for i_class in range(4):
+    # 预测：该场站的有效极端天气模型
+    for i_class in resolve_station_extreme_class_indices(station_id):
         model_name = f"model_fore_station{station_id}_extreme{i_class}.pth"
         model_fore_test_task_query.load_state_dict(torch.load(model_name))
         
@@ -1513,6 +1764,27 @@ for station_id in station_ids:
 print("\n保存所有场站测试结果...")
 scio.savemat('all_stations_test_results.mat', {'all_test_results': all_test_results, 'Cap': Cap})
 print("✓ 已保存: all_stations_test_results.mat")
+
+export_convergence_report(
+    CONVERGENCE_REPORT_PATH,
+    convergence_records,
+    run_config={
+        "use_federation": USE_FEDERATION,
+        "seasonal_protocol_enabled": SEASONAL_PROTOCOL_ENABLED,
+        "seasonal_protocol_metadata_path": SEASONAL_PROTOCOL_METADATA_PATH,
+        "station_ids": station_ids,
+        "pretrain_epochs": PRETRAIN_EPOCHS,
+        "proposed_meta_epochs": PROPOSED_META_EPOCHS,
+        "meta_only_meta_epochs": META_ONLY_META_EPOCHS,
+        "few_shot_epochs": FEW_SHOT_EPOCHS,
+        "meta_support_shots": META_SUPPORT_SHOTS,
+        "meta_query_shots": META_QUERY_SHOTS,
+        "proposed_meta_sampler_mode": PROPOSED_META_SAMPLER_MODE,
+        "conventional_ratio": CONVENTIONAL_RATIO,
+        "regime_missing_mode": REGIME_MISSING_MODE,
+        "enable_convergence_monitor": ENABLE_CONVERGENCE_MONITOR,
+    }
+)
 
 print("\n" + "="*70)
 print("✓✓✓ 训练和测试全部完成！")

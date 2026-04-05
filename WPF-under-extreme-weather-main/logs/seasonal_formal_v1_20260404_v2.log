@@ -1,0 +1,888 @@
+[build] env SEASONAL_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_METADATA_PATH=/root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/seasonal_protocol_data/seasonal_protocol_metadata.json META_SUPPORT_SHOTS=5 META_QUERY_SHOTS=5 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=4000 PROPOSED_META_EPOCHS=3000 META_ONLY_META_EPOCHS=3000 FEW_SHOT_EPOCHS=20 CONVENTIONAL_RATIO=1.0 REGIME_MISSING_MODE=none
+[build] /root/miniconda3/bin/python -u build_six_client_seasonal_protocol.py
+WT1 (58): K=4, sampler_task_count=2, valid_classes=['high_wind']
+WT2 (59): K=3, sampler_task_count=2, valid_classes=['high_wind']
+WT3 (60): K=3, sampler_task_count=2, valid_classes=['high_temp']
+WT4 (61): K=3, sampler_task_count=2, valid_classes=['high_temp']
+WT5 (62): K=2, sampler_task_count=2, valid_classes=['cold_wave', 'frost']
+WT6 (63): K=3, sampler_task_count=2, valid_classes=['cold_wave', 'frost']
+✓ saved seasonal protocol metadata: /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/seasonal_protocol_data/seasonal_protocol_metadata.json
+[train] env SEASONAL_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_METADATA_PATH=/root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/seasonal_protocol_data/seasonal_protocol_metadata.json META_SUPPORT_SHOTS=5 META_QUERY_SHOTS=5 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=4000 PROPOSED_META_EPOCHS=3000 META_ONLY_META_EPOCHS=3000 FEW_SHOT_EPOCHS=20 CONVENTIONAL_RATIO=1.0 REGIME_MISSING_MODE=none
+[train] /root/miniconda3/bin/python -u DemoModelTraining.py
+
+libgomp: Invalid value for environment variable OMP_NUM_THREADS
+======================================================================
+Phase 2 Proposed sampler mode: balanced
+Regime-missing mode: none
+Seasonal protocol enabled: /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/seasonal_protocol_data/seasonal_protocol_metadata.json
+META_SUPPORT_SHOTS=5, META_QUERY_SHOTS=5
+======================================================================
+季节稀缺协议模式：加载6个实验客户端
+======================================================================
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/seasonal_protocol_data/58wf_seasonal_protocol.mat...
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/seasonal_protocol_data/59wf_seasonal_protocol.mat...
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/seasonal_protocol_data/60wf_seasonal_protocol.mat...
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/seasonal_protocol_data/61wf_seasonal_protocol.mat...
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/seasonal_protocol_data/62wf_seasonal_protocol.mat...
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/seasonal_protocol_data/63wf_seasonal_protocol.mat...
+
+======================================================================
+准备所有场站的完整数据（元训练+极端天气+测试集）
+======================================================================
+
+准备联邦客户端数据（常规天气）...
+  处理场站 58...
+    shape: (1, 721, 5) → (1, 721, 1)
+  处理场站 59...
+    shape: (1, 744, 5) → (1, 744, 1)
+  处理场站 60...
+    shape: (1, 720, 5) → (1, 720, 1)
+  处理场站 61...
+    shape: (1, 720, 5) → (1, 720, 1)
+  处理场站 62...
+    shape: (1, 692, 5) → (1, 692, 1)
+  处理场站 63...
+    shape: (1, 698, 5) → (1, 698, 1)
+  总数据量: 4295 样本
+
+准备所有场站的元训练和测试数据（3场站一视同仁）...
+
+  场站 58:
+    测试集2023: (184, 12, 1)
+    聚类类别: 4类
+    极端天气: 4类
+
+  场站 59:
+    测试集2023: (184, 12, 1)
+    聚类类别: 3类
+    极端天气: 4类
+
+  场站 60:
+    测试集2023: (184, 12, 1)
+    聚类类别: 3类
+    极端天气: 4类
+
+  场站 61:
+    测试集2023: (184, 12, 1)
+    聚类类别: 3类
+    极端天气: 4类
+
+  场站 62:
+    测试集2023: (184, 12, 1)
+    聚类类别: 2类
+    极端天气: 4类
+
+  场站 63:
+    测试集2023: (184, 12, 1)
+    聚类类别: 3类
+    极端天气: 4类
+
+✓ 所有场站数据准备完成！
+#########################################################################——————————联邦预训练（Federation Pre-train）——————————############################################################
+客户端数量: 6, 场站: 58, 59, 60, 61, 62, 63
+0.329056
+[Epoch 1/4000] [loss_mse: 0.000904] 
+0.577173
+[Epoch 2/4000] [loss_mse: 0.000915] 
+0.820352
+[Epoch 3/4000] [loss_mse: 0.000854] 
+1.086204
+[Epoch 4/4000] [loss_mse: 0.000830] 
+1.353361
+[Epoch 5/4000] [loss_mse: 0.000857] 
+1.616734
+[Epoch 6/4000] [loss_mse: 0.000800] 
+1.878873
+[Epoch 7/4000] [loss_mse: 0.000782] 
+2.182281
+[Epoch 8/4000] [loss_mse: 0.000758] 
+2.461046
+[Epoch 9/4000] [loss_mse: 0.000716] 
+2.749990
+[Epoch 10/4000] [loss_mse: 0.000659] 
+27.262735
+[Epoch 100/4000] [loss_mse: 0.000043] 
+54.567252
+[Epoch 200/4000] [loss_mse: 0.000017] 
+81.885478
+[Epoch 300/4000] [loss_mse: 0.000017] 
+108.208836
+[Epoch 400/4000] [loss_mse: 0.000017] 
+134.482592
+[Epoch 500/4000] [loss_mse: 0.000017] 
+160.962302
+[Epoch 600/4000] [loss_mse: 0.000017] 
+185.150209
+[Epoch 700/4000] [loss_mse: 0.000017] 
+211.535285
+[Epoch 800/4000] [loss_mse: 0.000017] 
+238.661515
+[Epoch 900/4000] [loss_mse: 0.000017] 
+263.846076
+[Epoch 1000/4000] [loss_mse: 0.000017] 
+288.596999
+[Epoch 1100/4000] [loss_mse: 0.000017] 
+315.290187
+[Epoch 1200/4000] [loss_mse: 0.000017] 
+340.672419
+[Epoch 1300/4000] [loss_mse: 0.000017] 
+367.237926
+[Epoch 1400/4000] [loss_mse: 0.000017] 
+392.490290
+[Epoch 1500/4000] [loss_mse: 0.000017] 
+417.291829
+[Epoch 1600/4000] [loss_mse: 0.000017] 
+442.414667
+[Epoch 1700/4000] [loss_mse: 0.000017] 
+468.451344
+[Epoch 1800/4000] [loss_mse: 0.000017] 
+496.160010
+[Epoch 1900/4000] [loss_mse: 0.000017] 
+522.584322
+[Epoch 2000/4000] [loss_mse: 0.000016] 
+548.093215
+[Epoch 2100/4000] [loss_mse: 0.000016] 
+573.640367
+[Epoch 2200/4000] [loss_mse: 0.000015] 
+599.488171
+[Epoch 2300/4000] [loss_mse: 0.000017] 
+625.409724
+[Epoch 2400/4000] [loss_mse: 0.000016] 
+653.187205
+[Epoch 2500/4000] [loss_mse: 0.000016] 
+679.613703
+[Epoch 2600/4000] [loss_mse: 0.000015] 
+705.213970
+[Epoch 2700/4000] [loss_mse: 0.000014] 
+730.359297
+[Epoch 2800/4000] [loss_mse: 0.000014] 
+755.078537
+[Epoch 2900/4000] [loss_mse: 0.000014] 
+779.731983
+[Epoch 3000/4000] [loss_mse: 0.000014] 
+807.136246
+[Epoch 3100/4000] [loss_mse: 0.000016] 
+831.788764
+[Epoch 3200/4000] [loss_mse: 0.000016] 
+856.152668
+[Epoch 3300/4000] [loss_mse: 0.000017] 
+882.721591
+[Epoch 3400/4000] [loss_mse: 0.000016] 
+909.580288
+[Epoch 3500/4000] [loss_mse: 0.000013] 
+935.089805
+[Epoch 3600/4000] [loss_mse: 0.000013] 
+961.870418
+[Epoch 3700/4000] [loss_mse: 0.000016] 
+986.830329
+[Epoch 3800/4000] [loss_mse: 0.000015] 
+1012.418769
+[Epoch 3900/4000] [loss_mse: 0.000016] 
+1039.550686
+[Epoch 4000/4000] [loss_mse: 0.000016] 
+  收敛检测[federated_pretrain:global]: 已收敛 @ epoch 268 (best_epoch=68, best_loss=0.000109, final_loss=0.000016)
+
+✓ 联邦预训练完成: model_fore_pre_federated.pth
+
+======================================================================
+开始场站 58 的本地 conventional pretrain
+  epochs=4000
+======================================================================
+  [local_pretrain:station58] [Epoch 1/4000] [loss_mse: 0.000703]
+  [local_pretrain:station58] [Epoch 2/4000] [loss_mse: 0.000634]
+  [local_pretrain:station58] [Epoch 3/4000] [loss_mse: 0.000605]
+  [local_pretrain:station58] [Epoch 4/4000] [loss_mse: 0.000621]
+  [local_pretrain:station58] [Epoch 5/4000] [loss_mse: 0.000598]
+  [local_pretrain:station58] [Epoch 6/4000] [loss_mse: 0.000622]
+  [local_pretrain:station58] [Epoch 7/4000] [loss_mse: 0.000554]
+  [local_pretrain:station58] [Epoch 8/4000] [loss_mse: 0.000448]
+  [local_pretrain:station58] [Epoch 9/4000] [loss_mse: 0.000524]
+  [local_pretrain:station58] [Epoch 10/4000] [loss_mse: 0.000524]
+  [local_pretrain:station58] [Epoch 100/4000] [loss_mse: 0.000069]
+  [local_pretrain:station58] [Epoch 200/4000] [loss_mse: 0.000045]
+  [local_pretrain:station58] [Epoch 300/4000] [loss_mse: 0.000041]
+  [local_pretrain:station58] [Epoch 400/4000] [loss_mse: 0.000040]
+  [local_pretrain:station58] [Epoch 500/4000] [loss_mse: 0.000040]
+  [local_pretrain:station58] [Epoch 600/4000] [loss_mse: 0.000040]
+  [local_pretrain:station58] [Epoch 700/4000] [loss_mse: 0.000039]
+  [local_pretrain:station58] [Epoch 800/4000] [loss_mse: 0.000040]
+  [local_pretrain:station58] [Epoch 900/4000] [loss_mse: 0.000040]
+  [local_pretrain:station58] [Epoch 1000/4000] [loss_mse: 0.000040]
+  [local_pretrain:station58] [Epoch 1100/4000] [loss_mse: 0.000040]
+  [local_pretrain:station58] [Epoch 1200/4000] [loss_mse: 0.000039]
+  [local_pretrain:station58] [Epoch 1300/4000] [loss_mse: 0.000039]
+  [local_pretrain:station58] [Epoch 1400/4000] [loss_mse: 0.000040]
+  [local_pretrain:station58] [Epoch 1500/4000] [loss_mse: 0.000040]
+  [local_pretrain:station58] [Epoch 1600/4000] [loss_mse: 0.000040]
+  [local_pretrain:station58] [Epoch 1700/4000] [loss_mse: 0.000039]
+  [local_pretrain:station58] [Epoch 1800/4000] [loss_mse: 0.000039]
+  [local_pretrain:station58] [Epoch 1900/4000] [loss_mse: 0.000040]
+  [local_pretrain:station58] [Epoch 2000/4000] [loss_mse: 0.000039]
+  [local_pretrain:station58] [Epoch 2100/4000] [loss_mse: 0.000039]
+  [local_pretrain:station58] [Epoch 2200/4000] [loss_mse: 0.000039]
+  [local_pretrain:station58] [Epoch 2300/4000] [loss_mse: 0.000039]
+  [local_pretrain:station58] [Epoch 2400/4000] [loss_mse: 0.000038]
+  [local_pretrain:station58] [Epoch 2500/4000] [loss_mse: 0.000038]
+  [local_pretrain:station58] [Epoch 2600/4000] [loss_mse: 0.000038]
+  [local_pretrain:station58] [Epoch 2700/4000] [loss_mse: 0.000037]
+  [local_pretrain:station58] [Epoch 2800/4000] [loss_mse: 0.000037]
+  [local_pretrain:station58] [Epoch 2900/4000] [loss_mse: 0.000037]
+  [local_pretrain:station58] [Epoch 3000/4000] [loss_mse: 0.000038]
+  [local_pretrain:station58] [Epoch 3100/4000] [loss_mse: 0.000037]
+  [local_pretrain:station58] [Epoch 3200/4000] [loss_mse: 0.000037]
+  [local_pretrain:station58] [Epoch 3300/4000] [loss_mse: 0.000037]
+  [local_pretrain:station58] [Epoch 3400/4000] [loss_mse: 0.000036]
+  [local_pretrain:station58] [Epoch 3500/4000] [loss_mse: 0.000035]
+  [local_pretrain:station58] [Epoch 3600/4000] [loss_mse: 0.000035]
+  [local_pretrain:station58] [Epoch 3700/4000] [loss_mse: 0.000035]
+  [local_pretrain:station58] [Epoch 3800/4000] [loss_mse: 0.000034]
+  [local_pretrain:station58] [Epoch 3900/4000] [loss_mse: 0.000033]
+  [local_pretrain:station58] [Epoch 4000/4000] [loss_mse: 0.000032]
+  收敛检测[local_pretrain:station58]: 已收敛 @ epoch 254 (best_epoch=54, best_loss=0.000120, final_loss=0.000032)
+✓ 场站 58 本地 conventional pretrain 完成: model_fore_pre_station58_local.pth
+
+======================================================================
+开始场站 59 的本地 conventional pretrain
+  epochs=4000
+======================================================================
+  [local_pretrain:station59] [Epoch 1/4000] [loss_mse: 0.000597]
+  [local_pretrain:station59] [Epoch 2/4000] [loss_mse: 0.000483]
+  [local_pretrain:station59] [Epoch 3/4000] [loss_mse: 0.000450]
+  [local_pretrain:station59] [Epoch 4/4000] [loss_mse: 0.000450]
+  [local_pretrain:station59] [Epoch 5/4000] [loss_mse: 0.000422]
+  [local_pretrain:station59] [Epoch 6/4000] [loss_mse: 0.000414]
+  [local_pretrain:station59] [Epoch 7/4000] [loss_mse: 0.000408]
+  [local_pretrain:station59] [Epoch 8/4000] [loss_mse: 0.000377]
+  [local_pretrain:station59] [Epoch 9/4000] [loss_mse: 0.000423]
+  [local_pretrain:station59] [Epoch 10/4000] [loss_mse: 0.000392]
+  [local_pretrain:station59] [Epoch 100/4000] [loss_mse: 0.000040]
+  [local_pretrain:station59] [Epoch 200/4000] [loss_mse: 0.000007]
+  [local_pretrain:station59] [Epoch 300/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 400/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 500/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 600/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 700/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 800/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 900/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 1000/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 1100/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 1200/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 1300/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 1400/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 1500/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 1600/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 1700/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 1800/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 1900/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 2000/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 2100/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 2200/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 2300/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 2400/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 2500/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 2600/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 2700/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 2800/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 2900/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 3000/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 3100/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 3200/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 3300/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 3400/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 3500/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 3600/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 3700/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 3800/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 3900/4000] [loss_mse: 0.000003]
+  [local_pretrain:station59] [Epoch 4000/4000] [loss_mse: 0.000003]
+  收敛检测[local_pretrain:station59]: 已收敛 @ epoch 279 (best_epoch=79, best_loss=0.000063, final_loss=0.000003)
+✓ 场站 59 本地 conventional pretrain 完成: model_fore_pre_station59_local.pth
+
+======================================================================
+开始场站 60 的本地 conventional pretrain
+  epochs=4000
+======================================================================
+  [local_pretrain:station60] [Epoch 1/4000] [loss_mse: 0.000374]
+  [local_pretrain:station60] [Epoch 2/4000] [loss_mse: 0.000366]
+  [local_pretrain:station60] [Epoch 3/4000] [loss_mse: 0.000368]
+  [local_pretrain:station60] [Epoch 4/4000] [loss_mse: 0.000341]
+  [local_pretrain:station60] [Epoch 5/4000] [loss_mse: 0.000352]
+  [local_pretrain:station60] [Epoch 6/4000] [loss_mse: 0.000305]
+  [local_pretrain:station60] [Epoch 7/4000] [loss_mse: 0.000296]
+  [local_pretrain:station60] [Epoch 8/4000] [loss_mse: 0.000282]
+  [local_pretrain:station60] [Epoch 9/4000] [loss_mse: 0.000252]
+  [local_pretrain:station60] [Epoch 10/4000] [loss_mse: 0.000294]
+  [local_pretrain:station60] [Epoch 100/4000] [loss_mse: 0.000038]
+  [local_pretrain:station60] [Epoch 200/4000] [loss_mse: 0.000003]
+  [local_pretrain:station60] [Epoch 300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 1000/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 1100/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 1200/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 1300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 1400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 1500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 1600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 1700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 1800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 1900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 2000/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 2100/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 2200/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 2300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 2400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 2500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 2600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 2700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 2800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 2900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 3000/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 3100/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 3200/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 3300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 3400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 3500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 3600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 3700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 3800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 3900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station60] [Epoch 4000/4000] [loss_mse: 0.000000]
+  收敛检测[local_pretrain:station60]: 已收敛 @ epoch 281 (best_epoch=81, best_loss=0.000044, final_loss=0.000000)
+✓ 场站 60 本地 conventional pretrain 完成: model_fore_pre_station60_local.pth
+
+======================================================================
+开始场站 61 的本地 conventional pretrain
+  epochs=4000
+======================================================================
+  [local_pretrain:station61] [Epoch 1/4000] [loss_mse: 0.000314]
+  [local_pretrain:station61] [Epoch 2/4000] [loss_mse: 0.000233]
+  [local_pretrain:station61] [Epoch 3/4000] [loss_mse: 0.000217]
+  [local_pretrain:station61] [Epoch 4/4000] [loss_mse: 0.000194]
+  [local_pretrain:station61] [Epoch 5/4000] [loss_mse: 0.000184]
+  [local_pretrain:station61] [Epoch 6/4000] [loss_mse: 0.000180]
+  [local_pretrain:station61] [Epoch 7/4000] [loss_mse: 0.000180]
+  [local_pretrain:station61] [Epoch 8/4000] [loss_mse: 0.000157]
+  [local_pretrain:station61] [Epoch 9/4000] [loss_mse: 0.000161]
+  [local_pretrain:station61] [Epoch 10/4000] [loss_mse: 0.000173]
+  [local_pretrain:station61] [Epoch 100/4000] [loss_mse: 0.000002]
+  [local_pretrain:station61] [Epoch 200/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 1000/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 1100/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 1200/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 1300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 1400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 1500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 1600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 1700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 1800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 1900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 2000/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 2100/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 2200/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 2300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 2400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 2500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 2600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 2700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 2800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 2900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 3000/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 3100/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 3200/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 3300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 3400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 3500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 3600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 3700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 3800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 3900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station61] [Epoch 4000/4000] [loss_mse: 0.000000]
+  收敛检测[local_pretrain:station61]: 已收敛 @ epoch 219 (best_epoch=19, best_loss=0.000089, final_loss=0.000000)
+✓ 场站 61 本地 conventional pretrain 完成: model_fore_pre_station61_local.pth
+
+======================================================================
+开始场站 62 的本地 conventional pretrain
+  epochs=4000
+======================================================================
+  [local_pretrain:station62] [Epoch 1/4000] [loss_mse: 0.000583]
+  [local_pretrain:station62] [Epoch 2/4000] [loss_mse: 0.000565]
+  [local_pretrain:station62] [Epoch 3/4000] [loss_mse: 0.000510]
+  [local_pretrain:station62] [Epoch 4/4000] [loss_mse: 0.000609]
+  [local_pretrain:station62] [Epoch 5/4000] [loss_mse: 0.000503]
+  [local_pretrain:station62] [Epoch 6/4000] [loss_mse: 0.000455]
+  [local_pretrain:station62] [Epoch 7/4000] [loss_mse: 0.000489]
+  [local_pretrain:station62] [Epoch 8/4000] [loss_mse: 0.000493]
+  [local_pretrain:station62] [Epoch 9/4000] [loss_mse: 0.000439]
+  [local_pretrain:station62] [Epoch 10/4000] [loss_mse: 0.000456]
+  [local_pretrain:station62] [Epoch 100/4000] [loss_mse: 0.000030]
+  [local_pretrain:station62] [Epoch 200/4000] [loss_mse: 0.000001]
+  [local_pretrain:station62] [Epoch 300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 1000/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 1100/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 1200/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 1300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 1400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 1500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 1600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 1700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 1800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 1900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 2000/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 2100/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 2200/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 2300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 2400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 2500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 2600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 2700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 2800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 2900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 3000/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 3100/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 3200/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 3300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 3400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 3500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 3600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 3700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 3800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 3900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station62] [Epoch 4000/4000] [loss_mse: 0.000000]
+  收敛检测[local_pretrain:station62]: 已收敛 @ epoch 312 (best_epoch=112, best_loss=0.000020, final_loss=0.000000)
+✓ 场站 62 本地 conventional pretrain 完成: model_fore_pre_station62_local.pth
+
+======================================================================
+开始场站 63 的本地 conventional pretrain
+  epochs=4000
+======================================================================
+  [local_pretrain:station63] [Epoch 1/4000] [loss_mse: 0.000299]
+  [local_pretrain:station63] [Epoch 2/4000] [loss_mse: 0.000264]
+  [local_pretrain:station63] [Epoch 3/4000] [loss_mse: 0.000263]
+  [local_pretrain:station63] [Epoch 4/4000] [loss_mse: 0.000223]
+  [local_pretrain:station63] [Epoch 5/4000] [loss_mse: 0.000222]
+  [local_pretrain:station63] [Epoch 6/4000] [loss_mse: 0.000195]
+  [local_pretrain:station63] [Epoch 7/4000] [loss_mse: 0.000164]
+  [local_pretrain:station63] [Epoch 8/4000] [loss_mse: 0.000205]
+  [local_pretrain:station63] [Epoch 9/4000] [loss_mse: 0.000180]
+  [local_pretrain:station63] [Epoch 10/4000] [loss_mse: 0.000168]
+  [local_pretrain:station63] [Epoch 100/4000] [loss_mse: 0.000002]
+  [local_pretrain:station63] [Epoch 200/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 1000/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 1100/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 1200/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 1300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 1400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 1500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 1600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 1700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 1800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 1900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 2000/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 2100/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 2200/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 2300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 2400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 2500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 2600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 2700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 2800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 2900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 3000/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 3100/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 3200/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 3300/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 3400/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 3500/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 3600/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 3700/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 3800/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 3900/4000] [loss_mse: 0.000000]
+  [local_pretrain:station63] [Epoch 4000/4000] [loss_mse: 0.000000]
+  收敛检测[local_pretrain:station63]: 已收敛 @ epoch 218 (best_epoch=18, best_loss=0.000081, final_loss=0.000000)
+✓ 场站 63 本地 conventional pretrain 完成: model_fore_pre_station63_local.pth
+
+======================================================================
+开始场站 58 的本地元训练: proposed_station58
+  use_cdrm=True, train_all_params=False, disable_lwp=False, shared_anchor_beta=0.01, shared_lr_scale=0.3, sampler_mode=balanced
+  tasks_per_epoch=2, station_task_pool=4
+======================================================================
+  [proposed_station58] [Epoch 1/3000] [support_mse: 0.000073] [query_mse: 0.000047] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 2/3000] [support_mse: 0.000046] [query_mse: 0.000025] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 3/3000] [support_mse: 0.000021] [query_mse: 0.000082] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 4/3000] [support_mse: 0.000042] [query_mse: 0.000030] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 5/3000] [support_mse: 0.000095] [query_mse: 0.000086] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 6/3000] [support_mse: 0.000090] [query_mse: 0.000072] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 7/3000] [support_mse: 0.000016] [query_mse: 0.000020] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 8/3000] [support_mse: 0.000061] [query_mse: 0.000054] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 9/3000] [support_mse: 0.000034] [query_mse: 0.000021] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 10/3000] [support_mse: 0.000032] [query_mse: 0.000029] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 100/3000] [support_mse: 0.000045] [query_mse: 0.000057] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station58] [Epoch 200/3000] [support_mse: 0.000052] [query_mse: 0.000039] [support_anchor: 0.000003] [query_anchor: 0.000003]
+  [proposed_station58] [Epoch 300/3000] [support_mse: 0.000036] [query_mse: 0.000022] [support_anchor: 0.000003] [query_anchor: 0.000003]
+  [proposed_station58] [Epoch 400/3000] [support_mse: 0.000040] [query_mse: 0.000059] [support_anchor: 0.000005] [query_anchor: 0.000005]
+  [proposed_station58] [Epoch 500/3000] [support_mse: 0.000025] [query_mse: 0.000034] [support_anchor: 0.000005] [query_anchor: 0.000005]
+  [proposed_station58] [Epoch 600/3000] [support_mse: 0.000036] [query_mse: 0.000027] [support_anchor: 0.000005] [query_anchor: 0.000005]
+  [proposed_station58] [Epoch 700/3000] [support_mse: 0.000049] [query_mse: 0.000045] [support_anchor: 0.000005] [query_anchor: 0.000005]
+  [proposed_station58] [Epoch 800/3000] [support_mse: 0.000048] [query_mse: 0.000052] [support_anchor: 0.000005] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 900/3000] [support_mse: 0.000027] [query_mse: 0.000034] [support_anchor: 0.000005] [query_anchor: 0.000005]
+  [proposed_station58] [Epoch 1000/3000] [support_mse: 0.000025] [query_mse: 0.000029] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 1100/3000] [support_mse: 0.000053] [query_mse: 0.000044] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 1200/3000] [support_mse: 0.000049] [query_mse: 0.000061] [support_anchor: 0.000005] [query_anchor: 0.000005]
+  [proposed_station58] [Epoch 1300/3000] [support_mse: 0.000057] [query_mse: 0.000047] [support_anchor: 0.000005] [query_anchor: 0.000005]
+  [proposed_station58] [Epoch 1400/3000] [support_mse: 0.000048] [query_mse: 0.000050] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 1500/3000] [support_mse: 0.000052] [query_mse: 0.000057] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 1600/3000] [support_mse: 0.000029] [query_mse: 0.000024] [support_anchor: 0.000005] [query_anchor: 0.000005]
+  [proposed_station58] [Epoch 1700/3000] [support_mse: 0.000030] [query_mse: 0.000044] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 1800/3000] [support_mse: 0.000057] [query_mse: 0.000043] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 1900/3000] [support_mse: 0.000042] [query_mse: 0.000039] [support_anchor: 0.000007] [query_anchor: 0.000007]
+  [proposed_station58] [Epoch 2000/3000] [support_mse: 0.000026] [query_mse: 0.000039] [support_anchor: 0.000007] [query_anchor: 0.000007]
+  [proposed_station58] [Epoch 2100/3000] [support_mse: 0.000028] [query_mse: 0.000029] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 2200/3000] [support_mse: 0.000049] [query_mse: 0.000057] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 2300/3000] [support_mse: 0.000040] [query_mse: 0.000044] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 2400/3000] [support_mse: 0.000042] [query_mse: 0.000034] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 2500/3000] [support_mse: 0.000049] [query_mse: 0.000040] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 2600/3000] [support_mse: 0.000032] [query_mse: 0.000035] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 2700/3000] [support_mse: 0.000036] [query_mse: 0.000060] [support_anchor: 0.000005] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 2800/3000] [support_mse: 0.000038] [query_mse: 0.000024] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 2900/3000] [support_mse: 0.000031] [query_mse: 0.000029] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station58] [Epoch 3000/3000] [support_mse: 0.000036] [query_mse: 0.000020] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  收敛检测[local_meta:proposed_station58]: 已收敛 @ epoch 101 (best_epoch=1, best_loss=0.000047, final_loss=0.000020)
+✓ 场站 58 元训练完成: model_fore_train_task_query_proposed_station58.pth
+
+======================================================================
+开始场站 59 的本地元训练: proposed_station59
+  use_cdrm=True, train_all_params=False, disable_lwp=False, shared_anchor_beta=0.01, shared_lr_scale=0.3, sampler_mode=balanced
+  tasks_per_epoch=2, station_task_pool=3
+======================================================================
+  [proposed_station59] [Epoch 1/3000] [support_mse: 0.000005] [query_mse: 0.000002] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 2/3000] [support_mse: 0.000006] [query_mse: 0.000004] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 3/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 4/3000] [support_mse: 0.000003] [query_mse: 0.000002] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 5/3000] [support_mse: 0.000003] [query_mse: 0.000002] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 6/3000] [support_mse: 0.000004] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 7/3000] [support_mse: 0.000004] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 8/3000] [support_mse: 0.000003] [query_mse: 0.000004] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 9/3000] [support_mse: 0.000003] [query_mse: 0.000002] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 10/3000] [support_mse: 0.000003] [query_mse: 0.000002] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 100/3000] [support_mse: 0.000003] [query_mse: 0.000004] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 200/3000] [support_mse: 0.000002] [query_mse: 0.000002] [support_anchor: 0.000000] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 300/3000] [support_mse: 0.000003] [query_mse: 0.000002] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 400/3000] [support_mse: 0.000004] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 500/3000] [support_mse: 0.000002] [query_mse: 0.000002] [support_anchor: 0.000000] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 600/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 700/3000] [support_mse: 0.000003] [query_mse: 0.000002] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 800/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 900/3000] [support_mse: 0.000002] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 1000/3000] [support_mse: 0.000004] [query_mse: 0.000004] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 1100/3000] [support_mse: 0.000005] [query_mse: 0.000004] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 1200/3000] [support_mse: 0.000003] [query_mse: 0.000004] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 1300/3000] [support_mse: 0.000002] [query_mse: 0.000003] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 1400/3000] [support_mse: 0.000003] [query_mse: 0.000002] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 1500/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 1600/3000] [support_mse: 0.000002] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 1700/3000] [support_mse: 0.000002] [query_mse: 0.000002] [support_anchor: 0.000001] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 1800/3000] [support_mse: 0.000003] [query_mse: 0.000002] [support_anchor: 0.000001] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 1900/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 2000/3000] [support_mse: 0.000003] [query_mse: 0.000004] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 2100/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 2200/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 2300/3000] [support_mse: 0.000004] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 2400/3000] [support_mse: 0.000002] [query_mse: 0.000003] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 2500/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 2600/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 2700/3000] [support_mse: 0.000003] [query_mse: 0.000004] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 2800/3000] [support_mse: 0.000002] [query_mse: 0.000003] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 2900/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 3000/3000] [support_mse: 0.000003] [query_mse: 0.000004] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:proposed_station59]: 已收敛 @ epoch 101 (best_epoch=1, best_loss=0.000002, final_loss=0.000004)
+✓ 场站 59 元训练完成: model_fore_train_task_query_proposed_station59.pth
+
+======================================================================
+开始场站 60 的本地元训练: proposed_station60
+  use_cdrm=True, train_all_params=False, disable_lwp=False, shared_anchor_beta=0.01, shared_lr_scale=0.3, sampler_mode=balanced
+  tasks_per_epoch=2, station_task_pool=3
+======================================================================
+  [proposed_station60] [Epoch 1/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 2/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 3/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 4/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 5/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 6/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 7/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 8/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 9/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 10/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 100/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 200/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 300/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 400/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 500/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 600/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 700/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 800/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 900/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 1000/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 1100/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 1200/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 1300/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 1400/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 1500/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 1600/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 1700/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 1800/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 1900/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 2000/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 2100/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 2200/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 2300/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 2400/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 2500/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 2600/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 2700/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 2800/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 2900/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 3000/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:proposed_station60]: 已收敛 @ epoch 101 (best_epoch=1, best_loss=0.000000, final_loss=0.000000)
+✓ 场站 60 元训练完成: model_fore_train_task_query_proposed_station60.pth
+
+======================================================================
+开始场站 61 的本地元训练: proposed_station61
+  use_cdrm=True, train_all_params=False, disable_lwp=False, shared_anchor_beta=0.01, shared_lr_scale=0.3, sampler_mode=balanced
+  tasks_per_epoch=2, station_task_pool=3
+======================================================================
+  [proposed_station61] [Epoch 1/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 2/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 3/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 4/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 5/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 6/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 7/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 8/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 9/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 10/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 100/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 200/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 300/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 400/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 500/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 600/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 700/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 800/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 900/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 1000/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 1100/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 1200/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 1300/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 1400/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 1500/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 1600/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 1700/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 1800/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 1900/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 2000/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 2100/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 2200/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 2300/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 2400/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 2500/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 2600/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 2700/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 2800/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 2900/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station61] [Epoch 3000/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:proposed_station61]: 已收敛 @ epoch 101 (best_epoch=1, best_loss=0.000000, final_loss=0.000000)
+✓ 场站 61 元训练完成: model_fore_train_task_query_proposed_station61.pth
+
+======================================================================
+开始场站 62 的本地元训练: proposed_station62
+  use_cdrm=True, train_all_params=False, disable_lwp=False, shared_anchor_beta=0.01, shared_lr_scale=0.3, sampler_mode=balanced
+  tasks_per_epoch=2, station_task_pool=2
+======================================================================
+  [proposed_station62] [Epoch 1/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 2/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 3/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 4/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 5/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 6/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 7/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 8/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 9/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 10/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 100/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 200/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 300/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 400/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 500/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 600/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 700/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 800/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 900/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 1000/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 1100/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 1200/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 1300/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 1400/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 1500/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 1600/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 1700/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 1800/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 1900/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 2000/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 2100/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 2200/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 2300/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 2400/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 2500/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 2600/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 2700/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 2800/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 2900/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station62] [Epoch 3000/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:proposed_station62]: 已收敛 @ epoch 101 (best_epoch=1, best_loss=0.000000, final_loss=0.000000)
+✓ 场站 62 元训练完成: model_fore_train_task_query_proposed_station62.pth
+
+======================================================================
+开始场站 63 的本地元训练: proposed_station63
+  use_cdrm=True, train_all_params=False, disable_lwp=False, shared_anchor_beta=0.01, shared_lr_scale=0.3, sampler_mode=balanced
+  tasks_per_epoch=2, station_task_pool=3
+======================================================================
+  [proposed_station63] [Epoch 1/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 2/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 3/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 4/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 5/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 6/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 7/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 8/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 9/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 10/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 100/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 200/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 300/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 400/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 500/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 600/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 700/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 800/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 900/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 1000/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 1100/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 1200/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 1300/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 1400/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 1500/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 1600/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 1700/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 1800/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 1900/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 2000/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 2100/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 2200/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 2300/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 2400/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 2500/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 2600/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 2700/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 2800/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 2900/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station63] [Epoch 3000/3000] [support_mse: 0.000000] [query_mse: 0.000000] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:proposed_station63]: 已收敛 @ epoch 101 (best_epoch=1, best_loss=0.000000, final_loss=0.000000)
+✓ 场站 63 元训练完成: model_fore_train_task_query_proposed_station63.pth
+
+======================================================================
+开始场站 58 的本地元训练: local_meta_station58
+  use_cdrm=True, train_all_params=False, disable_lwp=False, shared_anchor_beta=0.0, shared_lr_scale=1.0, sampler_mode=uniform
+  tasks_per_epoch=2, station_task_pool=4
+======================================================================
+  [local_meta_station58] [Epoch 1/3000] [support_mse: 0.000040] [query_mse: 0.000039] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2/3000] [support_mse: 0.000086] [query_mse: 0.000055] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 3/3000] [support_mse: 0.000030] [query_mse: 0.000029] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 4/3000] [support_mse: 0.000060] [query_mse: 0.000068] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 5/3000] [support_mse: 0.000062] [query_mse: 0.000052] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 6/3000] [support_mse: 0.000054] [query_mse: 0.000044] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 7/3000] [support_mse: 0.000040] [query_mse: 0.000044] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 8/3000] [support_mse: 0.000041] [query_mse: 0.000033] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 9/3000] [support_mse: 0.000043] [query_mse: 0.000063] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 10/3000] [support_mse: 0.000036] [query_mse: 0.000034] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 100/3000] [support_mse: 0.000048] [query_mse: 0.000053] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 200/3000] [support_mse: 0.000059] [query_mse: 0.000072] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 300/3000] [support_mse: 0.000033] [query_mse: 0.000025] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 400/3000] [support_mse: 0.000016] [query_mse: 0.000038] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 500/3000] [support_mse: 0.000022] [query_mse: 0.000027] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 600/3000] [support_mse: 0.000071] [query_mse: 0.000061] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 700/3000] [support_mse: 0.000043] [query_mse: 0.000044] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 800/3000] [support_mse: 0.000033] [query_mse: 0.000041] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 900/3000] [support_mse: 0.000045] [query_mse: 0.000029] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1000/3000] [support_mse: 0.000015] [query_mse: 0.000018] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1100/3000] [support_mse: 0.000028] [query_mse: 0.000024] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1200/3000] [support_mse: 0.000039] [query_mse: 0.000061] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1300/3000] [support_mse: 0.000049] [query_mse: 0.000039] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1400/3000] [support_mse: 0.000034] [query_mse: 0.000023] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1500/3000] [support_mse: 0.000030] [query_mse: 0.000037] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1600/3000] [support_mse: 0.000028] [query_mse: 0.000030] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1700/3000] [support_mse: 0.000034] [query_mse: 0.000024] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1800/3000] [support_mse: 0.000033] [query_mse: 0.000029] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1900/3000] [support_mse: 0.000039] [query_mse: 0.000036] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2000/3000] [support_mse: 0.000041] [query_mse: 0.000037] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2100/3000] [support_mse: 0.000028] [query_mse: 0.000041] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2200/3000] [support_mse: 0.000033] [query_mse: 0.000037] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2300/3000] [support_mse: 0.000032] [query_mse: 0.000051] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2400/3000] [support_mse: 0.000042] [query_mse: 0.000032] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2500/3000] [support_mse: 0.000029] [query_mse: 0.000038] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2600/3000] [support_mse: 0.000051] [query_mse: 0.000059] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2700/3000] [support_mse: 0.000046] [query_mse: 0.000051] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2800/3000] [support_mse: 0.000044] [query_mse: 0.000048] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2900/3000] [support_mse: 0.000051] [query_mse: 0.000053] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 3000/3000] [support_mse: 0.000053] [query_mse: 0.000052] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station58]: 已收敛 @ epoch 101 (best_epoch=1, best_loss=0.000039, final_loss=0.000052)
+✓ 场站 58 元训练完成: model_fore_train_task_query_local_meta_station58.pth
+
+======================================================================
+开始场站 59 的本地元训练: local_meta_station59
+  use_cdrm=True, train_all_params=False, disable_lwp=False, shared_anchor_beta=0.0, shared_lr_scale=1.0, sampler_mode=uniform
+  tasks_per_epoch=2, station_task_pool=3
+======================================================================
+  [local_meta_station59] [Epoch 1/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 2/3000] [support_mse: 0.000002] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 3/3000] [support_mse: 0.000006] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 4/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 5/3000] [support_mse: 0.000002] [query_mse: 0.000002] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 6/3000] [support_mse: 0.000004] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 7/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 8/3000] [support_mse: 0.000003] [query_mse: 0.000002] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 9/3000] [support_mse: 0.000005] [query_mse: 0.000004] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 10/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 100/3000] [support_mse: 0.000004] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 200/3000] [support_mse: 0.000002] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 300/3000] [support_mse: 0.000003] [query_mse: 0.000002] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 400/3000] [support_mse: 0.000004] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 500/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 600/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 700/3000] [support_mse: 0.000003] [query_mse: 0.000002] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 800/3000] [support_mse: 0.000003] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 900/3000] [support_mse: 0.000004] [query_mse: 0.000003] [support_anchor: 0.000000] [query_anchor: 0.000000]

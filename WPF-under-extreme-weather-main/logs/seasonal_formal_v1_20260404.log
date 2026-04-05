@@ -1,0 +1,11 @@
+[build] /root/miniconda3/bin/python build_six_client_seasonal_protocol.py
+WT1 (58): K=4, sampler_task_count=2, valid_classes=['high_wind']
+WT2 (59): K=3, sampler_task_count=2, valid_classes=['high_wind']
+WT3 (60): K=3, sampler_task_count=2, valid_classes=['high_temp']
+WT4 (61): K=3, sampler_task_count=2, valid_classes=['high_temp']
+WT5 (62): K=2, sampler_task_count=2, valid_classes=['cold_wave', 'frost']
+WT6 (63): K=3, sampler_task_count=2, valid_classes=['cold_wave', 'frost']
+✓ saved seasonal protocol metadata: /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/seasonal_protocol_data/seasonal_protocol_metadata.json
+[train] /root/miniconda3/bin/python DemoModelTraining.py
+
+libgomp: Invalid value for environment variable OMP_NUM_THREADS

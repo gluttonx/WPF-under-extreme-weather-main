@@ -29,7 +29,7 @@
 - **本地/当前会话验证**：若当前环境无可用 CUDA，可使用 **CPU** 做短轮次 smoke test / 结构验证 / 语法验证，但必须明确标注其性质仅为“链路验证”，**不能**把 CPU 短程结果当作正式实验结论。
 - **运行分工约束**：
   - 小轮次与中轮次验证（例如 `1`、`2`、`50`、`100` epochs 这类 smoke / debug / sanity check）默认由代理直接在当前环境中执行；若当前无 CUDA，则按 **CPU** 口径执行。
-  - 长轮次或正式版本训练（例如上万轮、完整预算、最终汇报口径）默认**不**由代理在当前会话里代跑；代理只提供可直接执行的终端命令，由用户在自己的 `RTX 4090` 终端中运行。
+  - 长轮次或正式版本训练（例如上万轮、完整预算、最终汇报口径）默认**不**由代理在当前会话里代跑；代理只提供可直接执行的终端命令，由用户在远程的 `RTX 4090` 终端中运行。
 - **设备口径**：回答用户或记录实验时，必须显式区分：
   1. `CPU smoke / debug validation`
   2. `4090 formal run`
@@ -1452,3 +1452,244 @@
   - 论文本身已经从原始双层约束化简到 `(17)` 与 `(18)`；
   - Appendix A 又进一步通过固定 `eta=1.0`、线性假设和无偏估计解释，为“可计算代理化”留出了空间；
   - 代码选择 `scale`-gradient 点积，大概率是作者在可计算性、训练稳定性和实现复杂度之间做的工程折中。
+
+### 2026-04-04 - 六客户端季节稀缺协议与动态元任务设计（已确认）
+- 已确认弃用“`2022` 全年训练 / `2023` 全年测试”的三场站主协议，改为六客户端季节稀缺协议，用于更直接检验“target 数据不足时，跨客户端 federated prior 是否优于纯本地 prior”。
+- 六个实验客户端定义固定为：
+  - `WT1 (58)`: train `2022-03-01`~`2022-05-31`, test `2023-03-01`~`2023-05-31`
+  - `WT2 (59)`: train `2022-03-01`~`2022-05-31`, test `2023-03-01`~`2023-05-31`
+  - `WT3 (60)`: train `2022-06-01`~`2022-08-31`, test `2023-06-01`~`2023-08-31`
+  - `WT4 (61)`: train `2022-06-01`~`2022-08-31`, test `2023-06-01`~`2023-08-31`（源 workbook 仍来自 `058`）
+  - `WT5 (62)`: train `2022-11-01`~`2023-01-31`, test `2023-11-01`~`2024-01-31`（需拼接 `2024` workbook）
+  - `WT6 (63)`: train `2022-11-01`~`2023-01-31`, test `2023-11-01`~`2024-01-31`（需拼接 `2024` workbook）
+- 评估口径改为逐 `(client, extreme_class)` 报告，不强制再做总平均；当前预期主任务为：
+  - `(58, high_wind)`, `(59, high_wind)`, `(60, high_temp)`, `(61, high_temp)`, `(62, cold_wave)`, `(62, frost)`, `(63, cold_wave)`, `(63, frost)`。
+- `Proposed` / `LOCAL_META_TRANSFER` 的对齐口径固定为：
+  - `Phase 1/2` 常规天气只用训练块前 `1` 个月 `normal_weather`
+  - few-shot support 用目标客户端整个训练块中的 `extreme weather`
+  - test 用后一年的匹配季节块 `extreme weather`
+- 元训练任务设计已确认改为动态，而不再复用历史全年 `10` 类 + `10/10` episode：
+  - 保留 `len_realp = 12`
+  - 每个 meta episode 改为 `5 support + 5 query`
+  - 聚类只在训练块前 `1` 个月 `normal_weather` 上进行
+  - `K` 不设固定上限，而由窗口预算动态推导：`K_max = floor(N_windows / (support + query))`
+  - 肘部法仅在 `2..K_max` 内搜索，并要求最小簇窗口数不少于 `support + query`
+  - balanced sampler 的每轮采样类数固定为 `max(2, ceil(K / 2))`
+- `2024` 数据新增约束：
+  - `24jilin_058_processed_4classes.xlsx` / `059` / `060` 已确认覆盖完整 `2024-01-01`~`2024-12-31`
+  - 其中 `Power2` 标幺化容量必须按 `58/59/60 = 50/100/300` 处理，不能沿用旧的统一容量假设。
+
+#### 2026-04-04 - 六客户端季节协议已落地到代码与数据资产（已执行）
+- 已新增 `build_six_client_seasonal_protocol.py`，可直接从 `2223/24` 原始 `xlsx` 构建六客户端季节协议 `.mat` 资产与 `seasonal_protocol_data/seasonal_protocol_metadata.json`。
+- 该构建脚本已完成两项关键兼容修复：
+  - 不再依赖 `sklearn`；若环境缺少该依赖，则自动回退到内置 KMeans 实现；
+  - `xlsx` 解析已改为按单元格列号对齐，而不是按出现顺序 `zip`，避免因缺失单元格导致 `Power2` 等列被错位丢失。
+- 已实际生成 6 个客户端资产，当前动态聚类结果为：
+  - `WT1 (58): K=4, sampler_task_count=2`
+  - `WT2 (59): K=3, sampler_task_count=2`
+  - `WT3 (60): K=3, sampler_task_count=2`
+  - `WT4 (61): K=3, sampler_task_count=2`
+  - `WT5 (62): K=2, sampler_task_count=2`
+  - `WT6 (63): K=3, sampler_task_count=2`
+- `DemoModelTraining.py` 已接入 seasonal protocol 开关与 metadata 驱动逻辑：
+  - 支持 `SEASONAL_PROTOCOL_ENABLED=1`
+  - 支持按 metadata 加载 `58~63` 客户端资产
+  - 支持动态 `META_SUPPORT_SHOTS / META_QUERY_SHOTS`
+  - 支持按客户端 `valid_class_indices` 和 `sampler_task_count` 运行
+- `generate_multi_station_results.py` 已新增 seasonal protocol 专用结果路径：
+  - 读取 protocol metadata
+  - 逐 `(client_id, extreme_class)` 导出任务级结果
+  - 不再强制输出 `Overall_Average` 作为主结果
+- 已完成的验证：
+  - `tests.test_six_client_seasonal_protocol_ast`：通过
+  - `tests.test_generate_results_local_meta_ast`：通过
+  - `tests.test_local_ablation_matrix_ast`：通过
+  - `SEASONAL_PROTOCOL_ENABLED=1 python generate_multi_station_results.py`：已跑通并成功生成任务级 `multi_station_performance.csv`
+- 当前 smoke 结果中的 `61/62/63` 多个任务仍为 `NaN`，原因不是 seasonal protocol 路径错误，而是当前目录下尚无这些新客户端对应的完整 few-shot 模型产物；因此下一步真正需要做的是按新协议重训，而不是继续修结果脚本。
+
+#### 2026-04-04 - seasonal 训练启动器已补齐（已执行）
+- 已新增统一入口 `run_six_client_seasonal_protocol.py`，用于替代手工拼接环境变量。
+- 启动器支持四个 stage：
+  - `build`
+  - `train`
+  - `eval`
+  - `all`
+- 启动器默认注入的 seasonal preset：
+  - `SEASONAL_PROTOCOL_ENABLED=1`
+  - `SEASONAL_PROTOCOL_METADATA_PATH=seasonal_protocol_data/seasonal_protocol_metadata.json`
+  - `META_SUPPORT_SHOTS=5`
+  - `META_QUERY_SHOTS=5`
+- 启动器还支持：
+  - `--smoke`：注入 `PRETRAIN_EPOCHS=1`, `PROPOSED_META_EPOCHS=1`, `META_ONLY_META_EPOCHS=1`, `FEW_SHOT_EPOCHS=1`, `STRICT_PAPER_ORDER=0`
+  - `--dry-run`：只打印 build/train/eval 命令，不实际执行
+- 已新增 `tests/test_seasonal_protocol_launcher_ast.py`，并通过：
+  - launcher surface AST
+  - launcher stage command AST
+- 已完成 dry-run 验证：
+  - `python run_six_client_seasonal_protocol.py all --smoke --dry-run`
+  - 能正确打印 `build_six_client_seasonal_protocol.py -> DemoModelTraining.py -> generate_multi_station_results.py` 三阶段命令
+- 这意味着当前仓库已经具备：
+  - seasonal 数据构建脚本
+  - seasonal 训练/评估代码路径
+  - seasonal 统一启动入口
+  - 后续可直接在此入口上补充正式实验预算，而无需再手工维护命令行环境变量。
+
+#### 2026-04-04 - six-client seasonal protocol 冒烟全流程已跑通（已执行）
+- 已实际运行：
+  - `python run_six_client_seasonal_protocol.py all --smoke`
+- 运行结果确认了三点：
+  1. seasonal `build -> train -> eval` 三阶段链路能完整跑通；
+  2. `58~63` 六客户端的本地 pretrain、Proposed/LMT/Meta-only 元训练、few-shot 适应和最终评估都已真正产生产物；
+  3. `generate_multi_station_results.py` 在训练产物齐全后不再输出大量 `NaN`，说明前面的 seasonal 结果路径接线正确。
+- 本次 smoke 的任务级主表已写入 `multi_station_performance.csv`，当前按 `nMAE_%` 统计：
+  - `Proposed vs Local_Meta_Transfer = 2胜6负`
+  - 胜的任务为：
+    - `(59, high_wind)`
+    - `(63, cold_wave)`
+  - 其余任务均为 `LMT` 更优。
+- 因此，这次 `1/1/1/1` smoke run 的意义仅是：
+  - 验证 seasonal 协议实现闭环可运行；
+  - 初步暴露在六客户端稀缺协议下，当前默认超参并未自动带来 `Proposed > LMT`。
+- 不能把这组 smoke 分数当作正式结论，原因：
+  - `PRETRAIN_EPOCHS=1`
+  - `PROPOSED_META_EPOCHS=1`
+  - `META_ONLY_META_EPOCHS=1`
+  - `FEW_SHOT_EPOCHS=1`
+  - 这只是链路健康检查，不是有效性能实验。
+- 下一步若要继续做方法结论，应优先进入：
+  - 设定正式 seasonal 预算
+  - 跑至少一个可解释的 seed / budget 组合
+  - 再比较 `Proposed` 与 `LMT` 的任务级结果
+
+## 收敛检测（2026-04-04 起）
+- 已把收敛检测正式接入 `DemoModelTraining.py`，并默认开启：
+  - `ENABLE_CONVERGENCE_MONITOR=True`
+  - `CONVERGENCE_REPORT_PATH=training_convergence_report.json`
+- 设计原则固定为：
+  - 只检测，不 early stop；
+  - 不改变现有训练预算与优化路径；
+  - 仅额外记录“是否收敛，以及若收敛是在何时收敛”。
+- 当前收敛判定采用 `patience + min_delta` 的 plateau 检测，并要求至少达到 `min_epochs` 后才允许判定。
+- 若训练后续又出现显著下降，则撤销先前 plateau 判断，避免假阳性。
+- 当前默认超参：
+  - `CONVERGENCE_MIN_DELTA = 1e-4`
+  - `CONVERGENCE_MIN_EPOCHS = 5`
+  - `CONVERGENCE_PATIENCE_PRETRAIN = 200`
+  - `CONVERGENCE_PATIENCE_META = 100`
+  - `CONVERGENCE_PATIENCE_FEW_SHOT = 5`
+- 覆盖的训练过程固定为：
+  - `federated_pretrain`
+  - `local_pretrain`
+  - `local_meta`
+  - `few_shot`
+- 每条收敛记录至少包含：
+  - `stage_type`
+  - `stage_id`
+  - `total_epochs`
+  - `converged`
+  - `convergence_epoch`
+  - `best_epoch`
+  - `best_loss`
+  - `final_loss`
+- 冒烟验证已确认：
+  - `python run_six_client_seasonal_protocol.py all --smoke` 会真实打印各阶段收敛摘要；
+  - 并落盘 `training_convergence_report.json`；
+  - 当前 smoke 报告共 `57` 条记录：
+    - `federated_pretrain = 1`
+    - `local_pretrain = 6`
+    - `local_meta = 18`
+    - `few_shot = 32`
+  - 由于 smoke 预算仅 `1 epoch`，当前全部记录都为“未收敛”，这符合预期，不能误读为方法本身不收敛。
+
+## 训练日志可见性（2026-04-04 起）
+- six-client seasonal launcher 已固定使用非缓冲输出：
+  - `run_six_client_seasonal_protocol.py` 会注入 `PYTHONUNBUFFERED=1`
+  - 各阶段子进程统一按 `python -u ...` 启动
+- 目的固定为：保证 `screen + tee` 场景下，终端能够实时看到阶段切换与 epoch 进度，而不是等缓冲区累积后才一次性刷出。
+- `DemoModelTraining.py` 已新增统一日志辅助：
+  - `progress_log(...)`：关键日志一律 `flush=True`
+  - `should_log_epoch(...)`：统一控制长阶段打印节奏
+- 当前默认日志策略：
+  - `federated_pretrain` / `standalone_pretrain` / `local_pretrain`：前 `10` 个 epoch 每轮打印，之后每 `100` 轮打印一次，最后一轮必打
+  - `local_meta`：前 `10` 个 epoch 每轮打印，之后每 `100` 轮打印一次，最后一轮必打；单行汇总 `support_mse / query_mse / anchor`
+  - `few_shot`：预算较小，默认每轮都打印
+- 该改动只影响日志可见性，不改变训练算法、训练预算、收敛检测或结果口径。
+- CPU smoke 验证已确认：
+  - `python run_six_client_seasonal_protocol.py all --smoke` 在当前无 CUDA 环境下，`build -> train -> eval` 各阶段日志均可实时看到；
+  - 终端中已能直接看到 `local_pretrain`、`local_meta`、`few_shot` 的阶段头、`Epoch x/y`、以及收敛检测摘要。
+- 正式实验口径仍不变：
+  - 本地只用于 `CPU smoke / debug validation`
+  - 完整预算仍由用户在远程 `RTX 4090` 上运行。
+
+## Seasonal 数据完整性修复（2026-04-04）
+- 问题现象：
+  - `proposed_station60~63` 在元训练阶段出现 `support_mse / query_mse` 从首轮起接近或显示为 `0.000000`；
+  - 进一步核查发现不仅 `63`，`58~63` 六个 seasonal `.mat` 都存在不同程度的功率尺度错误。
+- 根因已确认在 `build_six_client_seasonal_protocol.py`：
+  - `workbook_cache` 中的 `SheetRecord` 是可变对象；
+  - `merge_workbooks_by_sheet(...)` 之前直接复用了这些对象；
+  - `serialize_client_assets(...)` 内部对 `merged_train` / `merged_test` 执行 `normalize_power(...)` 时是原地修改；
+  - 因此同一批记录会在 train/test 合并与多个 client 序列化过程中被重复归一化，导致后续 client 数值被越除越小。
+- 修复策略：
+  - 在 `merge_workbooks_by_sheet(...)` 中对每个 `SheetRecord` 进行深度脱钩复制（至少复制 `values` dict），保证每个 client 的 train/test sheet 只修改自己的副本；
+  - 保留 `normalize_power(...)` 的单次归一化逻辑，不再共享可变记录对象。
+- 回归测试已加入：
+  - `tests/test_seasonal_data_integrity.py`
+  - 覆盖两点：
+    1. merge 后记录对象与缓存对象必须脱钩；
+    2. 顺序构建所有 6 个 client 后，`63wf_seasonal_protocol.mat` 的 conventional target 尺度必须与从 `xlsx` 单次归一化得到的期望值一致。
+- 重建后已逐 client 对账，以下字段均与从原始 `xlsx` 单次归一化、按协议切窗重算的期望值一致：
+  - `p_conven_class`
+  - `p_1h`
+  - `p_test`
+  - 各极端天气类的训练 / 测试功率序列
+- 重建后的 6 个 client conventional 均值如下：
+  - `58`: `0.37397753`
+  - `59`: `0.24847406`
+  - `60`: `0.11088715`
+  - `61`: `0.22597806`
+  - `62`: `0.23172681`
+  - `63`: `0.16396683`
+- CPU smoke 复核已确认：
+  - `proposed_station60`: `support_mse=0.027336`, `query_mse=0.034695`
+  - `proposed_station61`: `support_mse=0.089465`, `query_mse=0.150499`
+  - `proposed_station62`: `support_mse=0.085218`, `query_mse=0.056790`
+  - `proposed_station63`: `support_mse=0.028353`, `query_mse=0.033794`
+  - 不再存在从首轮起恒为 `0.000000` 的异常。
+- 运行口径提醒：
+  - 在本地当前环境完成的仅是 `CPU smoke / debug validation`；
+  - 因 seasonal 资产已重建，之前基于旧资产启动的 `4090 formal run` 日志与结果均作废，必须在远程 `RTX 4090` 上使用新资产重新启动正式实验。
+
+## Seasonal 年份容量口径修复（2026-04-04）
+- 在修复“重复归一化”之后，继续核对 seasonal `.mat` 与源 `xlsx` 的归一化 power，发现 `59/60/62/63` 的 `p_conven_class` 与 `p_test` 均值仍偏小。
+- 进一步从源 `xlsx` 直接读取 `Power2`（以及能读到的 `Radio`）后确认：
+  - `2223jilin_058_processed_4classes.xlsx`：容量口径为 `50`，且 `Radio` 列与 `Power2 / 50` 对应；
+  - `2223jilin_059_processed_4classes.xlsx`：原始 `Power2` 最大值约 `48.16`，应按 `50` 归一化；
+  - `2223jilin_060_processed_4classes.xlsx`：原始 `Power2` 最大值约 `98.22`，应按 `100` 归一化；
+  - `24jilin_058/059/060_processed_4classes.xlsx`：容量口径分别为 `50 / 100 / 300`（与用户说明一致，且原始最大值约 `48.11 / 97.34 / 299.67`）。
+- 因此 seasonal builder 不能再按 `source_station_id` 绑定单一容量，而必须按 `workbook filename` 区分年份容量：
+  - `2223jilin_058_processed_4classes.xlsx -> 50`
+  - `2223jilin_059_processed_4classes.xlsx -> 50`
+  - `2223jilin_060_processed_4classes.xlsx -> 100`
+  - `24jilin_058_processed_4classes.xlsx -> 50`
+  - `24jilin_059_processed_4classes.xlsx -> 100`
+  - `24jilin_060_processed_4classes.xlsx -> 300`
+- 修复实现：
+  - `build_six_client_seasonal_protocol.py` 改为 `CAPACITY_BY_WORKBOOK`；
+  - `serialize_client_assets(...)` 先按工作簿克隆 sheet records，再按各自工作簿容量归一化，最后再 merge train/test；
+  - 这样对于 `WT5/WT6` 这类跨 `2223 + 2024` 的测试窗口，也能正确处理不同年份的不同容量。
+- 回归测试已扩展：
+  - `tests/test_seasonal_data_integrity.py` 现在不仅检查 merge 脱钩与 `client63` conventional 尺度，还检查 `client63` 跨 `2223 + 2024` 测试窗口的 mixed-workbook 容量归一化是否正确。
+- 修复后，以下 `seasonal .mat` 导出值已与源 `xlsx` 的归一化 power 对齐：
+  - `58`: `p_conven_class mean = 0.37397753`, `p_test mean = 0.43009737`
+  - `59`: `p_conven_class mean = 0.49694812`, `p_test mean = 0.50733650`
+  - `60`: `p_conven_class mean = 0.33266146`, `p_test mean = 0.28806461`
+  - `61`: `p_conven_class mean = 0.22597806`, `p_test mean = 0.19160303`
+  - `62`: `p_conven_class mean = 0.46345361`, `p_test mean = 0.38140211`
+  - `63`: `p_conven_class mean = 0.49190050`, `p_test mean = 0.33278873`
+- CPU smoke 复核后，`proposed_station60~63` 的元训练损失也已恢复正常非零：
+  - `60`: `support_mse=0.245595`, `query_mse=0.313472`
+  - `61`: `support_mse=0.089461`, `query_mse=0.150485`
+  - `62`: `support_mse=0.343715`, `query_mse=0.227622`
+  - `63`: `support_mse=0.249552`, `query_mse=0.304768`
+- 结论：当前 `seasonal_protocol_data/*.mat` 已和源 `xlsx` 中按正确年份容量归一化后的 power 对齐；任何在此修复前启动的 formal run 均需作废并重跑。

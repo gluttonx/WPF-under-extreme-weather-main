@@ -6,6 +6,7 @@
 """
 import os
 import glob
+import json
 import numpy as np
 import pandas as pd
 import torch.nn as nn
@@ -65,6 +66,11 @@ print("="*70)
 
 PREFER_TUNED_PROPOSED_MODELS = os.getenv("PREFER_TUNED_PROPOSED_MODELS", "0") != "0"
 STRICT_PAPER_ORDER = os.getenv("STRICT_PAPER_ORDER", "1") != "0"
+SEASONAL_PROTOCOL_ENABLED = os.getenv("SEASONAL_PROTOCOL_ENABLED", "0") != "0"
+SEASONAL_PROTOCOL_METADATA_PATH = os.getenv(
+    "SEASONAL_PROTOCOL_METADATA_PATH",
+    "seasonal_protocol_data/seasonal_protocol_metadata.json",
+)
 FED_PRETRAIN_MODEL_PATH = "model_fore_pre_federated.pth"
 LEGACY_PRETRAIN_MODEL_PATH = "model_fore_pre.pth"
 LOCAL_PRETRAIN_MODEL_TEMPLATE = "model_fore_pre_station{station_id}_local.pth"
@@ -73,6 +79,7 @@ STATION_LOCAL_LOCAL_META_MODEL_TEMPLATE = "model_fore_train_task_query_local_met
 STATION_LOCAL_META_ONLY_MODEL_TEMPLATE = "model_fore_train_task_query_meta_only_station{station_id}.pth"
 LEGACY_META_ONLY_MODEL_PATH = "model_fore_train_task_query_meta_only.pth"
 STATION_RESULT_TEMPLATE = "station{station_id}_test_results.mat"
+SEASONAL_EXTREME_CLASS_NAMES = ["high_wind", "high_temp", "cold_wave", "frost"]
 
 def benjamini_hochberg(p_values):
     """
@@ -242,6 +249,35 @@ def resolve_meta_learning_model_path(station_id, class_idx):
     return None
 
 
+def load_seasonal_protocol_metadata(metadata_path):
+    with open(metadata_path, "r", encoding="utf-8") as metadata_file:
+        metadata = json.load(metadata_file)
+
+    client_map = {}
+    for client in metadata.get("clients", []):
+        client_copy = dict(client)
+        client_copy["asset_path"] = os.path.join(
+            os.path.dirname(metadata_path),
+            client_copy["asset_path"],
+        )
+        client_copy["valid_class_index_set"] = set(client_copy.get("valid_class_indices", []))
+        client_map[str(client_copy["client_id"])] = client_copy
+
+    metadata["client_map"] = client_map
+    return metadata
+
+
+def iter_valid_protocol_tasks(client_metadata):
+    client_id = str(client_metadata["client_id"])
+    for class_index in client_metadata.get("valid_class_indices", []):
+        class_index = int(class_index)
+        yield {
+            "client_id": client_id,
+            "extreme_class_index": class_index,
+            "extreme_class": SEASONAL_EXTREME_CLASS_NAMES[class_index],
+        }
+
+
 def validate_paper_ablation_order(wide_df, weather_order):
     """
     联邦多场站主消融排序校验（误差类指标越小越好）：
@@ -292,7 +328,7 @@ def validate_paper_ablation_order(wide_df, weather_order):
     return issues
 
 
-def infer_training_durations_from_tensorboard():
+def infer_training_durations_from_tensorboard(station_ids=None):
     """
     从最新 TensorBoard 事件文件推断训练时长（秒）。
     口径：
@@ -351,7 +387,8 @@ def infer_training_durations_from_tensorboard():
         return np.nan
 
     pretrain_sec = tag_span_seconds('loss_mse_pre')
-    station_ids = ['58', '59', '60']
+    if station_ids is None:
+        station_ids = ['58', '59', '60']
     local_pretrain_sec = span_for_tags([
         f'loss_mse_pre_local_station{station_id}'
         for station_id in station_ids
@@ -434,6 +471,164 @@ def infer_training_durations_from_tensorboard():
 
     return duration_map
 
+
+def run_seasonal_protocol_evaluation():
+    print("\n检测到 seasonal protocol 模式，切换为逐 (client_id, extreme_class) 任务导出。")
+    seasonal_protocol_metadata = load_seasonal_protocol_metadata(SEASONAL_PROTOCOL_METADATA_PATH)
+    station_ids = [str(client["client_id"]) for client in seasonal_protocol_metadata.get("clients", [])]
+    model_names = resolve_output_model_names()
+    cap_norm = 1.0
+    dem_realc = 5
+    len_realp = int(seasonal_protocol_metadata.get("len_realp", 12))
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device0 = torch.device("cpu")
+    duration_map = infer_training_durations_from_tensorboard(station_ids=station_ids)
+
+    model_test = model_fore(
+        input_channel_fore=dem_realc,
+        output_channel_fore=[128, 96, 64, 48, 32, 16, 8],
+        mode='test_task_support',
+    )
+    model_test = model_test.to(device)
+    model_test.eval()
+
+    all_results = []
+
+    for client_id in station_ids:
+        client_metadata = seasonal_protocol_metadata["client_map"][client_id]
+        print(f"\nclient {client_id} ({client_metadata.get('client_name', client_id)}):")
+        wf_1 = scio.loadmat(client_metadata["asset_path"])
+        reference_nwp = wf_1["nwp_1h"]
+
+        proposed_model_files = {}
+        local_meta_model_files = {}
+        transfer_model_files = {}
+        meta_model_files = {}
+        for task in iter_valid_protocol_tasks(client_metadata):
+            class_index = task["extreme_class_index"]
+            proposed_model_files[class_index] = resolve_proposed_model_path(client_id, class_index)
+            local_meta_model_files[class_index] = resolve_local_meta_transfer_model_path(client_id, class_index)
+            transfer_model_files[class_index] = resolve_transfer_learning_model_path(client_id, class_index)
+            meta_model_files[class_index] = resolve_meta_learning_model_path(client_id, class_index)
+        local_pretrain_file = resolve_station_pretrain_model_path(client_id)
+
+        for task in iter_valid_protocol_tasks(client_metadata):
+            class_index = task["extreme_class_index"]
+            p_extre = wf_1[f"p_test_extre_class{class_index+1}"]
+            nwp_extre = wf_1[f"nwp_test_extre_class{class_index+1}_"]
+            num_samples = int(p_extre.shape[0] // len_realp)
+            if num_samples == 0:
+                continue
+
+            nwp_extre_list = []
+            for feature_index in range(dem_realc):
+                nwp_data = nwp_extre[0, feature_index].reshape(-1, 1)
+                scale = float(np.max(np.abs(reference_nwp[:, feature_index]), axis=0))
+                if scale < 1e-8:
+                    scale = 1.0
+                nwp_extre_list.append(nwp_data / scale)
+
+            nwp_extre_concat = np.concatenate(nwp_extre_list, axis=1)
+            nwp_extre_class = nwp_extre_concat[:num_samples * len_realp].reshape(
+                num_samples, len_realp, dem_realc
+            )
+            true_events = p_extre[:num_samples * len_realp].reshape(num_samples, len_realp)
+            input_class_tensor = torch.tensor(nwp_extre_class, dtype=torch.float32)
+
+            for model_name in model_names:
+                if model_name == 'Proposed':
+                    model_file = proposed_model_files.get(class_index)
+                elif model_name == 'Local_Meta_Transfer':
+                    model_file = local_meta_model_files.get(class_index)
+                elif model_name == 'Transfer_Learning':
+                    model_file = transfer_model_files.get(class_index)
+                elif model_name == 'Meta_Learning':
+                    model_file = meta_model_files.get(class_index)
+                else:
+                    model_file = local_pretrain_file
+
+                row = {
+                    'client_id': client_id,
+                    'client_name': client_metadata.get('client_name', client_id),
+                    'source_station_id': client_metadata.get('source_station_id'),
+                    'extreme_class': task["extreme_class"],
+                    'Extreme_Class': f'Extreme_Weather_Class{class_index+1}',
+                    'Model': model_name,
+                    'support_windows': int(client_metadata.get('support_window_counts', {}).get(task["extreme_class"], 0)),
+                    'test_windows': int(client_metadata.get('test_window_counts', {}).get(task["extreme_class"], num_samples)),
+                    'Samples': int(num_samples),
+                    'Training_duration_s': duration_map.get(model_name, np.nan),
+                }
+
+                if model_file is None:
+                    row.update({
+                        'nMAE_%': np.nan,
+                        'nRMSE_%': np.nan,
+                        'WD_%': np.nan,
+                        'R_p<0.05_%': np.nan,
+                    })
+                    all_results.append(row)
+                    continue
+
+                model_test.load_state_dict(torch.load(model_file, map_location=device))
+                model_test.eval()
+                with torch.no_grad():
+                    output_class = model_test(input_class_tensor.to(device))
+                    pred_events = output_class.to(device0).numpy().reshape(num_samples, len_realp)
+
+                nmae_percent, nrmse_percent, wd_percent, rp_less_005_percent = calc_paper_metrics(
+                    true_events, pred_events, cap_norm=cap_norm
+                )
+                row.update({
+                    'nMAE_%': round(nmae_percent, 4),
+                    'nRMSE_%': round(nrmse_percent, 4),
+                    'WD_%': round(wd_percent, 4),
+                    'R_p<0.05_%': round(rp_less_005_percent, 4),
+                })
+                all_results.append(row)
+
+    results_df = pd.DataFrame(all_results)
+    if results_df.empty:
+        raise RuntimeError("seasonal protocol 模式下没有生成任何有效测试任务结果。")
+
+    model_order = {name: index for index, name in enumerate(model_names)}
+    class_order = {name: index for index, name in enumerate(SEASONAL_EXTREME_CLASS_NAMES)}
+    results_df["client_sort_key"] = results_df["client_id"].astype(int)
+    results_df["class_sort_key"] = results_df["extreme_class"].map(class_order)
+    results_df["model_sort_key"] = results_df["Model"].map(model_order)
+    results_df = results_df.sort_values(
+        ["client_sort_key", "class_sort_key", "model_sort_key"]
+    ).drop(columns=["client_sort_key", "class_sort_key", "model_sort_key"])
+
+    metric_cols = ['nMAE_%', 'nRMSE_%', 'WD_%', 'R_p<0.05_%', 'Training_duration_s']
+    for col in metric_cols:
+        results_df[col] = pd.to_numeric(results_df[col], errors='coerce').round(4)
+
+    output_columns = [
+        'client_id',
+        'client_name',
+        'source_station_id',
+        'extreme_class',
+        'Model',
+        'support_windows',
+        'test_windows',
+        'Samples',
+        'nMAE_%',
+        'nRMSE_%',
+        'WD_%',
+        'R_p<0.05_%',
+        'Training_duration_s',
+    ]
+    results_df = results_df[output_columns]
+    results_df.to_csv('multi_station_performance.csv', index=False, encoding='utf-8-sig')
+
+    print("\n" + "=" * 70)
+    print("✓✓✓ six-client seasonal protocol 结果已生成")
+    print("=" * 70)
+    print("输出文件: multi_station_performance.csv")
+    print(f"任务行数: {len(results_df)}")
+    print(results_df.to_string(index=False))
+
 # 参数
 # 当前训练/评估数据为标幺值，因此按论文公式中的 Cap 取 1.0
 cap_norm = 1.0
@@ -442,6 +637,10 @@ dem_realp = 1
 len_realp = 12
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device0 = torch.device("cpu")
+
+if SEASONAL_PROTOCOL_ENABLED:
+    run_seasonal_protocol_evaluation()
+    raise SystemExit(0)
 
 # 场站列表
 station_ids = ['58', '59', '60']

@@ -1,0 +1,362 @@
+{
+  "protocol_name": "six_client_seasonal_protocol",
+  "len_realp": 12,
+  "meta_support_shots": 5,
+  "meta_query_shots": 5,
+  "extreme_class_names": [
+    "high_wind",
+    "high_temp",
+    "cold_wave",
+    "frost"
+  ],
+  "clients": [
+    {
+      "client_id": "58",
+      "client_name": "WT1",
+      "source_station_id": "058",
+      "train_start": "2022-03-01T00:00:00+08:00",
+      "train_end": "2022-06-01T00:00:00+08:00",
+      "test_start": "2023-03-01T00:00:00+08:00",
+      "test_end": "2023-06-01T00:00:00+08:00",
+      "main_sheet": "jilin_058",
+      "asset_path": "58wf_seasonal_protocol.mat",
+      "valid_class_indices": [
+        0
+      ],
+      "valid_class_names": [
+        "high_wind"
+      ],
+      "support_window_counts": {
+        "high_wind": 8,
+        "high_temp": 0,
+        "cold_wave": 0,
+        "frost": 0
+      },
+      "test_window_counts": {
+        "high_wind": 7,
+        "high_temp": 0,
+        "cold_wave": 0,
+        "frost": 0
+      },
+      "normal_hours": 721,
+      "normal_window_count": 60,
+      "chosen_k": 4,
+      "sampler_task_count": 2,
+      "meta_support_shots": 5,
+      "meta_query_shots": 5,
+      "len_realp": 12,
+      "clustering": {
+        "candidate_k": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "candidate_inertia": [
+          2809.85986328125,
+          2276.7060546875,
+          1890.007080078125,
+          1574.4923095703125,
+          1465.483642578125
+        ],
+        "chosen_window_counts": [
+          16,
+          11,
+          18,
+          13
+        ],
+        "k_max": 6
+      }
+    },
+    {
+      "client_id": "59",
+      "client_name": "WT2",
+      "source_station_id": "059",
+      "train_start": "2022-03-01T00:00:00+08:00",
+      "train_end": "2022-06-01T00:00:00+08:00",
+      "test_start": "2023-03-01T00:00:00+08:00",
+      "test_end": "2023-06-01T00:00:00+08:00",
+      "main_sheet": "jilin_059",
+      "asset_path": "59wf_seasonal_protocol.mat",
+      "valid_class_indices": [
+        0
+      ],
+      "valid_class_names": [
+        "high_wind"
+      ],
+      "support_window_counts": {
+        "high_wind": 6,
+        "high_temp": 0,
+        "cold_wave": 0,
+        "frost": 0
+      },
+      "test_window_counts": {
+        "high_wind": 6,
+        "high_temp": 0,
+        "cold_wave": 0,
+        "frost": 0
+      },
+      "normal_hours": 744,
+      "normal_window_count": 62,
+      "chosen_k": 3,
+      "sampler_task_count": 2,
+      "meta_support_shots": 5,
+      "meta_query_shots": 5,
+      "len_realp": 12,
+      "clustering": {
+        "candidate_k": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "candidate_inertia": [
+          2837.767578125,
+          2317.53369140625,
+          2006.805419921875,
+          1714.579345703125,
+          1555.4508056640625
+        ],
+        "chosen_window_counts": [
+          22,
+          18,
+          20
+        ],
+        "k_max": 6
+      }
+    },
+    {
+      "client_id": "60",
+      "client_name": "WT3",
+      "source_station_id": "060",
+      "train_start": "2022-06-01T00:00:00+08:00",
+      "train_end": "2022-09-01T00:00:00+08:00",
+      "test_start": "2023-06-01T00:00:00+08:00",
+      "test_end": "2023-09-01T00:00:00+08:00",
+      "main_sheet": "jilin_060",
+      "asset_path": "60wf_seasonal_protocol.mat",
+      "valid_class_indices": [
+        1
+      ],
+      "valid_class_names": [
+        "high_temp"
+      ],
+      "support_window_counts": {
+        "high_wind": 0,
+        "high_temp": 3,
+        "cold_wave": 0,
+        "frost": 0
+      },
+      "test_window_counts": {
+        "high_wind": 0,
+        "high_temp": 8,
+        "cold_wave": 0,
+        "frost": 0
+      },
+      "normal_hours": 720,
+      "normal_window_count": 60,
+      "chosen_k": 3,
+      "sampler_task_count": 2,
+      "meta_support_shots": 5,
+      "meta_query_shots": 5,
+      "len_realp": 12,
+      "clustering": {
+        "candidate_k": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "candidate_inertia": [
+          2629.251953125,
+          2226.5400390625,
+          1938.6080322265625,
+          1644.28857421875,
+          1457.625244140625
+        ],
+        "chosen_window_counts": [
+          22,
+          24,
+          13
+        ],
+        "k_max": 6
+      }
+    },
+    {
+      "client_id": "61",
+      "client_name": "WT4",
+      "source_station_id": "058",
+      "train_start": "2022-06-01T00:00:00+08:00",
+      "train_end": "2022-09-01T00:00:00+08:00",
+      "test_start": "2023-06-01T00:00:00+08:00",
+      "test_end": "2023-09-01T00:00:00+08:00",
+      "main_sheet": "jilin_058",
+      "asset_path": "61wf_seasonal_protocol.mat",
+      "valid_class_indices": [
+        1
+      ],
+      "valid_class_names": [
+        "high_temp"
+      ],
+      "support_window_counts": {
+        "high_wind": 0,
+        "high_temp": 1,
+        "cold_wave": 0,
+        "frost": 0
+      },
+      "test_window_counts": {
+        "high_wind": 0,
+        "high_temp": 5,
+        "cold_wave": 0,
+        "frost": 0
+      },
+      "normal_hours": 720,
+      "normal_window_count": 60,
+      "chosen_k": 3,
+      "sampler_task_count": 2,
+      "meta_support_shots": 5,
+      "meta_query_shots": 5,
+      "len_realp": 12,
+      "clustering": {
+        "candidate_k": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "candidate_inertia": [
+          2654.335693359375,
+          2237.67626953125,
+          1984.881103515625,
+          1703.03076171875,
+          1501.919921875
+        ],
+        "chosen_window_counts": [
+          20,
+          17,
+          21
+        ],
+        "k_max": 6
+      }
+    },
+    {
+      "client_id": "62",
+      "client_name": "WT5",
+      "source_station_id": "059",
+      "train_start": "2022-11-01T00:00:00+08:00",
+      "train_end": "2023-02-01T00:00:00+08:00",
+      "test_start": "2023-11-01T00:00:00+08:00",
+      "test_end": "2024-02-01T00:00:00+08:00",
+      "main_sheet": "jilin_059",
+      "asset_path": "62wf_seasonal_protocol.mat",
+      "valid_class_indices": [
+        2,
+        3
+      ],
+      "valid_class_names": [
+        "cold_wave",
+        "frost"
+      ],
+      "support_window_counts": {
+        "high_wind": 0,
+        "high_temp": 0,
+        "cold_wave": 4,
+        "frost": 2
+      },
+      "test_window_counts": {
+        "high_wind": 1,
+        "high_temp": 0,
+        "cold_wave": 2,
+        "frost": 16
+      },
+      "normal_hours": 692,
+      "normal_window_count": 57,
+      "chosen_k": 2,
+      "sampler_task_count": 2,
+      "meta_support_shots": 5,
+      "meta_query_shots": 5,
+      "len_realp": 12,
+      "clustering": {
+        "candidate_k": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "candidate_inertia": [
+          2558.53857421875,
+          2118.065185546875,
+          1797.88623046875,
+          1719.614501953125
+        ],
+        "chosen_window_counts": [
+          27,
+          30
+        ],
+        "k_max": 5
+      }
+    },
+    {
+      "client_id": "63",
+      "client_name": "WT6",
+      "source_station_id": "060",
+      "train_start": "2022-11-01T00:00:00+08:00",
+      "train_end": "2023-02-01T00:00:00+08:00",
+      "test_start": "2023-11-01T00:00:00+08:00",
+      "test_end": "2024-02-01T00:00:00+08:00",
+      "main_sheet": "jilin_060",
+      "asset_path": "63wf_seasonal_protocol.mat",
+      "valid_class_indices": [
+        2,
+        3
+      ],
+      "valid_class_names": [
+        "cold_wave",
+        "frost"
+      ],
+      "support_window_counts": {
+        "high_wind": 0,
+        "high_temp": 0,
+        "cold_wave": 3,
+        "frost": 2
+      },
+      "test_window_counts": {
+        "high_wind": 1,
+        "high_temp": 0,
+        "cold_wave": 2,
+        "frost": 9
+      },
+      "normal_hours": 698,
+      "normal_window_count": 58,
+      "chosen_k": 3,
+      "sampler_task_count": 2,
+      "meta_support_shots": 5,
+      "meta_query_shots": 5,
+      "len_realp": 12,
+      "clustering": {
+        "candidate_k": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "candidate_inertia": [
+          2628.66552734375,
+          2219.55859375,
+          1914.85498046875,
+          1636.828857421875
+        ],
+        "chosen_window_counts": [
+          19,
+          25,
+          13
+        ],
+        "k_max": 5
+      }
+    }
+  ]
+}
