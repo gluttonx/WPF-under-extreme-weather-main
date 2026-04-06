@@ -1,27 +1,25 @@
 {
+  "timestamp": "2026-04-05T15:40:57.923884Z",
   "os": {
     "system": "Linux",
     "release": "5.15.0-97-generic",
-    "machine": "x86_64",
-    "python_version": "3.8.10"
+    "machine": "x86_64"
   },
   "cpu": {
     "logical_cores": 128
   },
   "memory": {
-    "total_gb": 1007.52,
-    "available_gb": 940.7
+    "total_gb": 1007.5235252380371,
+    "available_gb": 947.1730499267578
   },
   "disk": {
     "total_gb": 30.0,
-    "available_gb": 21.65
+    "available_gb": 21.515766143798828
   },
-  "nvidia": {
-    "available": false,
-    "output": "Failed to initialize NVML: Unknown Error"
+  "gpu": {
+    "nvidia_gpus": [],
+    "total_gpus": 0,
+    "available_backends": []
   },
-  "amd": {
-    "available": false,
-    "error": "[Errno 2] No such file or directory: 'rocm-smi'"
-  }
+  "note": "Fallback resource snapshot using stdlib because detect_resources.py dependency psutil is unavailable in this environment."
 }

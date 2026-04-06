@@ -13,6 +13,7 @@ class RuntimeEnvConfigAstTest(unittest.TestCase):
         self.assertIn("def env_flag(", text)
         self.assertIn("def env_int(", text)
         self.assertIn('USE_FEDERATION = env_flag("USE_FEDERATION", True)', text)
+        self.assertIn('RUN_FEDERATED_PRETRAIN = env_flag("RUN_FEDERATED_PRETRAIN", USE_FEDERATION and not YEARLY_PROTOCOL_ENABLED)', text)
         self.assertIn('TRAIN_META_ONLY_BASELINE = env_flag("TRAIN_META_ONLY_BASELINE", True)', text)
         self.assertIn('FEW_SHOT_EPOCHS = env_int("FEW_SHOT_EPOCHS", 50)', text)
         self.assertIn('META_TASKS_PER_EPOCH = env_int("META_TASKS_PER_EPOCH", 5)', text)
@@ -23,6 +24,7 @@ class RuntimeEnvConfigAstTest(unittest.TestCase):
         self.assertIn('META_ONLY_USE_CDRM = env_flag("META_ONLY_USE_CDRM", True)', text)
         self.assertIn('META_ONLY_TRAIN_ALL_PARAMS = env_flag("META_ONLY_TRAIN_ALL_PARAMS", False)', text)
         self.assertIn('META_ONLY_DISABLE_LWP = env_flag("META_ONLY_DISABLE_LWP", False)', text)
+        self.assertIn("if RUN_FEDERATED_PRETRAIN:", text)
 
 
 if __name__ == "__main__":

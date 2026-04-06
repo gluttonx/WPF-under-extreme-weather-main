@@ -1621,6 +1621,40 @@
   - 本地只用于 `CPU smoke / debug validation`
   - 完整预算仍由用户在远程 `RTX 4090` 上运行。
 
+## 4090 screen runtime contract（2026-04-06）
+- 当前 three-station yearly 主线的默认正式入口改为：
+  - `run_three_station_yearly_protocol.py`
+  - stages 固定为 `build -> train -> eval`
+- 4090 正式运行推荐命令固定为：
+  - `CUDA_VISIBLE_DEVICES=0 python run_three_station_yearly_protocol.py all --preset formal-v1 2>&1 | tee logs/yearly_formal_$(date +%Y%m%d_%H%M%S).log`
+- 该 launcher 的 runtime contract 固定为：
+  - 强制 `PYTHONUNBUFFERED=1`
+  - 各阶段子进程统一按 `python -u ...` 启动
+  - 目标固定是让 `screen + tee` 场景下实时看到当前阶段、当前 epoch、以及是否已触发收敛条件
+- `DemoModelTraining.py` 的阶段头固定覆盖：
+  - `federated_pretrain`
+  - `standalone_pretrain`
+  - `local_pretrain`
+  - `local_meta`
+  - `few_shot`
+  - `eval`
+- 当前默认日志策略固定为：
+  - `federated_pretrain` / `standalone_pretrain` / `local_pretrain`：前 10 个 epoch 每轮打印，之后每 `100` 轮打印一次，最后一轮必打
+  - `local_meta`：前 10 个 epoch 每轮打印，之后每 `100` 轮打印一次，最后一轮必打
+  - `few_shot`：默认每轮打印；若预算提高，可通过 `FEW_SHOT_LOG_INTERVAL` 调整
+  - 若需要更密的中预算观测，优先把 `PRETRAIN_LOG_INTERVAL` / `META_LOG_INTERVAL` 调成 `50`，而不是随意改训练逻辑
+- 收敛日志策略固定为：
+  - 首次满足 patience 条件时，终端立即打印一次 `已收敛` / `convergence_epoch` / `best_epoch` / `best_loss`
+  - 阶段结束后仍保留最终收敛摘要，并继续写入 `training_convergence_report.json`
+- 预算策略固定采用 `smoke / pilot / formal` 三档，而不是默认一上来就 full-budget：
+  - `smoke`：链路验证；典型为 `PRETRAIN_EPOCHS=1`、`PROPOSED_META_EPOCHS=1`、`FEW_SHOT_EPOCHS=1`
+  - `pilot`：保守 pilot；当前固定为 `PRETRAIN_EPOCHS=500`、`PROPOSED_META_EPOCHS=500`、`FEW_SHOT_EPOCHS=10`
+  - `pilot-medium`：中预算 pilot；当前固定为 `PRETRAIN_EPOCHS=2000`、`PROPOSED_META_EPOCHS=2000`、`FEW_SHOT_EPOCHS=20`
+  - `formal`：论文口径；当前 `formal-v1` 固定为 `PRETRAIN_EPOCHS=35000`、`PROPOSED_META_EPOCHS=30000`、`FEW_SHOT_EPOCHS=50`
+- 解释口径固定：
+  - 开发与排障不应默认直接上几万轮
+  - 只有在协议、代码路径、日志、结果导出均稳定后，才进入 `formal-v1`
+
 ## Seasonal 数据完整性修复（2026-04-04）
 - 问题现象：
   - `proposed_station60~63` 在元训练阶段出现 `support_mse / query_mse` 从首轮起接近或显示为 `0.000000`；
@@ -1693,3 +1727,142 @@
   - `62`: `support_mse=0.343715`, `query_mse=0.227622`
   - `63`: `support_mse=0.249552`, `query_mse=0.304768`
 - 结论：当前 `seasonal_protocol_data/*.mat` 已和源 `xlsx` 中按正确年份容量归一化后的 power 对齐；任何在此修复前启动的 formal run 均需作废并重跑。
+
+### 2026-04-05 - 主命题转向：从 normal-only federated pretrain 转向 extreme-stage same-class FL
+- 当前 seasonal 六客户端方案虽然已跑通，但 formal 结果不支持“`Proposed` 在各 client 上稳定优于 `LMT`”。
+- 核心判断已更新：
+  - 主要问题不再解释为“budget 不足”或“数据窗口不够极端”，而是**共享发生在 wrong objective 上**；
+  - 旧 `Proposed` 的联邦发生在 `normal/conventional` 阶段，而最终目标是 `extreme few-shot`，二者存在明显错位。
+- 因此新的主命题固定为：
+  - **在极端天气小样本预测中，跨 client 的共享应该放在哪个阶段、以什么目标进行，才真正有助于 extreme few-shot？**
+- 对应的协议定义也一并更新：
+  - scarcity 不再定义为全年 `normal/conventional` 数据不足；
+  - scarcity 定义为**目标场站在某类 extreme task 上的数据有限**。
+- 对于这一新主命题，`2026-04-04` 的 six-client seasonal protocol 不再作为主方法路线，只保留为已执行过的 archive 路径。
+
+#### 主创新点 1：Extreme-Type-Conditioned Effective-Window Federated Adaptation（Extreme Stage）
+- 目标：让跨场站共享直接服务于目标场站的 extreme few-shot，而不是继续依赖 upstream `normal/conventional` 共享的间接迁移。
+- `2026-04-06` 起，yearly 三条主线的 clean ablation 定义固定为：
+  - `LMT-new = local_pretrain -> local_meta -> target-only local extreme adaptation`
+  - `Extreme-FedAvg = local_pretrain -> local_meta -> same-class extreme FL with uniform aggregation`
+  - `Proposed-A = local_pretrain -> local_meta -> same-class extreme FL with target-conditioned weighted aggregation`
+- 这意味着：
+  - 共同上游固定为 `local_pretrain`
+  - 共同中游固定为 `local_meta`
+  - 三条线唯一允许变化的是 extreme-stage 协作策略
+- 为避免与元学习术语混淆，extreme-stage 统一使用：
+  - `D_{s,c}^{adapt}`：目标场站 `s` 在类别 `c` 上的 local adaptation split
+  - `D_{s,c}^{val}`：目标场站 `s` 在类别 `c` 上的 local validation split
+  - `P_{k,c}`：source 场站 `k` 在类别 `c` 上的全部候选 extreme windows
+  - `Q_{k,c}`：source-quality gate 后的窗口池
+  - `E_{k→s,c}`：对目标场站 `s` 真正有效的 source windows 集合
+- 新的 extreme-stage shared initialization 固定为：
+  - `theta_{s,c}^{(0)} = theta_s^{meta}`
+  - 即 target self update 与两个 source updates 都从目标场站的 `local_meta` 初始化出发。
+- 目标场站自更新定义为：
+  - `theta_{s→s,c}^{(1)} = U(theta_{s,c}^{(0)} ; D_{s,c}^{adapt})`
+- source 场站更新定义为：
+  - `theta_{k→s,c}^{(1)} = U(theta_{s,c}^{(0)} ; E_{k→s,c}^{adapt})`
+  - 其中 `k != s`，且两个 source 场站都参与，但都只使用各自的有效窗口集合。
+- `Extreme-FedAvg` 的 extreme-stage 聚合定义为：
+  - `theta_{s,c}^{agg-fedavg} = (1 / (1 + |K_s^c|)) * (theta_{s→s,c}^{(1)} + sum_{k in K_s^c} theta_{k→s,c}^{(1)})`
+  - 其中 `K_s^c = {k != s | |E_{k→s,c}^{adapt}| > 0}`
+- `Proposed-A` 的最终 extreme-stage 输出定义为：
+  - `theta_{s,c}^{final} = U_refine(theta_{s,c}^{agg-prop} ; D_{s,c}^{adapt})`
+  - 即先跨站聚合，再做一次 target-only refinement。
+- 理论解释：
+  - 旧方法的问题不是“没有共享”，而是“共享发生在 wrong objective 上”，且 extreme-stage 更像一次性参数平均而不是真正的联邦适配；
+  - 新方法要求共享直接围绕目标场站的 same-class extreme adaptation，并且严格使用 shared initialization；
+  - 若 `Extreme-FedAvg / Proposed-A` 继续继承 federated pretrain 初始化，则会把“上游跨站共享”重新混入消融；该口径自 `2026-04-06` 起明确废止。
+
+#### 主创新点 2：Effective-Window Screening and Target-Conditioned Reliability Calibration
+- 目标：在仅有 `58 / 59 / 60` 三场站的背景下，不再依赖噪声较大的站级相似性代理，而是直接利用“对当前 target/class 真正有效”的 source windows。
+- 第一步是 `source-quality gate`。对 source 场站 `k` 的候选窗口 `w in P_{k,c}`，定义 source-internal quality 误差：
+  - `e_{k,c}^{self}(w) = L(f_k^{meta}(x_w), y_w)`
+- 令 `tau_{k,c}^{self}` 为 `P_{k,c}` 上该误差分布的分位阈值，则：
+  - `Q_{k,c} = { w in P_{k,c} | e_{k,c}^{self}(w) <= tau_{k,c}^{self} }`
+  - 该步骤只负责去掉明显异常和 source 自身都难以解释的窗口，不承担 target-conditioned 排序。
+- 第二步是 `target-conditioned usefulness screening`。对每个 `w in Q_{k,c}`，从共享初始化出发做轻量更新：
+  - `theta_{s,c}^{(0)}(w) = U(theta_{s,c}^{(0)} ; w)`
+- 然后直接在目标场站 validation split 上评估该窗口对 target 的帮助：
+  - `u_{k→s,c}(w) = L(theta_{s,c}^{(0)} ; D_{s,c}^{val}) - L(theta_{s,c}^{(0)}(w) ; D_{s,c}^{val})`
+  - 若 `u_{k→s,c}(w) > 0`，说明该窗口对 target 有正迁移价值。
+- 于是 source 的有效窗口集合定义为：
+  - `E_{k→s,c} = TopB_{k→s,c}({ w in Q_{k,c} | u_{k→s,c}(w) > 0 })`
+  - 这意味着不是“source station 二选一”，而是“两个 source 都参与，但各自只贡献 top useful windows”。
+- 为避免 source borrowing 压过 target shots，借用预算定义为：
+  - `B_{k→s,c} = min(|Q_{k,c}|, max(B_min, ceil(gamma * |D_{s,c}^{adapt}|)))`
+- 在 effective windows 基础上，定义三类权重因子：
+  - `m_{k→s,c} = log(1 + |E_{k→s,c}^{adapt}|)`：有效样本量
+  - `q_{k→s,c} = exp(-tau_q * L(theta_{k→s,c}^{(1)} ; E_{k→s,c}^{val}))`：source-side reliability
+  - `t_{k→s,c} = exp(-tau_t * L(theta_{k→s,c}^{(1)} ; D_{s,c}^{val}))`：target-side transferability
+- `Proposed-A` 的未归一化 source 权重定义为：
+  - `a_{k→s,c} = (m_{k→s,c})^lambda * (q_{k→s,c})^mu * (t_{k→s,c})^nu`
+- 归一化后 source 权重为：
+  - `tilde_alpha_{k→s,c} = a_{k→s,c} / sum_{j in K_s^c} a_{j→s,c}`
+- 最终聚合定义为：
+  - `theta_{s,c}^{agg-prop} = beta_self * theta_{s→s,c}^{(1)} + (1 - beta_self) * sum_{k in K_s^c} tilde_alpha_{k→s,c} * theta_{k→s,c}^{(1)}`
+- 第一版默认：
+  - `rho_self = 0.8`
+  - `B_min = 1`
+  - `gamma = 1.0`
+  - `tau_q = 1`
+  - `tau_t = 1`
+  - `lambda = 1`
+  - `mu = 1`
+  - `nu = 2`
+  - `beta_self = 0.5`
+- 理论解释：
+  - 在仅有 3 个场站时，station-level similarity 不足以提供稳定排序；
+  - extreme few-shot 下真正该共享的不是“更像目标的站”，而是“对目标 validation loss 真正有帮助的 source windows”；
+  - 因此新 `Proposed-A` 的主项不再是 `sim_{k→s}^c`，而是 `target-conditioned usefulness + transferability`。
+
+#### 2026-04-05 - 与原始 git 版本 `3.24.23: RAPP-original data` 的关系（重要）
+- 上述两条新主创新点不是脱离原始代码重写，而是**明确建立在 `d5030ab` 的方法骨架之上**：
+  - 保留原始三阶段主线：`local conventional pretrain -> local conventional meta -> per-class extreme adaptation`
+  - 保留原始 backbone：`TCN + LWP + fore_baselearner`
+  - 保留原始 few-shot 任务单位：按 extreme class 单独适配与评估
+- 真正改变的是：
+  - 共享从 `normal-only federated pretrain` 转移到 `extreme stage`
+  - 聚合从 plain average / `FedAvg` 转移到 target-conditioned reliability-aware weighting
+  - 数据协议从旧 `.mat` 中混年 extreme 类数据转为显式 `2022 support -> 2023 test`
+- 因而这条路线应理解为：
+  - **基于 `RAPP-original data` 主骨架的新方法创新**
+  - 而不是基于 six-client seasonal 路径继续做补丁扩展
+
+### 2026-04-05 - 长会话续接索引（新窗口必读）
+- 当前最重要的续接材料不是 seasonal formal run 的日志本身，而是以下 3 份文档：
+  1. `docs/plans/2026-04-05-session-summary.md`
+  2. `docs/plans/2026-04-05-extreme-stage-weighted-fl-design.md`
+  3. `docs/plans/2026-04-05-extreme-stage-weighted-fl-implementation.md`
+- 当前已固定的会话结论：
+  - six-client seasonal 路径保留为 archive，但不再是主方法路线；
+  - 主命题已转向“extreme-stage same-class FL 应该如何设计”；
+  - 新方法建立在 `d5030ab / 3.24.23: RAPP-original data` 骨架上；
+  - 下一步不是继续调 seasonal，而是实现三场站全年 `2022 support -> 2023 test` 的 same-class extreme FL。
+- 新窗口续接时，必须显式说明：
+  - 先读取上述 3 份文档；
+  - 再从 `2026-04-05-extreme-stage-weighted-fl-implementation.md` 的 Task 2 开始。
+
+### 2026-04-06 - three-station yearly 4090 screen runtime contract 已固定
+- 当前主线正式运行入口固定为：
+  - `run_three_station_yearly_protocol.py`
+  - 该 launcher 统一负责 `build -> train -> eval`
+- runtime 可见性 contract 固定为：
+  - `PYTHONUNBUFFERED=1`
+  - 子进程统一使用 `python -u`
+  - `DemoModelTraining.py` 统一通过 `progress_log(...)` 和 `log_stage_banner(...)` 输出关键阶段日志
+  - 阶段头至少覆盖 `federated_pretrain / standalone_pretrain / local_pretrain / local_meta / few_shot / eval`
+- 长阶段日志节奏固定为：
+  - 前 10 个 epoch 每轮打印
+  - 之后按 `PRETRAIN_LOG_INTERVAL` / `META_LOG_INTERVAL` / `FEW_SHOT_LOG_INTERVAL` 控制
+  - 最后一轮必打
+  - 首次满足 patience 条件时即时打印一次 `已收敛 / convergence_epoch / best_epoch / best_loss`
+- 预算 contract 固定为 `smoke / pilot / formal` 三档：
+  - `smoke`：`1 / 1 / 1`
+  - `pilot`：保守 pilot，默认 `500 / 500 / 10`
+  - `pilot-medium`：中预算 pilot，固定 `2000 / 2000 / 20`
+  - `formal-v1`：`PRETRAIN_EPOCHS=35000`、`PROPOSED_META_EPOCHS=30000`、`FEW_SHOT_EPOCHS=50`
+- 解释口径固定：
+  - 开发调试不默认直接上几万轮
+  - 只有协议、日志、导出和 smoke/pilot 都稳定后才进入 `formal-v1`

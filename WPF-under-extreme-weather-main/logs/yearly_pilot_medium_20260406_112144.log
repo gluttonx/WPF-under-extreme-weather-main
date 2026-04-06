@@ -1,0 +1,1514 @@
+
+======================================================================
+stage=build
+env  YEARLY_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_ENABLED=0 YEARLY_PROTOCOL_METADATA_PATH=/root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json USE_FEDERATION=1 TRAIN_META_ONLY_BASELINE=0 META_SUPPORT_SHOTS=10 META_QUERY_SHOTS=10 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=2000 PROPOSED_META_EPOCHS=2000 META_ONLY_META_EPOCHS=2000 FEW_SHOT_EPOCHS=20 PRETRAIN_LOG_INTERVAL=100 META_LOG_INTERVAL=100 FEW_SHOT_LOG_INTERVAL=1
+exec /root/miniconda3/bin/python -u build_three_station_extreme_yearly_protocol.py
+======================================================================
+station 58: support_windows={'high_wind': 8, 'high_temp': 1, 'cold_wave': 1, 'frost': 36}, test_windows={'high_wind': 9, 'high_temp': 5, 'cold_wave': 4, 'frost': 13}
+station 59: support_windows={'high_wind': 7, 'high_temp': 4, 'cold_wave': 2, 'frost': 19}, test_windows={'high_wind': 7, 'high_temp': 7, 'cold_wave': 5, 'frost': 13}
+station 60: support_windows={'high_wind': 5, 'high_temp': 3, 'cold_wave': 1, 'frost': 28}, test_windows={'high_wind': 8, 'high_temp': 8, 'cold_wave': 4, 'frost': 10}
+saved yearly protocol metadata: /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json
+
+======================================================================
+stage=train
+env  YEARLY_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_ENABLED=0 YEARLY_PROTOCOL_METADATA_PATH=/root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json USE_FEDERATION=1 TRAIN_META_ONLY_BASELINE=0 META_SUPPORT_SHOTS=10 META_QUERY_SHOTS=10 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=2000 PROPOSED_META_EPOCHS=2000 META_ONLY_META_EPOCHS=2000 FEW_SHOT_EPOCHS=20 PRETRAIN_LOG_INTERVAL=100 META_LOG_INTERVAL=100 FEW_SHOT_LOG_INTERVAL=1
+exec /root/miniconda3/bin/python -u DemoModelTraining.py
+======================================================================
+
+libgomp: Invalid value for environment variable OMP_NUM_THREADS
+
+======================================================================
+运行配置
+  sampler_mode=balanced
+  regime_missing_mode=none
+  pretrain_log_interval=100
+  meta_log_interval=100
+  few_shot_log_interval=1
+======================================================================
+Phase 2 Proposed sampler mode: balanced
+Regime-missing mode: none
+Yearly protocol enabled: /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json
+META_SUPPORT_SHOTS=10, META_QUERY_SHOTS=10
+
+======================================================================
+数据协议: yearly extreme protocol
+  加载3个yearly实验场站
+======================================================================
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/58wf_yearly_protocol.mat...
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/59wf_yearly_protocol.mat...
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/60wf_yearly_protocol.mat...
+
+======================================================================
+阶段: data_preparation
+  准备所有场站的完整数据（元训练+极端天气+测试集）
+======================================================================
+
+准备联邦客户端数据（常规天气）...
+  处理场站 58...
+    shape: (1, 8172, 5) → (1, 8172, 1)
+  处理场站 59...
+    shape: (1, 8354, 5) → (1, 8354, 1)
+  处理场站 60...
+    shape: (1, 8297, 5) → (1, 8297, 1)
+  总数据量: 24823 样本
+
+准备所有场站的元训练和测试数据（3场站一视同仁）...
+
+  场站 58:
+    测试集2023: (730, 12, 1)
+    聚类类别: 10类
+    极端天气: 4类
+
+  场站 59:
+    测试集2023: (730, 12, 1)
+    聚类类别: 10类
+    极端天气: 4类
+
+  场站 60:
+    测试集2023: (730, 12, 1)
+    聚类类别: 10类
+    极端天气: 4类
+
+✓ 所有场站数据准备完成！
+
+======================================================================
+阶段: federated_pretrain
+  clients=3
+  stations=58, 59, 60
+  epochs=2000
+  log_interval=100
+======================================================================
+  [federated_pretrain] [Epoch 1/2000] [loss_mse: 0.245044] [elapsed_sec: 0.217228]
+  [federated_pretrain] [Epoch 2/2000] [loss_mse: 0.244499] [elapsed_sec: 0.344465]
+  [federated_pretrain] [Epoch 3/2000] [loss_mse: 0.243626] [elapsed_sec: 0.478605]
+  [federated_pretrain] [Epoch 4/2000] [loss_mse: 0.243182] [elapsed_sec: 0.604787]
+  [federated_pretrain] [Epoch 5/2000] [loss_mse: 0.242516] [elapsed_sec: 0.733467]
+  [federated_pretrain] [Epoch 6/2000] [loss_mse: 0.241544] [elapsed_sec: 0.893483]
+  [federated_pretrain] [Epoch 7/2000] [loss_mse: 0.240962] [elapsed_sec: 1.049891]
+  [federated_pretrain] [Epoch 8/2000] [loss_mse: 0.240241] [elapsed_sec: 1.204265]
+  [federated_pretrain] [Epoch 9/2000] [loss_mse: 0.239897] [elapsed_sec: 1.366147]
+  [federated_pretrain] [Epoch 10/2000] [loss_mse: 0.238929] [elapsed_sec: 1.516708]
+  [federated_pretrain] [Epoch 100/2000] [loss_mse: 0.176536] [elapsed_sec: 14.861232]
+  [federated_pretrain] [Epoch 200/2000] [loss_mse: 0.113459] [elapsed_sec: 28.675923]
+  [federated_pretrain] [Epoch 300/2000] [loss_mse: 0.090039] [elapsed_sec: 41.429085]
+  [federated_pretrain] [Epoch 400/2000] [loss_mse: 0.063456] [elapsed_sec: 55.814876]
+  [federated_pretrain] [Epoch 500/2000] [loss_mse: 0.054985] [elapsed_sec: 70.471005]
+  [federated_pretrain] [Epoch 600/2000] [loss_mse: 0.050952] [elapsed_sec: 84.582346]
+  [federated_pretrain] [Epoch 700/2000] [loss_mse: 0.049524] [elapsed_sec: 97.655734]
+  [federated_pretrain] [Epoch 800/2000] [loss_mse: 0.047439] [elapsed_sec: 111.762287]
+  [federated_pretrain] [Epoch 900/2000] [loss_mse: 0.046898] [elapsed_sec: 125.698432]
+  [federated_pretrain] [Epoch 1000/2000] [loss_mse: 0.045945] [elapsed_sec: 140.237797]
+  [federated_pretrain] [Epoch 1100/2000] [loss_mse: 0.045145] [elapsed_sec: 154.878838]
+  [federated_pretrain] [Epoch 1200/2000] [loss_mse: 0.044964] [elapsed_sec: 169.798945]
+  [federated_pretrain] [Epoch 1300/2000] [loss_mse: 0.044897] [elapsed_sec: 183.610398]
+  [federated_pretrain] [Epoch 1400/2000] [loss_mse: 0.044530] [elapsed_sec: 197.285449]
+  [federated_pretrain] [Epoch 1500/2000] [loss_mse: 0.043726] [elapsed_sec: 209.904105]
+  [federated_pretrain] [Epoch 1600/2000] [loss_mse: 0.043587] [elapsed_sec: 223.313962]
+  [federated_pretrain] [Epoch 1700/2000] [loss_mse: 0.043595] [elapsed_sec: 235.876740]
+  收敛检测[federated_pretrain:global]: 首次达到收敛条件 @ epoch 1702 (best_epoch=1502, best_loss=0.043051, final_loss=0.043209)
+  [federated_pretrain] [Epoch 1800/2000] [loss_mse: 0.043125] [elapsed_sec: 248.145062]
+  [federated_pretrain] [Epoch 1900/2000] [loss_mse: 0.043549] [elapsed_sec: 260.894361]
+  [federated_pretrain] [Epoch 2000/2000] [loss_mse: 0.043453] [elapsed_sec: 274.785028]
+  收敛检测[federated_pretrain:global]: 未收敛 (best_epoch=1933, best_loss=0.042193, final_loss=0.043453)
+
+✓ 联邦预训练完成: model_fore_pre_federated.pth
+
+======================================================================
+阶段: local_pretrain
+  station_id=58
+  epochs=2000
+  log_interval=100
+======================================================================
+  [local_pretrain:station58] [Epoch 1/2000] [loss_mse: 0.175079]
+  [local_pretrain:station58] [Epoch 2/2000] [loss_mse: 0.174447]
+  [local_pretrain:station58] [Epoch 3/2000] [loss_mse: 0.173800]
+  [local_pretrain:station58] [Epoch 4/2000] [loss_mse: 0.173423]
+  [local_pretrain:station58] [Epoch 5/2000] [loss_mse: 0.172879]
+  [local_pretrain:station58] [Epoch 6/2000] [loss_mse: 0.172305]
+  [local_pretrain:station58] [Epoch 7/2000] [loss_mse: 0.171696]
+  [local_pretrain:station58] [Epoch 8/2000] [loss_mse: 0.171177]
+  [local_pretrain:station58] [Epoch 9/2000] [loss_mse: 0.170660]
+  [local_pretrain:station58] [Epoch 10/2000] [loss_mse: 0.170292]
+  [local_pretrain:station58] [Epoch 100/2000] [loss_mse: 0.101238]
+  [local_pretrain:station58] [Epoch 200/2000] [loss_mse: 0.051741]
+  [local_pretrain:station58] [Epoch 300/2000] [loss_mse: 0.045119]
+  [local_pretrain:station58] [Epoch 400/2000] [loss_mse: 0.042729]
+  [local_pretrain:station58] [Epoch 500/2000] [loss_mse: 0.040661]
+  [local_pretrain:station58] [Epoch 600/2000] [loss_mse: 0.038239]
+  [local_pretrain:station58] [Epoch 700/2000] [loss_mse: 0.038335]
+  [local_pretrain:station58] [Epoch 800/2000] [loss_mse: 0.035491]
+  [local_pretrain:station58] [Epoch 900/2000] [loss_mse: 0.035665]
+  [local_pretrain:station58] [Epoch 1000/2000] [loss_mse: 0.032912]
+  [local_pretrain:station58] [Epoch 1100/2000] [loss_mse: 0.032573]
+  [local_pretrain:station58] [Epoch 1200/2000] [loss_mse: 0.030595]
+  [local_pretrain:station58] [Epoch 1300/2000] [loss_mse: 0.030478]
+  [local_pretrain:station58] [Epoch 1400/2000] [loss_mse: 0.028478]
+  [local_pretrain:station58] [Epoch 1500/2000] [loss_mse: 0.026990]
+  [local_pretrain:station58] [Epoch 1600/2000] [loss_mse: 0.026831]
+  [local_pretrain:station58] [Epoch 1700/2000] [loss_mse: 0.025776]
+  [local_pretrain:station58] [Epoch 1800/2000] [loss_mse: 0.024753]
+  [local_pretrain:station58] [Epoch 1900/2000] [loss_mse: 0.024196]
+  [local_pretrain:station58] [Epoch 2000/2000] [loss_mse: 0.023370]
+  收敛检测[local_pretrain:station58]: 未收敛 (best_epoch=1987, best_loss=0.023073, final_loss=0.023370)
+✓ 场站 58 本地 conventional pretrain 完成: model_fore_pre_station58_local.pth
+
+======================================================================
+阶段: local_pretrain
+  station_id=59
+  epochs=2000
+  log_interval=100
+======================================================================
+  [local_pretrain:station59] [Epoch 1/2000] [loss_mse: 0.259362]
+  [local_pretrain:station59] [Epoch 2/2000] [loss_mse: 0.257940]
+  [local_pretrain:station59] [Epoch 3/2000] [loss_mse: 0.257433]
+  [local_pretrain:station59] [Epoch 4/2000] [loss_mse: 0.256405]
+  [local_pretrain:station59] [Epoch 5/2000] [loss_mse: 0.256337]
+  [local_pretrain:station59] [Epoch 6/2000] [loss_mse: 0.255583]
+  [local_pretrain:station59] [Epoch 7/2000] [loss_mse: 0.254637]
+  [local_pretrain:station59] [Epoch 8/2000] [loss_mse: 0.254003]
+  [local_pretrain:station59] [Epoch 9/2000] [loss_mse: 0.253068]
+  [local_pretrain:station59] [Epoch 10/2000] [loss_mse: 0.252645]
+  [local_pretrain:station59] [Epoch 100/2000] [loss_mse: 0.160714]
+  [local_pretrain:station59] [Epoch 200/2000] [loss_mse: 0.059476]
+  [local_pretrain:station59] [Epoch 300/2000] [loss_mse: 0.053499]
+  [local_pretrain:station59] [Epoch 400/2000] [loss_mse: 0.047661]
+  [local_pretrain:station59] [Epoch 500/2000] [loss_mse: 0.044949]
+  [local_pretrain:station59] [Epoch 600/2000] [loss_mse: 0.043022]
+  [local_pretrain:station59] [Epoch 700/2000] [loss_mse: 0.041477]
+  [local_pretrain:station59] [Epoch 800/2000] [loss_mse: 0.039775]
+  [local_pretrain:station59] [Epoch 900/2000] [loss_mse: 0.038961]
+  [local_pretrain:station59] [Epoch 1000/2000] [loss_mse: 0.037315]
+  [local_pretrain:station59] [Epoch 1100/2000] [loss_mse: 0.036660]
+  [local_pretrain:station59] [Epoch 1200/2000] [loss_mse: 0.036136]
+  [local_pretrain:station59] [Epoch 1300/2000] [loss_mse: 0.034821]
+  [local_pretrain:station59] [Epoch 1400/2000] [loss_mse: 0.035259]
+  [local_pretrain:station59] [Epoch 1500/2000] [loss_mse: 0.033861]
+  [local_pretrain:station59] [Epoch 1600/2000] [loss_mse: 0.033285]
+  [local_pretrain:station59] [Epoch 1700/2000] [loss_mse: 0.032260]
+  [local_pretrain:station59] [Epoch 1800/2000] [loss_mse: 0.031913]
+  [local_pretrain:station59] [Epoch 1900/2000] [loss_mse: 0.032290]
+  [local_pretrain:station59] [Epoch 2000/2000] [loss_mse: 0.030782]
+  收敛检测[local_pretrain:station59]: 未收敛 (best_epoch=1968, best_loss=0.030432, final_loss=0.030782)
+✓ 场站 59 本地 conventional pretrain 完成: model_fore_pre_station59_local.pth
+
+======================================================================
+阶段: local_pretrain
+  station_id=60
+  epochs=2000
+  log_interval=100
+======================================================================
+  [local_pretrain:station60] [Epoch 1/2000] [loss_mse: 0.292078]
+  [local_pretrain:station60] [Epoch 2/2000] [loss_mse: 0.291502]
+  [local_pretrain:station60] [Epoch 3/2000] [loss_mse: 0.290910]
+  [local_pretrain:station60] [Epoch 4/2000] [loss_mse: 0.289303]
+  [local_pretrain:station60] [Epoch 5/2000] [loss_mse: 0.288950]
+  [local_pretrain:station60] [Epoch 6/2000] [loss_mse: 0.287743]
+  [local_pretrain:station60] [Epoch 7/2000] [loss_mse: 0.287170]
+  [local_pretrain:station60] [Epoch 8/2000] [loss_mse: 0.286068]
+  [local_pretrain:station60] [Epoch 9/2000] [loss_mse: 0.285393]
+  [local_pretrain:station60] [Epoch 10/2000] [loss_mse: 0.284596]
+  [local_pretrain:station60] [Epoch 100/2000] [loss_mse: 0.157831]
+  [local_pretrain:station60] [Epoch 200/2000] [loss_mse: 0.059157]
+  [local_pretrain:station60] [Epoch 300/2000] [loss_mse: 0.052798]
+  [local_pretrain:station60] [Epoch 400/2000] [loss_mse: 0.046501]
+  [local_pretrain:station60] [Epoch 500/2000] [loss_mse: 0.044606]
+  [local_pretrain:station60] [Epoch 600/2000] [loss_mse: 0.042759]
+  [local_pretrain:station60] [Epoch 700/2000] [loss_mse: 0.042747]
+  [local_pretrain:station60] [Epoch 800/2000] [loss_mse: 0.040640]
+  [local_pretrain:station60] [Epoch 900/2000] [loss_mse: 0.039597]
+  [local_pretrain:station60] [Epoch 1000/2000] [loss_mse: 0.038681]
+  [local_pretrain:station60] [Epoch 1100/2000] [loss_mse: 0.037653]
+  [local_pretrain:station60] [Epoch 1200/2000] [loss_mse: 0.037548]
+  [local_pretrain:station60] [Epoch 1300/2000] [loss_mse: 0.037209]
+  [local_pretrain:station60] [Epoch 1400/2000] [loss_mse: 0.036563]
+  [local_pretrain:station60] [Epoch 1500/2000] [loss_mse: 0.035882]
+  [local_pretrain:station60] [Epoch 1600/2000] [loss_mse: 0.035076]
+  [local_pretrain:station60] [Epoch 1700/2000] [loss_mse: 0.034759]
+  [local_pretrain:station60] [Epoch 1800/2000] [loss_mse: 0.035024]
+  [local_pretrain:station60] [Epoch 1900/2000] [loss_mse: 0.033695]
+  [local_pretrain:station60] [Epoch 2000/2000] [loss_mse: 0.033350]
+  收敛检测[local_pretrain:station60]: 未收敛 (best_epoch=1945, best_loss=0.032807, final_loss=0.033350)
+✓ 场站 60 本地 conventional pretrain 完成: model_fore_pre_station60_local.pth
+
+======================================================================
+阶段: local_meta
+  station_id=58
+  meta_tag=proposed_station58
+  epochs=2000
+  log_interval=100
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.01
+  shared_lr_scale=0.3
+  sampler_mode=balanced
+======================================================================
+  tasks_per_epoch=5, station_task_pool=10
+  [proposed_station58] [Epoch 1/2000] [support_mse: 0.115858] [query_mse: 0.126391] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 2/2000] [support_mse: 0.123808] [query_mse: 0.124064] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 3/2000] [support_mse: 0.127626] [query_mse: 0.107669] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 4/2000] [support_mse: 0.101793] [query_mse: 0.107464] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 5/2000] [support_mse: 0.103520] [query_mse: 0.112398] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 6/2000] [support_mse: 0.097971] [query_mse: 0.108888] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station58] [Epoch 7/2000] [support_mse: 0.108486] [query_mse: 0.118473] [support_anchor: 0.000000] [query_anchor: 0.000001]
+  [proposed_station58] [Epoch 8/2000] [support_mse: 0.113077] [query_mse: 0.115712] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station58] [Epoch 9/2000] [support_mse: 0.107021] [query_mse: 0.108578] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station58] [Epoch 10/2000] [support_mse: 0.096757] [query_mse: 0.095077] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station58] [Epoch 100/2000] [support_mse: 0.101762] [query_mse: 0.112330] [support_anchor: 0.000019] [query_anchor: 0.000019]
+  [proposed_station58] [Epoch 200/2000] [support_mse: 0.081547] [query_mse: 0.071417] [support_anchor: 0.000021] [query_anchor: 0.000021]
+  [proposed_station58] [Epoch 300/2000] [support_mse: 0.096781] [query_mse: 0.087938] [support_anchor: 0.000019] [query_anchor: 0.000019]
+  收敛检测[local_meta:proposed_station58]: 首次达到收敛条件 @ epoch 339 (best_epoch=239, best_loss=0.041851, final_loss=0.120878)
+  [proposed_station58] [Epoch 400/2000] [support_mse: 0.100415] [query_mse: 0.093729] [support_anchor: 0.000020] [query_anchor: 0.000020]
+  收敛检测[local_meta:proposed_station58]: 首次达到收敛条件 @ epoch 483 (best_epoch=383, best_loss=0.040246, final_loss=0.075804)
+  [proposed_station58] [Epoch 500/2000] [support_mse: 0.103163] [query_mse: 0.109122] [support_anchor: 0.000016] [query_anchor: 0.000016]
+  [proposed_station58] [Epoch 600/2000] [support_mse: 0.045488] [query_mse: 0.048020] [support_anchor: 0.000019] [query_anchor: 0.000019]
+  收敛检测[local_meta:proposed_station58]: 首次达到收敛条件 @ epoch 686 (best_epoch=586, best_loss=0.039243, final_loss=0.095585)
+  [proposed_station58] [Epoch 700/2000] [support_mse: 0.089535] [query_mse: 0.088660] [support_anchor: 0.000015] [query_anchor: 0.000015]
+  [proposed_station58] [Epoch 800/2000] [support_mse: 0.077344] [query_mse: 0.068019] [support_anchor: 0.000017] [query_anchor: 0.000017]
+  收敛检测[local_meta:proposed_station58]: 首次达到收敛条件 @ epoch 883 (best_epoch=783, best_loss=0.038053, final_loss=0.084799)
+  [proposed_station58] [Epoch 900/2000] [support_mse: 0.086119] [query_mse: 0.098075] [support_anchor: 0.000014] [query_anchor: 0.000014]
+  [proposed_station58] [Epoch 1000/2000] [support_mse: 0.123714] [query_mse: 0.113557] [support_anchor: 0.000014] [query_anchor: 0.000014]
+  [proposed_station58] [Epoch 1100/2000] [support_mse: 0.094955] [query_mse: 0.106108] [support_anchor: 0.000015] [query_anchor: 0.000015]
+  [proposed_station58] [Epoch 1200/2000] [support_mse: 0.091247] [query_mse: 0.109345] [support_anchor: 0.000017] [query_anchor: 0.000017]
+  [proposed_station58] [Epoch 1300/2000] [support_mse: 0.104728] [query_mse: 0.095830] [support_anchor: 0.000018] [query_anchor: 0.000018]
+  [proposed_station58] [Epoch 1400/2000] [support_mse: 0.105601] [query_mse: 0.091873] [support_anchor: 0.000018] [query_anchor: 0.000018]
+  [proposed_station58] [Epoch 1500/2000] [support_mse: 0.090586] [query_mse: 0.078804] [support_anchor: 0.000018] [query_anchor: 0.000018]
+  [proposed_station58] [Epoch 1600/2000] [support_mse: 0.068088] [query_mse: 0.065658] [support_anchor: 0.000018] [query_anchor: 0.000018]
+  [proposed_station58] [Epoch 1700/2000] [support_mse: 0.072394] [query_mse: 0.068312] [support_anchor: 0.000020] [query_anchor: 0.000020]
+  [proposed_station58] [Epoch 1800/2000] [support_mse: 0.071827] [query_mse: 0.072754] [support_anchor: 0.000020] [query_anchor: 0.000020]
+  [proposed_station58] [Epoch 1900/2000] [support_mse: 0.092914] [query_mse: 0.098674] [support_anchor: 0.000021] [query_anchor: 0.000021]
+  [proposed_station58] [Epoch 2000/2000] [support_mse: 0.089448] [query_mse: 0.089668] [support_anchor: 0.000023] [query_anchor: 0.000023]
+  收敛检测[local_meta:proposed_station58]: 已收敛 @ epoch 883 (best_epoch=783, best_loss=0.038053, final_loss=0.089668)
+✓ 场站 58 元训练完成: model_fore_train_task_query_proposed_station58.pth
+
+======================================================================
+阶段: local_meta
+  station_id=59
+  meta_tag=proposed_station59
+  epochs=2000
+  log_interval=100
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.01
+  shared_lr_scale=0.3
+  sampler_mode=balanced
+======================================================================
+  tasks_per_epoch=5, station_task_pool=10
+  [proposed_station59] [Epoch 1/2000] [support_mse: 0.136790] [query_mse: 0.129805] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 2/2000] [support_mse: 0.096065] [query_mse: 0.103270] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 3/2000] [support_mse: 0.087268] [query_mse: 0.093691] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 4/2000] [support_mse: 0.086113] [query_mse: 0.094381] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 5/2000] [support_mse: 0.091489] [query_mse: 0.105321] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 6/2000] [support_mse: 0.116712] [query_mse: 0.107992] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 7/2000] [support_mse: 0.131033] [query_mse: 0.131906] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 8/2000] [support_mse: 0.096371] [query_mse: 0.094207] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 9/2000] [support_mse: 0.114461] [query_mse: 0.103223] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station59] [Epoch 10/2000] [support_mse: 0.122078] [query_mse: 0.141394] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station59] [Epoch 100/2000] [support_mse: 0.127222] [query_mse: 0.145569] [support_anchor: 0.000004] [query_anchor: 0.000004]
+  收敛检测[local_meta:proposed_station59]: 首次达到收敛条件 @ epoch 193 (best_epoch=93, best_loss=0.066260, final_loss=0.121390)
+  [proposed_station59] [Epoch 200/2000] [support_mse: 0.115685] [query_mse: 0.133186] [support_anchor: 0.000003] [query_anchor: 0.000003]
+  [proposed_station59] [Epoch 300/2000] [support_mse: 0.075364] [query_mse: 0.070139] [support_anchor: 0.000003] [query_anchor: 0.000004]
+  收敛检测[local_meta:proposed_station59]: 首次达到收敛条件 @ epoch 383 (best_epoch=283, best_loss=0.062100, final_loss=0.145112)
+  [proposed_station59] [Epoch 400/2000] [support_mse: 0.086805] [query_mse: 0.094061] [support_anchor: 0.000002] [query_anchor: 0.000002]
+  [proposed_station59] [Epoch 500/2000] [support_mse: 0.104011] [query_mse: 0.103646] [support_anchor: 0.000002] [query_anchor: 0.000002]
+  [proposed_station59] [Epoch 600/2000] [support_mse: 0.128128] [query_mse: 0.115357] [support_anchor: 0.000003] [query_anchor: 0.000003]
+  收敛检测[local_meta:proposed_station59]: 首次达到收敛条件 @ epoch 647 (best_epoch=547, best_loss=0.058901, final_loss=0.086556)
+  [proposed_station59] [Epoch 700/2000] [support_mse: 0.087710] [query_mse: 0.080940] [support_anchor: 0.000003] [query_anchor: 0.000003]
+  [proposed_station59] [Epoch 800/2000] [support_mse: 0.123102] [query_mse: 0.127086] [support_anchor: 0.000003] [query_anchor: 0.000003]
+  收敛检测[local_meta:proposed_station59]: 首次达到收敛条件 @ epoch 841 (best_epoch=741, best_loss=0.055432, final_loss=0.073235)
+  [proposed_station59] [Epoch 900/2000] [support_mse: 0.084409] [query_mse: 0.075844] [support_anchor: 0.000004] [query_anchor: 0.000004]
+  [proposed_station59] [Epoch 1000/2000] [support_mse: 0.087730] [query_mse: 0.092795] [support_anchor: 0.000004] [query_anchor: 0.000004]
+  [proposed_station59] [Epoch 1100/2000] [support_mse: 0.067552] [query_mse: 0.087062] [support_anchor: 0.000004] [query_anchor: 0.000004]
+  [proposed_station59] [Epoch 1200/2000] [support_mse: 0.135648] [query_mse: 0.109835] [support_anchor: 0.000005] [query_anchor: 0.000005]
+  [proposed_station59] [Epoch 1300/2000] [support_mse: 0.089616] [query_mse: 0.083451] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station59] [Epoch 1400/2000] [support_mse: 0.103998] [query_mse: 0.107777] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station59] [Epoch 1500/2000] [support_mse: 0.091752] [query_mse: 0.085538] [support_anchor: 0.000006] [query_anchor: 0.000006]
+  [proposed_station59] [Epoch 1600/2000] [support_mse: 0.079043] [query_mse: 0.083676] [support_anchor: 0.000007] [query_anchor: 0.000007]
+  [proposed_station59] [Epoch 1700/2000] [support_mse: 0.133769] [query_mse: 0.119635] [support_anchor: 0.000007] [query_anchor: 0.000007]
+  [proposed_station59] [Epoch 1800/2000] [support_mse: 0.081818] [query_mse: 0.082043] [support_anchor: 0.000008] [query_anchor: 0.000008]
+  [proposed_station59] [Epoch 1900/2000] [support_mse: 0.121550] [query_mse: 0.133393] [support_anchor: 0.000008] [query_anchor: 0.000008]
+  [proposed_station59] [Epoch 2000/2000] [support_mse: 0.116574] [query_mse: 0.119161] [support_anchor: 0.000009] [query_anchor: 0.000009]
+  收敛检测[local_meta:proposed_station59]: 已收敛 @ epoch 841 (best_epoch=741, best_loss=0.055432, final_loss=0.119161)
+✓ 场站 59 元训练完成: model_fore_train_task_query_proposed_station59.pth
+
+======================================================================
+阶段: local_meta
+  station_id=60
+  meta_tag=proposed_station60
+  epochs=2000
+  log_interval=100
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.01
+  shared_lr_scale=0.3
+  sampler_mode=balanced
+======================================================================
+  tasks_per_epoch=5, station_task_pool=10
+  [proposed_station60] [Epoch 1/2000] [support_mse: 0.136121] [query_mse: 0.137508] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 2/2000] [support_mse: 0.116577] [query_mse: 0.119261] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 3/2000] [support_mse: 0.133713] [query_mse: 0.118503] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 4/2000] [support_mse: 0.118062] [query_mse: 0.095848] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 5/2000] [support_mse: 0.103965] [query_mse: 0.112960] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 6/2000] [support_mse: 0.096381] [query_mse: 0.093424] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 7/2000] [support_mse: 0.116165] [query_mse: 0.133359] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 8/2000] [support_mse: 0.124883] [query_mse: 0.136297] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 9/2000] [support_mse: 0.102267] [query_mse: 0.100450] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 10/2000] [support_mse: 0.119286] [query_mse: 0.118548] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [proposed_station60] [Epoch 100/2000] [support_mse: 0.120624] [query_mse: 0.097171] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:proposed_station60]: 首次达到收敛条件 @ epoch 114 (best_epoch=14, best_loss=0.078640, final_loss=0.126202)
+  [proposed_station60] [Epoch 200/2000] [support_mse: 0.096298] [query_mse: 0.101230] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  [proposed_station60] [Epoch 300/2000] [support_mse: 0.097547] [query_mse: 0.078201] [support_anchor: 0.000001] [query_anchor: 0.000001]
+  收敛检测[local_meta:proposed_station60]: 首次达到收敛条件 @ epoch 370 (best_epoch=270, best_loss=0.065981, final_loss=0.120219)
+  [proposed_station60] [Epoch 400/2000] [support_mse: 0.093393] [query_mse: 0.104976] [support_anchor: 0.000002] [query_anchor: 0.000002]
+  [proposed_station60] [Epoch 500/2000] [support_mse: 0.091587] [query_mse: 0.086011] [support_anchor: 0.000003] [query_anchor: 0.000003]
+  [proposed_station60] [Epoch 600/2000] [support_mse: 0.131004] [query_mse: 0.126232] [support_anchor: 0.000004] [query_anchor: 0.000004]
+  [proposed_station60] [Epoch 700/2000] [support_mse: 0.115477] [query_mse: 0.116669] [support_anchor: 0.000005] [query_anchor: 0.000005]
+  [proposed_station60] [Epoch 800/2000] [support_mse: 0.097103] [query_mse: 0.104397] [support_anchor: 0.000007] [query_anchor: 0.000006]
+  [proposed_station60] [Epoch 900/2000] [support_mse: 0.104955] [query_mse: 0.096613] [support_anchor: 0.000007] [query_anchor: 0.000007]
+  [proposed_station60] [Epoch 1000/2000] [support_mse: 0.133435] [query_mse: 0.108070] [support_anchor: 0.000008] [query_anchor: 0.000008]
+  [proposed_station60] [Epoch 1100/2000] [support_mse: 0.097271] [query_mse: 0.094539] [support_anchor: 0.000009] [query_anchor: 0.000009]
+  [proposed_station60] [Epoch 1200/2000] [support_mse: 0.110696] [query_mse: 0.113127] [support_anchor: 0.000010] [query_anchor: 0.000010]
+  [proposed_station60] [Epoch 1300/2000] [support_mse: 0.113840] [query_mse: 0.109177] [support_anchor: 0.000011] [query_anchor: 0.000011]
+  [proposed_station60] [Epoch 1400/2000] [support_mse: 0.085298] [query_mse: 0.105449] [support_anchor: 0.000013] [query_anchor: 0.000014]
+  [proposed_station60] [Epoch 1500/2000] [support_mse: 0.109784] [query_mse: 0.123088] [support_anchor: 0.000012] [query_anchor: 0.000012]
+  [proposed_station60] [Epoch 1600/2000] [support_mse: 0.090921] [query_mse: 0.098113] [support_anchor: 0.000014] [query_anchor: 0.000014]
+  [proposed_station60] [Epoch 1700/2000] [support_mse: 0.091940] [query_mse: 0.090558] [support_anchor: 0.000013] [query_anchor: 0.000013]
+  [proposed_station60] [Epoch 1800/2000] [support_mse: 0.119670] [query_mse: 0.111941] [support_anchor: 0.000014] [query_anchor: 0.000014]
+  [proposed_station60] [Epoch 1900/2000] [support_mse: 0.103341] [query_mse: 0.084958] [support_anchor: 0.000014] [query_anchor: 0.000014]
+  [proposed_station60] [Epoch 2000/2000] [support_mse: 0.086510] [query_mse: 0.092702] [support_anchor: 0.000014] [query_anchor: 0.000014]
+  收敛检测[local_meta:proposed_station60]: 已收敛 @ epoch 370 (best_epoch=270, best_loss=0.065981, final_loss=0.092702)
+✓ 场站 60 元训练完成: model_fore_train_task_query_proposed_station60.pth
+
+======================================================================
+阶段: local_meta
+  station_id=58
+  meta_tag=local_meta_station58
+  epochs=2000
+  log_interval=100
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.0
+  shared_lr_scale=1.0
+  sampler_mode=uniform
+======================================================================
+  tasks_per_epoch=5, station_task_pool=10
+  [local_meta_station58] [Epoch 1/2000] [support_mse: 0.107890] [query_mse: 0.090172] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2/2000] [support_mse: 0.125997] [query_mse: 0.130294] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 3/2000] [support_mse: 0.141570] [query_mse: 0.160417] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 4/2000] [support_mse: 0.111748] [query_mse: 0.110526] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 5/2000] [support_mse: 0.157363] [query_mse: 0.140302] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 6/2000] [support_mse: 0.082383] [query_mse: 0.085418] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 7/2000] [support_mse: 0.075059] [query_mse: 0.071002] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 8/2000] [support_mse: 0.134900] [query_mse: 0.123612] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 9/2000] [support_mse: 0.102816] [query_mse: 0.096034] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 10/2000] [support_mse: 0.124512] [query_mse: 0.114998] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 100/2000] [support_mse: 0.101501] [query_mse: 0.087195] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 200/2000] [support_mse: 0.116404] [query_mse: 0.130553] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station58]: 首次达到收敛条件 @ epoch 216 (best_epoch=116, best_loss=0.039784, final_loss=0.097957)
+  [local_meta_station58] [Epoch 300/2000] [support_mse: 0.113931] [query_mse: 0.093636] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 400/2000] [support_mse: 0.122896] [query_mse: 0.119436] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 500/2000] [support_mse: 0.077211] [query_mse: 0.065800] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 600/2000] [support_mse: 0.043375] [query_mse: 0.051821] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 700/2000] [support_mse: 0.072130] [query_mse: 0.071514] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 800/2000] [support_mse: 0.104617] [query_mse: 0.110725] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 900/2000] [support_mse: 0.095065] [query_mse: 0.088689] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station58]: 首次达到收敛条件 @ epoch 930 (best_epoch=830, best_loss=0.035781, final_loss=0.044565)
+  [local_meta_station58] [Epoch 1000/2000] [support_mse: 0.126661] [query_mse: 0.108707] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1100/2000] [support_mse: 0.059200] [query_mse: 0.055910] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1200/2000] [support_mse: 0.047955] [query_mse: 0.042509] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1300/2000] [support_mse: 0.039373] [query_mse: 0.043979] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1400/2000] [support_mse: 0.082595] [query_mse: 0.104006] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1500/2000] [support_mse: 0.079448] [query_mse: 0.081408] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1600/2000] [support_mse: 0.114228] [query_mse: 0.131465] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1700/2000] [support_mse: 0.092829] [query_mse: 0.080092] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1800/2000] [support_mse: 0.099567] [query_mse: 0.098837] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1900/2000] [support_mse: 0.076747] [query_mse: 0.112027] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2000/2000] [support_mse: 0.103083] [query_mse: 0.121082] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station58]: 已收敛 @ epoch 930 (best_epoch=830, best_loss=0.035781, final_loss=0.121082)
+✓ 场站 58 元训练完成: model_fore_train_task_query_local_meta_station58.pth
+
+======================================================================
+阶段: local_meta
+  station_id=59
+  meta_tag=local_meta_station59
+  epochs=2000
+  log_interval=100
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.0
+  shared_lr_scale=1.0
+  sampler_mode=uniform
+======================================================================
+  tasks_per_epoch=5, station_task_pool=10
+  [local_meta_station59] [Epoch 1/2000] [support_mse: 0.094686] [query_mse: 0.097042] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 2/2000] [support_mse: 0.088490] [query_mse: 0.094169] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 3/2000] [support_mse: 0.133137] [query_mse: 0.131548] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 4/2000] [support_mse: 0.099713] [query_mse: 0.090909] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 5/2000] [support_mse: 0.093389] [query_mse: 0.092860] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 6/2000] [support_mse: 0.144562] [query_mse: 0.129906] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 7/2000] [support_mse: 0.152668] [query_mse: 0.161513] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 8/2000] [support_mse: 0.107344] [query_mse: 0.128788] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 9/2000] [support_mse: 0.110999] [query_mse: 0.119248] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 10/2000] [support_mse: 0.096041] [query_mse: 0.118633] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 100/2000] [support_mse: 0.142424] [query_mse: 0.151218] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 200/2000] [support_mse: 0.128021] [query_mse: 0.135311] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station59]: 首次达到收敛条件 @ epoch 219 (best_epoch=119, best_loss=0.064805, final_loss=0.113355)
+  [local_meta_station59] [Epoch 300/2000] [support_mse: 0.111193] [query_mse: 0.124604] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station59]: 首次达到收敛条件 @ epoch 349 (best_epoch=249, best_loss=0.062057, final_loss=0.106885)
+  [local_meta_station59] [Epoch 400/2000] [support_mse: 0.097441] [query_mse: 0.110485] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 500/2000] [support_mse: 0.124230] [query_mse: 0.146136] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 600/2000] [support_mse: 0.130090] [query_mse: 0.139365] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 700/2000] [support_mse: 0.107899] [query_mse: 0.098046] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 800/2000] [support_mse: 0.115463] [query_mse: 0.112814] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station59]: 首次达到收敛条件 @ epoch 878 (best_epoch=778, best_loss=0.058486, final_loss=0.115463)
+  [local_meta_station59] [Epoch 900/2000] [support_mse: 0.155352] [query_mse: 0.164486] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1000/2000] [support_mse: 0.145140] [query_mse: 0.140239] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station59]: 首次达到收敛条件 @ epoch 1074 (best_epoch=974, best_loss=0.055469, final_loss=0.109101)
+  [local_meta_station59] [Epoch 1100/2000] [support_mse: 0.123419] [query_mse: 0.123537] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1200/2000] [support_mse: 0.115378] [query_mse: 0.123881] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1300/2000] [support_mse: 0.098116] [query_mse: 0.101576] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1400/2000] [support_mse: 0.112916] [query_mse: 0.097314] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1500/2000] [support_mse: 0.070186] [query_mse: 0.071177] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1600/2000] [support_mse: 0.111652] [query_mse: 0.129771] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1700/2000] [support_mse: 0.098319] [query_mse: 0.103838] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1800/2000] [support_mse: 0.128046] [query_mse: 0.113875] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1900/2000] [support_mse: 0.093770] [query_mse: 0.100118] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 2000/2000] [support_mse: 0.118203] [query_mse: 0.116978] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station59]: 已收敛 @ epoch 1074 (best_epoch=974, best_loss=0.055469, final_loss=0.116978)
+✓ 场站 59 元训练完成: model_fore_train_task_query_local_meta_station59.pth
+
+======================================================================
+阶段: local_meta
+  station_id=60
+  meta_tag=local_meta_station60
+  epochs=2000
+  log_interval=100
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.0
+  shared_lr_scale=1.0
+  sampler_mode=uniform
+======================================================================
+  tasks_per_epoch=5, station_task_pool=10
+  [local_meta_station60] [Epoch 1/2000] [support_mse: 0.138960] [query_mse: 0.132422] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 2/2000] [support_mse: 0.127578] [query_mse: 0.124476] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 3/2000] [support_mse: 0.160630] [query_mse: 0.147200] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 4/2000] [support_mse: 0.137135] [query_mse: 0.118251] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 5/2000] [support_mse: 0.106566] [query_mse: 0.097991] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 6/2000] [support_mse: 0.131499] [query_mse: 0.134456] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 7/2000] [support_mse: 0.168447] [query_mse: 0.133512] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 8/2000] [support_mse: 0.107292] [query_mse: 0.123450] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 9/2000] [support_mse: 0.117572] [query_mse: 0.131409] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 10/2000] [support_mse: 0.136655] [query_mse: 0.157364] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 100/2000] [support_mse: 0.105296] [query_mse: 0.123332] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 200/2000] [support_mse: 0.127909] [query_mse: 0.128574] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station60]: 首次达到收敛条件 @ epoch 260 (best_epoch=160, best_loss=0.079228, final_loss=0.151353)
+  [local_meta_station60] [Epoch 300/2000] [support_mse: 0.149595] [query_mse: 0.133424] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station60]: 首次达到收敛条件 @ epoch 389 (best_epoch=289, best_loss=0.070276, final_loss=0.139736)
+  [local_meta_station60] [Epoch 400/2000] [support_mse: 0.132057] [query_mse: 0.126613] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 500/2000] [support_mse: 0.106407] [query_mse: 0.148723] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 600/2000] [support_mse: 0.120296] [query_mse: 0.112904] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 700/2000] [support_mse: 0.138886] [query_mse: 0.144515] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station60]: 首次达到收敛条件 @ epoch 709 (best_epoch=609, best_loss=0.069574, final_loss=0.111481)
+  [local_meta_station60] [Epoch 800/2000] [support_mse: 0.122550] [query_mse: 0.142354] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 900/2000] [support_mse: 0.144670] [query_mse: 0.117934] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station60]: 首次达到收敛条件 @ epoch 969 (best_epoch=869, best_loss=0.069440, final_loss=0.125965)
+  [local_meta_station60] [Epoch 1000/2000] [support_mse: 0.101322] [query_mse: 0.117119] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1100/2000] [support_mse: 0.108605] [query_mse: 0.103292] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1200/2000] [support_mse: 0.144831] [query_mse: 0.123671] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1300/2000] [support_mse: 0.126849] [query_mse: 0.133846] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1400/2000] [support_mse: 0.124089] [query_mse: 0.114198] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1500/2000] [support_mse: 0.119360] [query_mse: 0.126490] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1600/2000] [support_mse: 0.126880] [query_mse: 0.136200] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1700/2000] [support_mse: 0.097047] [query_mse: 0.101686] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1800/2000] [support_mse: 0.098876] [query_mse: 0.090562] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1900/2000] [support_mse: 0.109910] [query_mse: 0.128945] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 2000/2000] [support_mse: 0.135672] [query_mse: 0.118660] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station60]: 已收敛 @ epoch 969 (best_epoch=869, best_loss=0.069440, final_loss=0.118660)
+✓ 场站 60 元训练完成: model_fore_train_task_query_local_meta_station60.pth
+
+======================================================================
+阶段: few_shot
+  few_shot_model_count=36
+  epochs=20
+  log_interval=1
+======================================================================
+
+======================================================================
+场站 58 的Few-shot适应
+======================================================================
+
+  极端天气类别 1:
+    样本数: 8
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.160452]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.161510]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.164954]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.163432]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.158509]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.162504]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.163098]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.160062]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.165592]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class0]: 首次达到收敛条件 @ epoch 10 (best_epoch=5, best_loss=0.158509, final_loss=0.159608)
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.159608]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.161017]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.162736]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.160580]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.158134]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.164394]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.159266]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.160583]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.164909]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class0]: 首次达到收敛条件 @ epoch 19 (best_epoch=14, best_loss=0.158134, final_loss=0.165388)
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.165388]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.155430]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class0]: 未收敛 (best_epoch=20, best_loss=0.155430, final_loss=0.155430)
+    ✓ 保存(LMT-new): ./model_fore_station58_extreme0_lmt_new.pth
+      [Extreme-FedAvg] [Epoch 1/20] [loss_mse: 0.200841]
+      [Extreme-FedAvg] [Epoch 2/20] [loss_mse: 0.219596]
+      [Extreme-FedAvg] [Epoch 3/20] [loss_mse: 0.199296]
+      [Extreme-FedAvg] [Epoch 4/20] [loss_mse: 0.190270]
+      [Extreme-FedAvg] [Epoch 5/20] [loss_mse: 0.189878]
+      [Extreme-FedAvg] [Epoch 6/20] [loss_mse: 0.193010]
+      [Extreme-FedAvg] [Epoch 7/20] [loss_mse: 0.181744]
+      [Extreme-FedAvg] [Epoch 8/20] [loss_mse: 0.202792]
+      [Extreme-FedAvg] [Epoch 9/20] [loss_mse: 0.193372]
+      [Extreme-FedAvg] [Epoch 10/20] [loss_mse: 0.182233]
+      [Extreme-FedAvg] [Epoch 11/20] [loss_mse: 0.178676]
+      [Extreme-FedAvg] [Epoch 12/20] [loss_mse: 0.197469]
+      [Extreme-FedAvg] [Epoch 13/20] [loss_mse: 0.187091]
+      [Extreme-FedAvg] [Epoch 14/20] [loss_mse: 0.175389]
+      [Extreme-FedAvg] [Epoch 15/20] [loss_mse: 0.194048]
+      [Extreme-FedAvg] [Epoch 16/20] [loss_mse: 0.174306]
+      [Extreme-FedAvg] [Epoch 17/20] [loss_mse: 0.192839]
+      [Extreme-FedAvg] [Epoch 18/20] [loss_mse: 0.180410]
+      [Extreme-FedAvg] [Epoch 19/20] [loss_mse: 0.190257]
+      [Extreme-FedAvg] [Epoch 20/20] [loss_mse: 0.174060]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station58_class0]: 未收敛 (best_epoch=20, best_loss=0.174060, final_loss=0.174060)
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station58_extreme0_extreme_fedavg.pth
+      [Proposed-A] [Epoch 1/20] [loss_mse: 0.168804]
+      [Proposed-A] [Epoch 2/20] [loss_mse: 0.162183]
+      [Proposed-A] [Epoch 3/20] [loss_mse: 0.161069]
+      [Proposed-A] [Epoch 4/20] [loss_mse: 0.157079]
+      [Proposed-A] [Epoch 5/20] [loss_mse: 0.162987]
+      [Proposed-A] [Epoch 6/20] [loss_mse: 0.163608]
+      [Proposed-A] [Epoch 7/20] [loss_mse: 0.165018]
+      [Proposed-A] [Epoch 8/20] [loss_mse: 0.160409]
+  收敛检测[few_shot:Proposed-A:proposed_a_station58_class0]: 首次达到收敛条件 @ epoch 9 (best_epoch=4, best_loss=0.157079, final_loss=0.157621)
+      [Proposed-A] [Epoch 9/20] [loss_mse: 0.157621]
+      [Proposed-A] [Epoch 10/20] [loss_mse: 0.160913]
+      [Proposed-A] [Epoch 11/20] [loss_mse: 0.170029]
+      [Proposed-A] [Epoch 12/20] [loss_mse: 0.165374]
+      [Proposed-A] [Epoch 13/20] [loss_mse: 0.164243]
+      [Proposed-A] [Epoch 14/20] [loss_mse: 0.154426]
+      [Proposed-A] [Epoch 15/20] [loss_mse: 0.166376]
+      [Proposed-A] [Epoch 16/20] [loss_mse: 0.170791]
+      [Proposed-A] [Epoch 17/20] [loss_mse: 0.159720]
+      [Proposed-A] [Epoch 18/20] [loss_mse: 0.153535]
+      [Proposed-A] [Epoch 19/20] [loss_mse: 0.160580]
+      [Proposed-A] [Epoch 20/20] [loss_mse: 0.168208]
+  收敛检测[few_shot:Proposed-A:proposed_a_station58_class0]: 未收敛 (best_epoch=18, best_loss=0.153535, final_loss=0.168208)
+    ✓ 保存(Proposed-A): ./model_fore_station58_extreme0.pth
+
+  极端天气类别 2:
+    样本数: 1
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.032358]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.030201]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.035310]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.027269]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.038250]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.022219]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.037948]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.024596]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.020484]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.032083]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.036746]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.025661]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.027556]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class1]: 首次达到收敛条件 @ epoch 14 (best_epoch=9, best_loss=0.020484, final_loss=0.032804)
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.032804]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.025269]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.034593]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.027413]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.028166]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.033594]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.032010]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class1]: 已收敛 @ epoch 14 (best_epoch=9, best_loss=0.020484, final_loss=0.032010)
+    ✓ 保存(LMT-new): ./model_fore_station58_extreme1_lmt_new.pth
+      [Extreme-FedAvg] [Epoch 1/20] [loss_mse: 0.088930]
+      [Extreme-FedAvg] [Epoch 2/20] [loss_mse: 0.054087]
+      [Extreme-FedAvg] [Epoch 3/20] [loss_mse: 0.088947]
+      [Extreme-FedAvg] [Epoch 4/20] [loss_mse: 0.060477]
+      [Extreme-FedAvg] [Epoch 5/20] [loss_mse: 0.097449]
+      [Extreme-FedAvg] [Epoch 6/20] [loss_mse: 0.071312]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station58_class1]: 首次达到收敛条件 @ epoch 7 (best_epoch=2, best_loss=0.054087, final_loss=0.069931)
+      [Extreme-FedAvg] [Epoch 7/20] [loss_mse: 0.069931]
+      [Extreme-FedAvg] [Epoch 8/20] [loss_mse: 0.054640]
+      [Extreme-FedAvg] [Epoch 9/20] [loss_mse: 0.052994]
+      [Extreme-FedAvg] [Epoch 10/20] [loss_mse: 0.066195]
+      [Extreme-FedAvg] [Epoch 11/20] [loss_mse: 0.069585]
+      [Extreme-FedAvg] [Epoch 12/20] [loss_mse: 0.070302]
+      [Extreme-FedAvg] [Epoch 13/20] [loss_mse: 0.066018]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station58_class1]: 首次达到收敛条件 @ epoch 14 (best_epoch=9, best_loss=0.052994, final_loss=0.072788)
+      [Extreme-FedAvg] [Epoch 14/20] [loss_mse: 0.072788]
+      [Extreme-FedAvg] [Epoch 15/20] [loss_mse: 0.059032]
+      [Extreme-FedAvg] [Epoch 16/20] [loss_mse: 0.050083]
+      [Extreme-FedAvg] [Epoch 17/20] [loss_mse: 0.036544]
+      [Extreme-FedAvg] [Epoch 18/20] [loss_mse: 0.036490]
+      [Extreme-FedAvg] [Epoch 19/20] [loss_mse: 0.036626]
+      [Extreme-FedAvg] [Epoch 20/20] [loss_mse: 0.048517]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station58_class1]: 未收敛 (best_epoch=17, best_loss=0.036544, final_loss=0.048517)
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station58_extreme1_extreme_fedavg.pth
+      [Proposed-A] [Epoch 1/20] [loss_mse: 0.022835]
+      [Proposed-A] [Epoch 2/20] [loss_mse: 0.029762]
+      [Proposed-A] [Epoch 3/20] [loss_mse: 0.025505]
+      [Proposed-A] [Epoch 4/20] [loss_mse: 0.024257]
+      [Proposed-A] [Epoch 5/20] [loss_mse: 0.037640]
+  收敛检测[few_shot:Proposed-A:proposed_a_station58_class1]: 首次达到收敛条件 @ epoch 6 (best_epoch=1, best_loss=0.022835, final_loss=0.030340)
+      [Proposed-A] [Epoch 6/20] [loss_mse: 0.030340]
+      [Proposed-A] [Epoch 7/20] [loss_mse: 0.031470]
+      [Proposed-A] [Epoch 8/20] [loss_mse: 0.037686]
+      [Proposed-A] [Epoch 9/20] [loss_mse: 0.024459]
+      [Proposed-A] [Epoch 10/20] [loss_mse: 0.032736]
+      [Proposed-A] [Epoch 11/20] [loss_mse: 0.030645]
+      [Proposed-A] [Epoch 12/20] [loss_mse: 0.035138]
+      [Proposed-A] [Epoch 13/20] [loss_mse: 0.033959]
+      [Proposed-A] [Epoch 14/20] [loss_mse: 0.029707]
+      [Proposed-A] [Epoch 15/20] [loss_mse: 0.033441]
+      [Proposed-A] [Epoch 16/20] [loss_mse: 0.031303]
+      [Proposed-A] [Epoch 17/20] [loss_mse: 0.032282]
+      [Proposed-A] [Epoch 18/20] [loss_mse: 0.032102]
+      [Proposed-A] [Epoch 19/20] [loss_mse: 0.038240]
+      [Proposed-A] [Epoch 20/20] [loss_mse: 0.038560]
+  收敛检测[few_shot:Proposed-A:proposed_a_station58_class1]: 已收敛 @ epoch 6 (best_epoch=1, best_loss=0.022835, final_loss=0.038560)
+    ✓ 保存(Proposed-A): ./model_fore_station58_extreme1.pth
+
+  极端天气类别 3:
+    样本数: 1
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.154070]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.144397]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.130664]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.138966]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.159397]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.124491]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.138330]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.167848]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.124009]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.101003]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.119465]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.127103]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.125750]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.108144]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class2]: 首次达到收敛条件 @ epoch 15 (best_epoch=10, best_loss=0.101003, final_loss=0.110110)
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.110110]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.107984]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.110475]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.089651]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.086389]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.104561]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class2]: 未收敛 (best_epoch=19, best_loss=0.086389, final_loss=0.104561)
+    ✓ 保存(LMT-new): ./model_fore_station58_extreme2_lmt_new.pth
+      [Extreme-FedAvg] [Epoch 1/20] [loss_mse: 0.081434]
+      [Extreme-FedAvg] [Epoch 2/20] [loss_mse: 0.046120]
+      [Extreme-FedAvg] [Epoch 3/20] [loss_mse: 0.069263]
+      [Extreme-FedAvg] [Epoch 4/20] [loss_mse: 0.079749]
+      [Extreme-FedAvg] [Epoch 5/20] [loss_mse: 0.076038]
+      [Extreme-FedAvg] [Epoch 6/20] [loss_mse: 0.051739]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station58_class2]: 首次达到收敛条件 @ epoch 7 (best_epoch=2, best_loss=0.046120, final_loss=0.080816)
+      [Extreme-FedAvg] [Epoch 7/20] [loss_mse: 0.080816]
+      [Extreme-FedAvg] [Epoch 8/20] [loss_mse: 0.070831]
+      [Extreme-FedAvg] [Epoch 9/20] [loss_mse: 0.062986]
+      [Extreme-FedAvg] [Epoch 10/20] [loss_mse: 0.097332]
+      [Extreme-FedAvg] [Epoch 11/20] [loss_mse: 0.056400]
+      [Extreme-FedAvg] [Epoch 12/20] [loss_mse: 0.066243]
+      [Extreme-FedAvg] [Epoch 13/20] [loss_mse: 0.081761]
+      [Extreme-FedAvg] [Epoch 14/20] [loss_mse: 0.043611]
+      [Extreme-FedAvg] [Epoch 15/20] [loss_mse: 0.072905]
+      [Extreme-FedAvg] [Epoch 16/20] [loss_mse: 0.047286]
+      [Extreme-FedAvg] [Epoch 17/20] [loss_mse: 0.064475]
+      [Extreme-FedAvg] [Epoch 18/20] [loss_mse: 0.058869]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station58_class2]: 首次达到收敛条件 @ epoch 19 (best_epoch=14, best_loss=0.043611, final_loss=0.102311)
+      [Extreme-FedAvg] [Epoch 19/20] [loss_mse: 0.102311]
+      [Extreme-FedAvg] [Epoch 20/20] [loss_mse: 0.071046]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station58_class2]: 已收敛 @ epoch 19 (best_epoch=14, best_loss=0.043611, final_loss=0.071046)
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station58_extreme2_extreme_fedavg.pth
+      [Proposed-A] [Epoch 1/20] [loss_mse: 0.163548]
+      [Proposed-A] [Epoch 2/20] [loss_mse: 0.149645]
+      [Proposed-A] [Epoch 3/20] [loss_mse: 0.156406]
+      [Proposed-A] [Epoch 4/20] [loss_mse: 0.148206]
+      [Proposed-A] [Epoch 5/20] [loss_mse: 0.127685]
+      [Proposed-A] [Epoch 6/20] [loss_mse: 0.147327]
+      [Proposed-A] [Epoch 7/20] [loss_mse: 0.136200]
+      [Proposed-A] [Epoch 8/20] [loss_mse: 0.127950]
+      [Proposed-A] [Epoch 9/20] [loss_mse: 0.137923]
+  收敛检测[few_shot:Proposed-A:proposed_a_station58_class2]: 首次达到收敛条件 @ epoch 10 (best_epoch=5, best_loss=0.127685, final_loss=0.131930)
+      [Proposed-A] [Epoch 10/20] [loss_mse: 0.131930]
+      [Proposed-A] [Epoch 11/20] [loss_mse: 0.132579]
+      [Proposed-A] [Epoch 12/20] [loss_mse: 0.111989]
+      [Proposed-A] [Epoch 13/20] [loss_mse: 0.124529]
+      [Proposed-A] [Epoch 14/20] [loss_mse: 0.111333]
+      [Proposed-A] [Epoch 15/20] [loss_mse: 0.134858]
+      [Proposed-A] [Epoch 16/20] [loss_mse: 0.114160]
+      [Proposed-A] [Epoch 17/20] [loss_mse: 0.086930]
+      [Proposed-A] [Epoch 18/20] [loss_mse: 0.103587]
+      [Proposed-A] [Epoch 19/20] [loss_mse: 0.101319]
+      [Proposed-A] [Epoch 20/20] [loss_mse: 0.118128]
+  收敛检测[few_shot:Proposed-A:proposed_a_station58_class2]: 未收敛 (best_epoch=17, best_loss=0.086930, final_loss=0.118128)
+    ✓ 保存(Proposed-A): ./model_fore_station58_extreme2.pth
+
+  极端天气类别 4:
+    样本数: 36
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.065462]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.062927]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.058371]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.058303]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.056794]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.054130]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.053881]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.050596]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.049678]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.047554]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.047125]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.046148]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.044286]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.045214]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.043747]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.042270]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.041006]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.041048]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.040355]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.040012]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class3]: 未收敛 (best_epoch=20, best_loss=0.040012, final_loss=0.040012)
+    ✓ 保存(LMT-new): ./model_fore_station58_extreme3_lmt_new.pth
+      [Extreme-FedAvg] [Epoch 1/20] [loss_mse: 0.167954]
+      [Extreme-FedAvg] [Epoch 2/20] [loss_mse: 0.163538]
+      [Extreme-FedAvg] [Epoch 3/20] [loss_mse: 0.153612]
+      [Extreme-FedAvg] [Epoch 4/20] [loss_mse: 0.156310]
+      [Extreme-FedAvg] [Epoch 5/20] [loss_mse: 0.152413]
+      [Extreme-FedAvg] [Epoch 6/20] [loss_mse: 0.140564]
+      [Extreme-FedAvg] [Epoch 7/20] [loss_mse: 0.139821]
+      [Extreme-FedAvg] [Epoch 8/20] [loss_mse: 0.131543]
+      [Extreme-FedAvg] [Epoch 9/20] [loss_mse: 0.135058]
+      [Extreme-FedAvg] [Epoch 10/20] [loss_mse: 0.128947]
+      [Extreme-FedAvg] [Epoch 11/20] [loss_mse: 0.127878]
+      [Extreme-FedAvg] [Epoch 12/20] [loss_mse: 0.122040]
+      [Extreme-FedAvg] [Epoch 13/20] [loss_mse: 0.119313]
+      [Extreme-FedAvg] [Epoch 14/20] [loss_mse: 0.116392]
+      [Extreme-FedAvg] [Epoch 15/20] [loss_mse: 0.115316]
+      [Extreme-FedAvg] [Epoch 16/20] [loss_mse: 0.109986]
+      [Extreme-FedAvg] [Epoch 17/20] [loss_mse: 0.107777]
+      [Extreme-FedAvg] [Epoch 18/20] [loss_mse: 0.109076]
+      [Extreme-FedAvg] [Epoch 19/20] [loss_mse: 0.100194]
+      [Extreme-FedAvg] [Epoch 20/20] [loss_mse: 0.097454]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station58_class3]: 未收敛 (best_epoch=20, best_loss=0.097454, final_loss=0.097454)
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station58_extreme3_extreme_fedavg.pth
+      [Proposed-A] [Epoch 1/20] [loss_mse: 0.069328]
+      [Proposed-A] [Epoch 2/20] [loss_mse: 0.065921]
+      [Proposed-A] [Epoch 3/20] [loss_mse: 0.066568]
+      [Proposed-A] [Epoch 4/20] [loss_mse: 0.062091]
+      [Proposed-A] [Epoch 5/20] [loss_mse: 0.061155]
+      [Proposed-A] [Epoch 6/20] [loss_mse: 0.060066]
+      [Proposed-A] [Epoch 7/20] [loss_mse: 0.054972]
+      [Proposed-A] [Epoch 8/20] [loss_mse: 0.053287]
+      [Proposed-A] [Epoch 9/20] [loss_mse: 0.052798]
+      [Proposed-A] [Epoch 10/20] [loss_mse: 0.051376]
+      [Proposed-A] [Epoch 11/20] [loss_mse: 0.048769]
+      [Proposed-A] [Epoch 12/20] [loss_mse: 0.047430]
+      [Proposed-A] [Epoch 13/20] [loss_mse: 0.046992]
+      [Proposed-A] [Epoch 14/20] [loss_mse: 0.042773]
+      [Proposed-A] [Epoch 15/20] [loss_mse: 0.044952]
+      [Proposed-A] [Epoch 16/20] [loss_mse: 0.044257]
+      [Proposed-A] [Epoch 17/20] [loss_mse: 0.042440]
+      [Proposed-A] [Epoch 18/20] [loss_mse: 0.041594]
+      [Proposed-A] [Epoch 19/20] [loss_mse: 0.040089]
+      [Proposed-A] [Epoch 20/20] [loss_mse: 0.040867]
+  收敛检测[few_shot:Proposed-A:proposed_a_station58_class3]: 未收敛 (best_epoch=19, best_loss=0.040089, final_loss=0.040867)
+    ✓ 保存(Proposed-A): ./model_fore_station58_extreme3.pth
+
+======================================================================
+场站 59 的Few-shot适应
+======================================================================
+
+  极端天气类别 1:
+    样本数: 7
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.213842]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.205082]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.204710]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.199747]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.198096]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.189631]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.190537]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.179970]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.184770]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.173825]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.178092]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.176195]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.182928]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.163590]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.156544]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.168523]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.171321]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.165606]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.156268]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.168578]
+  收敛检测[few_shot:LMT-new:lmt_new_station59_class0]: 未收敛 (best_epoch=19, best_loss=0.156268, final_loss=0.168578)
+    ✓ 保存(LMT-new): ./model_fore_station59_extreme0_lmt_new.pth
+      [Extreme-FedAvg] [Epoch 1/20] [loss_mse: 0.242824]
+      [Extreme-FedAvg] [Epoch 2/20] [loss_mse: 0.232087]
+      [Extreme-FedAvg] [Epoch 3/20] [loss_mse: 0.217484]
+      [Extreme-FedAvg] [Epoch 4/20] [loss_mse: 0.246244]
+      [Extreme-FedAvg] [Epoch 5/20] [loss_mse: 0.215768]
+      [Extreme-FedAvg] [Epoch 6/20] [loss_mse: 0.231993]
+      [Extreme-FedAvg] [Epoch 7/20] [loss_mse: 0.205480]
+      [Extreme-FedAvg] [Epoch 8/20] [loss_mse: 0.213674]
+      [Extreme-FedAvg] [Epoch 9/20] [loss_mse: 0.207437]
+      [Extreme-FedAvg] [Epoch 10/20] [loss_mse: 0.213685]
+      [Extreme-FedAvg] [Epoch 11/20] [loss_mse: 0.221156]
+      [Extreme-FedAvg] [Epoch 12/20] [loss_mse: 0.204605]
+      [Extreme-FedAvg] [Epoch 13/20] [loss_mse: 0.229433]
+      [Extreme-FedAvg] [Epoch 14/20] [loss_mse: 0.194615]
+      [Extreme-FedAvg] [Epoch 15/20] [loss_mse: 0.207092]
+      [Extreme-FedAvg] [Epoch 16/20] [loss_mse: 0.173240]
+      [Extreme-FedAvg] [Epoch 17/20] [loss_mse: 0.218232]
+      [Extreme-FedAvg] [Epoch 18/20] [loss_mse: 0.192346]
+      [Extreme-FedAvg] [Epoch 19/20] [loss_mse: 0.178948]
+      [Extreme-FedAvg] [Epoch 20/20] [loss_mse: 0.196875]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station59_class0]: 未收敛 (best_epoch=16, best_loss=0.173240, final_loss=0.196875)
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station59_extreme0_extreme_fedavg.pth
+      [Proposed-A] [Epoch 1/20] [loss_mse: 0.244421]
+      [Proposed-A] [Epoch 2/20] [loss_mse: 0.244314]
+      [Proposed-A] [Epoch 3/20] [loss_mse: 0.216023]
+      [Proposed-A] [Epoch 4/20] [loss_mse: 0.213713]
+      [Proposed-A] [Epoch 5/20] [loss_mse: 0.212411]
+      [Proposed-A] [Epoch 6/20] [loss_mse: 0.190831]
+      [Proposed-A] [Epoch 7/20] [loss_mse: 0.212995]
+      [Proposed-A] [Epoch 8/20] [loss_mse: 0.203654]
+      [Proposed-A] [Epoch 9/20] [loss_mse: 0.212063]
+      [Proposed-A] [Epoch 10/20] [loss_mse: 0.200755]
+      [Proposed-A] [Epoch 11/20] [loss_mse: 0.188553]
+      [Proposed-A] [Epoch 12/20] [loss_mse: 0.194034]
+      [Proposed-A] [Epoch 13/20] [loss_mse: 0.202149]
+      [Proposed-A] [Epoch 14/20] [loss_mse: 0.204623]
+      [Proposed-A] [Epoch 15/20] [loss_mse: 0.176579]
+      [Proposed-A] [Epoch 16/20] [loss_mse: 0.184544]
+      [Proposed-A] [Epoch 17/20] [loss_mse: 0.165232]
+      [Proposed-A] [Epoch 18/20] [loss_mse: 0.182607]
+      [Proposed-A] [Epoch 19/20] [loss_mse: 0.164294]
+      [Proposed-A] [Epoch 20/20] [loss_mse: 0.174721]
+  收敛检测[few_shot:Proposed-A:proposed_a_station59_class0]: 未收敛 (best_epoch=19, best_loss=0.164294, final_loss=0.174721)
+    ✓ 保存(Proposed-A): ./model_fore_station59_extreme0.pth
+
+  极端天气类别 2:
+    样本数: 4
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.099499]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.098731]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.091107]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.088518]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.082737]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.078323]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.074087]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.069468]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.063796]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.066181]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.065420]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.054003]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.054168]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.050005]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.048813]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.045549]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.039814]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.038086]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.043425]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.038542]
+  收敛检测[few_shot:LMT-new:lmt_new_station59_class1]: 未收敛 (best_epoch=18, best_loss=0.038086, final_loss=0.038542)
+    ✓ 保存(LMT-new): ./model_fore_station59_extreme1_lmt_new.pth
+      [Extreme-FedAvg] [Epoch 1/20] [loss_mse: 0.075503]
+      [Extreme-FedAvg] [Epoch 2/20] [loss_mse: 0.075657]
+      [Extreme-FedAvg] [Epoch 3/20] [loss_mse: 0.078261]
+      [Extreme-FedAvg] [Epoch 4/20] [loss_mse: 0.067139]
+      [Extreme-FedAvg] [Epoch 5/20] [loss_mse: 0.066214]
+      [Extreme-FedAvg] [Epoch 6/20] [loss_mse: 0.069972]
+      [Extreme-FedAvg] [Epoch 7/20] [loss_mse: 0.063446]
+      [Extreme-FedAvg] [Epoch 8/20] [loss_mse: 0.074332]
+      [Extreme-FedAvg] [Epoch 9/20] [loss_mse: 0.055917]
+      [Extreme-FedAvg] [Epoch 10/20] [loss_mse: 0.065509]
+      [Extreme-FedAvg] [Epoch 11/20] [loss_mse: 0.065439]
+      [Extreme-FedAvg] [Epoch 12/20] [loss_mse: 0.041819]
+      [Extreme-FedAvg] [Epoch 13/20] [loss_mse: 0.053141]
+      [Extreme-FedAvg] [Epoch 14/20] [loss_mse: 0.043001]
+      [Extreme-FedAvg] [Epoch 15/20] [loss_mse: 0.063503]
+      [Extreme-FedAvg] [Epoch 16/20] [loss_mse: 0.048502]
+      [Extreme-FedAvg] [Epoch 17/20] [loss_mse: 0.038221]
+      [Extreme-FedAvg] [Epoch 18/20] [loss_mse: 0.040557]
+      [Extreme-FedAvg] [Epoch 19/20] [loss_mse: 0.040058]
+      [Extreme-FedAvg] [Epoch 20/20] [loss_mse: 0.047622]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station59_class1]: 未收敛 (best_epoch=17, best_loss=0.038221, final_loss=0.047622)
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station59_extreme1_extreme_fedavg.pth
+      [Proposed-A] [Epoch 1/20] [loss_mse: 0.058459]
+      [Proposed-A] [Epoch 2/20] [loss_mse: 0.058189]
+      [Proposed-A] [Epoch 3/20] [loss_mse: 0.048488]
+      [Proposed-A] [Epoch 4/20] [loss_mse: 0.054899]
+      [Proposed-A] [Epoch 5/20] [loss_mse: 0.053812]
+      [Proposed-A] [Epoch 6/20] [loss_mse: 0.062200]
+      [Proposed-A] [Epoch 7/20] [loss_mse: 0.040833]
+      [Proposed-A] [Epoch 8/20] [loss_mse: 0.048953]
+      [Proposed-A] [Epoch 9/20] [loss_mse: 0.046750]
+      [Proposed-A] [Epoch 10/20] [loss_mse: 0.045421]
+      [Proposed-A] [Epoch 11/20] [loss_mse: 0.044231]
+      [Proposed-A] [Epoch 12/20] [loss_mse: 0.036809]
+      [Proposed-A] [Epoch 13/20] [loss_mse: 0.038871]
+      [Proposed-A] [Epoch 14/20] [loss_mse: 0.032167]
+      [Proposed-A] [Epoch 15/20] [loss_mse: 0.033006]
+      [Proposed-A] [Epoch 16/20] [loss_mse: 0.028828]
+      [Proposed-A] [Epoch 17/20] [loss_mse: 0.030837]
+      [Proposed-A] [Epoch 18/20] [loss_mse: 0.029765]
+      [Proposed-A] [Epoch 19/20] [loss_mse: 0.022294]
+      [Proposed-A] [Epoch 20/20] [loss_mse: 0.031284]
+  收敛检测[few_shot:Proposed-A:proposed_a_station59_class1]: 未收敛 (best_epoch=19, best_loss=0.022294, final_loss=0.031284)
+    ✓ 保存(Proposed-A): ./model_fore_station59_extreme1.pth
+
+  极端天气类别 3:
+    样本数: 2
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.137577]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.145496]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.142821]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.131375]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.134146]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.115270]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.127037]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.122217]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.114861]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.109608]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.106250]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.104963]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.118677]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.098326]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.101469]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.085767]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.082807]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.077373]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.060310]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.077944]
+  收敛检测[few_shot:LMT-new:lmt_new_station59_class2]: 未收敛 (best_epoch=19, best_loss=0.060310, final_loss=0.077944)
+    ✓ 保存(LMT-new): ./model_fore_station59_extreme2_lmt_new.pth
+      [Extreme-FedAvg] [Epoch 1/20] [loss_mse: 0.134496]
+      [Extreme-FedAvg] [Epoch 2/20] [loss_mse: 0.108735]
+      [Extreme-FedAvg] [Epoch 3/20] [loss_mse: 0.121660]
+      [Extreme-FedAvg] [Epoch 4/20] [loss_mse: 0.125401]
+      [Extreme-FedAvg] [Epoch 5/20] [loss_mse: 0.109718]
+      [Extreme-FedAvg] [Epoch 6/20] [loss_mse: 0.120436]
+      [Extreme-FedAvg] [Epoch 7/20] [loss_mse: 0.099709]
+      [Extreme-FedAvg] [Epoch 8/20] [loss_mse: 0.093316]
+      [Extreme-FedAvg] [Epoch 9/20] [loss_mse: 0.103134]
+      [Extreme-FedAvg] [Epoch 10/20] [loss_mse: 0.109126]
+      [Extreme-FedAvg] [Epoch 11/20] [loss_mse: 0.110922]
+      [Extreme-FedAvg] [Epoch 12/20] [loss_mse: 0.121724]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station59_class2]: 首次达到收敛条件 @ epoch 13 (best_epoch=8, best_loss=0.093316, final_loss=0.102952)
+      [Extreme-FedAvg] [Epoch 13/20] [loss_mse: 0.102952]
+      [Extreme-FedAvg] [Epoch 14/20] [loss_mse: 0.088396]
+      [Extreme-FedAvg] [Epoch 15/20] [loss_mse: 0.083864]
+      [Extreme-FedAvg] [Epoch 16/20] [loss_mse: 0.110652]
+      [Extreme-FedAvg] [Epoch 17/20] [loss_mse: 0.105395]
+      [Extreme-FedAvg] [Epoch 18/20] [loss_mse: 0.114718]
+      [Extreme-FedAvg] [Epoch 19/20] [loss_mse: 0.089925]
+      [Extreme-FedAvg] [Epoch 20/20] [loss_mse: 0.078523]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station59_class2]: 未收敛 (best_epoch=20, best_loss=0.078523, final_loss=0.078523)
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station59_extreme2_extreme_fedavg.pth
+      [Proposed-A] [Epoch 1/20] [loss_mse: 0.159847]
+      [Proposed-A] [Epoch 2/20] [loss_mse: 0.151628]
+      [Proposed-A] [Epoch 3/20] [loss_mse: 0.144990]
+      [Proposed-A] [Epoch 4/20] [loss_mse: 0.131699]
+      [Proposed-A] [Epoch 5/20] [loss_mse: 0.157103]
+      [Proposed-A] [Epoch 6/20] [loss_mse: 0.133313]
+      [Proposed-A] [Epoch 7/20] [loss_mse: 0.111431]
+      [Proposed-A] [Epoch 8/20] [loss_mse: 0.135370]
+      [Proposed-A] [Epoch 9/20] [loss_mse: 0.123729]
+      [Proposed-A] [Epoch 10/20] [loss_mse: 0.138253]
+      [Proposed-A] [Epoch 11/20] [loss_mse: 0.105527]
+      [Proposed-A] [Epoch 12/20] [loss_mse: 0.114494]
+      [Proposed-A] [Epoch 13/20] [loss_mse: 0.098798]
+      [Proposed-A] [Epoch 14/20] [loss_mse: 0.085188]
+      [Proposed-A] [Epoch 15/20] [loss_mse: 0.081120]
+      [Proposed-A] [Epoch 16/20] [loss_mse: 0.096667]
+      [Proposed-A] [Epoch 17/20] [loss_mse: 0.081756]
+      [Proposed-A] [Epoch 18/20] [loss_mse: 0.083045]
+      [Proposed-A] [Epoch 19/20] [loss_mse: 0.086147]
+      [Proposed-A] [Epoch 20/20] [loss_mse: 0.070759]
+  收敛检测[few_shot:Proposed-A:proposed_a_station59_class2]: 未收敛 (best_epoch=20, best_loss=0.070759, final_loss=0.070759)
+    ✓ 保存(Proposed-A): ./model_fore_station59_extreme2.pth
+
+  极端天气类别 4:
+    样本数: 19
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.106821]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.101277]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.100574]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.098518]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.095631]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.094980]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.089827]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.091384]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.085724]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.088172]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.083378]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.084361]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.083603]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.083432]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.081005]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.083015]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.083023]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.076708]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.079959]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.078862]
+  收敛检测[few_shot:LMT-new:lmt_new_station59_class3]: 未收敛 (best_epoch=18, best_loss=0.076708, final_loss=0.078862)
+    ✓ 保存(LMT-new): ./model_fore_station59_extreme3_lmt_new.pth
+      [Extreme-FedAvg] [Epoch 1/20] [loss_mse: 0.120107]
+      [Extreme-FedAvg] [Epoch 2/20] [loss_mse: 0.116771]
+      [Extreme-FedAvg] [Epoch 3/20] [loss_mse: 0.118150]
+      [Extreme-FedAvg] [Epoch 4/20] [loss_mse: 0.116537]
+      [Extreme-FedAvg] [Epoch 5/20] [loss_mse: 0.112858]
+      [Extreme-FedAvg] [Epoch 6/20] [loss_mse: 0.115610]
+      [Extreme-FedAvg] [Epoch 7/20] [loss_mse: 0.113118]
+      [Extreme-FedAvg] [Epoch 8/20] [loss_mse: 0.108529]
+      [Extreme-FedAvg] [Epoch 9/20] [loss_mse: 0.110836]
+      [Extreme-FedAvg] [Epoch 10/20] [loss_mse: 0.110844]
+      [Extreme-FedAvg] [Epoch 11/20] [loss_mse: 0.102664]
+      [Extreme-FedAvg] [Epoch 12/20] [loss_mse: 0.096920]
+      [Extreme-FedAvg] [Epoch 13/20] [loss_mse: 0.095731]
+      [Extreme-FedAvg] [Epoch 14/20] [loss_mse: 0.099654]
+      [Extreme-FedAvg] [Epoch 15/20] [loss_mse: 0.097975]
+      [Extreme-FedAvg] [Epoch 16/20] [loss_mse: 0.092670]
+      [Extreme-FedAvg] [Epoch 17/20] [loss_mse: 0.096633]
+      [Extreme-FedAvg] [Epoch 18/20] [loss_mse: 0.093593]
+      [Extreme-FedAvg] [Epoch 19/20] [loss_mse: 0.095849]
+      [Extreme-FedAvg] [Epoch 20/20] [loss_mse: 0.089177]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station59_class3]: 未收敛 (best_epoch=20, best_loss=0.089177, final_loss=0.089177)
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station59_extreme3_extreme_fedavg.pth
+      [Proposed-A] [Epoch 1/20] [loss_mse: 0.108719]
+      [Proposed-A] [Epoch 2/20] [loss_mse: 0.105542]
+      [Proposed-A] [Epoch 3/20] [loss_mse: 0.103262]
+      [Proposed-A] [Epoch 4/20] [loss_mse: 0.102553]
+      [Proposed-A] [Epoch 5/20] [loss_mse: 0.093971]
+      [Proposed-A] [Epoch 6/20] [loss_mse: 0.095936]
+      [Proposed-A] [Epoch 7/20] [loss_mse: 0.093817]
+      [Proposed-A] [Epoch 8/20] [loss_mse: 0.096894]
+      [Proposed-A] [Epoch 9/20] [loss_mse: 0.098003]
+      [Proposed-A] [Epoch 10/20] [loss_mse: 0.092081]
+      [Proposed-A] [Epoch 11/20] [loss_mse: 0.084771]
+      [Proposed-A] [Epoch 12/20] [loss_mse: 0.085592]
+      [Proposed-A] [Epoch 13/20] [loss_mse: 0.088449]
+      [Proposed-A] [Epoch 14/20] [loss_mse: 0.085663]
+      [Proposed-A] [Epoch 15/20] [loss_mse: 0.082462]
+      [Proposed-A] [Epoch 16/20] [loss_mse: 0.081797]
+      [Proposed-A] [Epoch 17/20] [loss_mse: 0.083894]
+      [Proposed-A] [Epoch 18/20] [loss_mse: 0.083133]
+      [Proposed-A] [Epoch 19/20] [loss_mse: 0.081961]
+      [Proposed-A] [Epoch 20/20] [loss_mse: 0.083611]
+  收敛检测[few_shot:Proposed-A:proposed_a_station59_class3]: 未收敛 (best_epoch=16, best_loss=0.081797, final_loss=0.083611)
+    ✓ 保存(Proposed-A): ./model_fore_station59_extreme3.pth
+
+======================================================================
+场站 60 的Few-shot适应
+======================================================================
+
+  极端天气类别 1:
+    样本数: 5
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.230559]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.228473]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.218893]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.210042]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.213392]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.206416]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.202014]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.209935]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.195896]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.182345]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.182854]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.185678]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.170103]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.168521]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.166776]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.168161]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.163097]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.166650]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.155251]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.158462]
+  收敛检测[few_shot:LMT-new:lmt_new_station60_class0]: 未收敛 (best_epoch=19, best_loss=0.155251, final_loss=0.158462)
+    ✓ 保存(LMT-new): ./model_fore_station60_extreme0_lmt_new.pth
+      [Extreme-FedAvg] [Epoch 1/20] [loss_mse: 0.222334]
+      [Extreme-FedAvg] [Epoch 2/20] [loss_mse: 0.213610]
+      [Extreme-FedAvg] [Epoch 3/20] [loss_mse: 0.232779]
+      [Extreme-FedAvg] [Epoch 4/20] [loss_mse: 0.219899]
+      [Extreme-FedAvg] [Epoch 5/20] [loss_mse: 0.205929]
+      [Extreme-FedAvg] [Epoch 6/20] [loss_mse: 0.208611]
+      [Extreme-FedAvg] [Epoch 7/20] [loss_mse: 0.206527]
+      [Extreme-FedAvg] [Epoch 8/20] [loss_mse: 0.190288]
+      [Extreme-FedAvg] [Epoch 9/20] [loss_mse: 0.200190]
+      [Extreme-FedAvg] [Epoch 10/20] [loss_mse: 0.185446]
+      [Extreme-FedAvg] [Epoch 11/20] [loss_mse: 0.202969]
+      [Extreme-FedAvg] [Epoch 12/20] [loss_mse: 0.172961]
+      [Extreme-FedAvg] [Epoch 13/20] [loss_mse: 0.188681]
+      [Extreme-FedAvg] [Epoch 14/20] [loss_mse: 0.200650]
+      [Extreme-FedAvg] [Epoch 15/20] [loss_mse: 0.205306]
+      [Extreme-FedAvg] [Epoch 16/20] [loss_mse: 0.172456]
+      [Extreme-FedAvg] [Epoch 17/20] [loss_mse: 0.176050]
+      [Extreme-FedAvg] [Epoch 18/20] [loss_mse: 0.161733]
+      [Extreme-FedAvg] [Epoch 19/20] [loss_mse: 0.186783]
+      [Extreme-FedAvg] [Epoch 20/20] [loss_mse: 0.186359]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station60_class0]: 未收敛 (best_epoch=18, best_loss=0.161733, final_loss=0.186359)
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station60_extreme0_extreme_fedavg.pth
+      [Proposed-A] [Epoch 1/20] [loss_mse: 0.196973]
+      [Proposed-A] [Epoch 2/20] [loss_mse: 0.189277]
+      [Proposed-A] [Epoch 3/20] [loss_mse: 0.195665]
+      [Proposed-A] [Epoch 4/20] [loss_mse: 0.200238]
+      [Proposed-A] [Epoch 5/20] [loss_mse: 0.171886]
+      [Proposed-A] [Epoch 6/20] [loss_mse: 0.172355]
+      [Proposed-A] [Epoch 7/20] [loss_mse: 0.175554]
+      [Proposed-A] [Epoch 8/20] [loss_mse: 0.161792]
+      [Proposed-A] [Epoch 9/20] [loss_mse: 0.165236]
+      [Proposed-A] [Epoch 10/20] [loss_mse: 0.155870]
+      [Proposed-A] [Epoch 11/20] [loss_mse: 0.161792]
+      [Proposed-A] [Epoch 12/20] [loss_mse: 0.145244]
+      [Proposed-A] [Epoch 13/20] [loss_mse: 0.145937]
+      [Proposed-A] [Epoch 14/20] [loss_mse: 0.135351]
+      [Proposed-A] [Epoch 15/20] [loss_mse: 0.146203]
+      [Proposed-A] [Epoch 16/20] [loss_mse: 0.128831]
+      [Proposed-A] [Epoch 17/20] [loss_mse: 0.142968]
+      [Proposed-A] [Epoch 18/20] [loss_mse: 0.139534]
+      [Proposed-A] [Epoch 19/20] [loss_mse: 0.130871]
+      [Proposed-A] [Epoch 20/20] [loss_mse: 0.126556]
+  收敛检测[few_shot:Proposed-A:proposed_a_station60_class0]: 未收敛 (best_epoch=20, best_loss=0.126556, final_loss=0.126556)
+    ✓ 保存(Proposed-A): ./model_fore_station60_extreme0.pth
+
+  极端天气类别 2:
+    样本数: 3
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.044160]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.041603]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.036243]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.035249]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.041379]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.035940]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.034460]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.033962]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.025223]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.025023]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.027829]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.024647]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.024318]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.023139]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.026202]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.023246]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.022324]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.017621]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.017784]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.020378]
+  收敛检测[few_shot:LMT-new:lmt_new_station60_class1]: 未收敛 (best_epoch=18, best_loss=0.017621, final_loss=0.020378)
+    ✓ 保存(LMT-new): ./model_fore_station60_extreme1_lmt_new.pth
+      [Extreme-FedAvg] [Epoch 1/20] [loss_mse: 0.042567]
+      [Extreme-FedAvg] [Epoch 2/20] [loss_mse: 0.053432]
+      [Extreme-FedAvg] [Epoch 3/20] [loss_mse: 0.061039]
+      [Extreme-FedAvg] [Epoch 4/20] [loss_mse: 0.067998]
+      [Extreme-FedAvg] [Epoch 5/20] [loss_mse: 0.059900]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station60_class1]: 首次达到收敛条件 @ epoch 6 (best_epoch=1, best_loss=0.042567, final_loss=0.043248)
+      [Extreme-FedAvg] [Epoch 6/20] [loss_mse: 0.043248]
+      [Extreme-FedAvg] [Epoch 7/20] [loss_mse: 0.042348]
+      [Extreme-FedAvg] [Epoch 8/20] [loss_mse: 0.043879]
+      [Extreme-FedAvg] [Epoch 9/20] [loss_mse: 0.051154]
+      [Extreme-FedAvg] [Epoch 10/20] [loss_mse: 0.042666]
+      [Extreme-FedAvg] [Epoch 11/20] [loss_mse: 0.045129]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station60_class1]: 首次达到收敛条件 @ epoch 12 (best_epoch=7, best_loss=0.042348, final_loss=0.044853)
+      [Extreme-FedAvg] [Epoch 12/20] [loss_mse: 0.044853]
+      [Extreme-FedAvg] [Epoch 13/20] [loss_mse: 0.042485]
+      [Extreme-FedAvg] [Epoch 14/20] [loss_mse: 0.047412]
+      [Extreme-FedAvg] [Epoch 15/20] [loss_mse: 0.037741]
+      [Extreme-FedAvg] [Epoch 16/20] [loss_mse: 0.044541]
+      [Extreme-FedAvg] [Epoch 17/20] [loss_mse: 0.030984]
+      [Extreme-FedAvg] [Epoch 18/20] [loss_mse: 0.037724]
+      [Extreme-FedAvg] [Epoch 19/20] [loss_mse: 0.037322]
+      [Extreme-FedAvg] [Epoch 20/20] [loss_mse: 0.026838]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station60_class1]: 未收敛 (best_epoch=20, best_loss=0.026838, final_loss=0.026838)
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station60_extreme1_extreme_fedavg.pth
+      [Proposed-A] [Epoch 1/20] [loss_mse: 0.034078]
+      [Proposed-A] [Epoch 2/20] [loss_mse: 0.043956]
+      [Proposed-A] [Epoch 3/20] [loss_mse: 0.036662]
+      [Proposed-A] [Epoch 4/20] [loss_mse: 0.049657]
+      [Proposed-A] [Epoch 5/20] [loss_mse: 0.042904]
+      [Proposed-A] [Epoch 6/20] [loss_mse: 0.032954]
+      [Proposed-A] [Epoch 7/20] [loss_mse: 0.040225]
+      [Proposed-A] [Epoch 8/20] [loss_mse: 0.035840]
+      [Proposed-A] [Epoch 9/20] [loss_mse: 0.032051]
+      [Proposed-A] [Epoch 10/20] [loss_mse: 0.033169]
+      [Proposed-A] [Epoch 11/20] [loss_mse: 0.031948]
+      [Proposed-A] [Epoch 12/20] [loss_mse: 0.031241]
+      [Proposed-A] [Epoch 13/20] [loss_mse: 0.028000]
+      [Proposed-A] [Epoch 14/20] [loss_mse: 0.027388]
+      [Proposed-A] [Epoch 15/20] [loss_mse: 0.022492]
+      [Proposed-A] [Epoch 16/20] [loss_mse: 0.028553]
+      [Proposed-A] [Epoch 17/20] [loss_mse: 0.018707]
+      [Proposed-A] [Epoch 18/20] [loss_mse: 0.028737]
+      [Proposed-A] [Epoch 19/20] [loss_mse: 0.023380]
+      [Proposed-A] [Epoch 20/20] [loss_mse: 0.024043]
+  收敛检测[few_shot:Proposed-A:proposed_a_station60_class1]: 未收敛 (best_epoch=17, best_loss=0.018707, final_loss=0.024043)
+    ✓ 保存(Proposed-A): ./model_fore_station60_extreme1.pth
+
+  极端天气类别 3:
+    样本数: 1
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.250622]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.247757]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.227158]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.233684]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.223487]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.225977]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.211109]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.187764]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.187355]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.187282]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.190791]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.180250]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.195487]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.170565]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.148625]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.157899]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.170378]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.161387]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.148705]
+  收敛检测[few_shot:LMT-new:lmt_new_station60_class2]: 首次达到收敛条件 @ epoch 20 (best_epoch=15, best_loss=0.148625, final_loss=0.161689)
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.161689]
+  收敛检测[few_shot:LMT-new:lmt_new_station60_class2]: 已收敛 @ epoch 20 (best_epoch=15, best_loss=0.148625, final_loss=0.161689)
+    ✓ 保存(LMT-new): ./model_fore_station60_extreme2_lmt_new.pth
+      [Extreme-FedAvg] [Epoch 1/20] [loss_mse: 0.236821]
+      [Extreme-FedAvg] [Epoch 2/20] [loss_mse: 0.205230]
+      [Extreme-FedAvg] [Epoch 3/20] [loss_mse: 0.195857]
+      [Extreme-FedAvg] [Epoch 4/20] [loss_mse: 0.212465]
+      [Extreme-FedAvg] [Epoch 5/20] [loss_mse: 0.194162]
+      [Extreme-FedAvg] [Epoch 6/20] [loss_mse: 0.175730]
+      [Extreme-FedAvg] [Epoch 7/20] [loss_mse: 0.196905]
+      [Extreme-FedAvg] [Epoch 8/20] [loss_mse: 0.208963]
+      [Extreme-FedAvg] [Epoch 9/20] [loss_mse: 0.173081]
+      [Extreme-FedAvg] [Epoch 10/20] [loss_mse: 0.193843]
+      [Extreme-FedAvg] [Epoch 11/20] [loss_mse: 0.121212]
+      [Extreme-FedAvg] [Epoch 12/20] [loss_mse: 0.176765]
+      [Extreme-FedAvg] [Epoch 13/20] [loss_mse: 0.154813]
+      [Extreme-FedAvg] [Epoch 14/20] [loss_mse: 0.179115]
+      [Extreme-FedAvg] [Epoch 15/20] [loss_mse: 0.174006]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station60_class2]: 首次达到收敛条件 @ epoch 16 (best_epoch=11, best_loss=0.121212, final_loss=0.159917)
+      [Extreme-FedAvg] [Epoch 16/20] [loss_mse: 0.159917]
+      [Extreme-FedAvg] [Epoch 17/20] [loss_mse: 0.179319]
+      [Extreme-FedAvg] [Epoch 18/20] [loss_mse: 0.152743]
+      [Extreme-FedAvg] [Epoch 19/20] [loss_mse: 0.124912]
+      [Extreme-FedAvg] [Epoch 20/20] [loss_mse: 0.129557]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station60_class2]: 已收敛 @ epoch 16 (best_epoch=11, best_loss=0.121212, final_loss=0.129557)
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station60_extreme2_extreme_fedavg.pth
+      [Proposed-A] [Epoch 1/20] [loss_mse: 0.179015]
+      [Proposed-A] [Epoch 2/20] [loss_mse: 0.181401]
+      [Proposed-A] [Epoch 3/20] [loss_mse: 0.185429]
+      [Proposed-A] [Epoch 4/20] [loss_mse: 0.179468]
+      [Proposed-A] [Epoch 5/20] [loss_mse: 0.200520]
+      [Proposed-A] [Epoch 6/20] [loss_mse: 0.164350]
+      [Proposed-A] [Epoch 7/20] [loss_mse: 0.166287]
+      [Proposed-A] [Epoch 8/20] [loss_mse: 0.172094]
+      [Proposed-A] [Epoch 9/20] [loss_mse: 0.103741]
+      [Proposed-A] [Epoch 10/20] [loss_mse: 0.164429]
+      [Proposed-A] [Epoch 11/20] [loss_mse: 0.126565]
+      [Proposed-A] [Epoch 12/20] [loss_mse: 0.133556]
+      [Proposed-A] [Epoch 13/20] [loss_mse: 0.128224]
+  收敛检测[few_shot:Proposed-A:proposed_a_station60_class2]: 首次达到收敛条件 @ epoch 14 (best_epoch=9, best_loss=0.103741, final_loss=0.113951)
+      [Proposed-A] [Epoch 14/20] [loss_mse: 0.113951]
+      [Proposed-A] [Epoch 15/20] [loss_mse: 0.107215]
+      [Proposed-A] [Epoch 16/20] [loss_mse: 0.123554]
+      [Proposed-A] [Epoch 17/20] [loss_mse: 0.141498]
+      [Proposed-A] [Epoch 18/20] [loss_mse: 0.130766]
+      [Proposed-A] [Epoch 19/20] [loss_mse: 0.128539]
+      [Proposed-A] [Epoch 20/20] [loss_mse: 0.124671]
+  收敛检测[few_shot:Proposed-A:proposed_a_station60_class2]: 已收敛 @ epoch 14 (best_epoch=9, best_loss=0.103741, final_loss=0.124671)
+    ✓ 保存(Proposed-A): ./model_fore_station60_extreme2.pth
+
+  极端天气类别 4:
+    样本数: 28
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.093486]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.088845]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.089656]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.087651]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.082027]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.079504]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.076741]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.075277]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.073105]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.071955]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.069061]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.067159]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.066415]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.063527]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.063540]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.061804]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.061880]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.058501]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.058309]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.057303]
+  收敛检测[few_shot:LMT-new:lmt_new_station60_class3]: 未收敛 (best_epoch=20, best_loss=0.057303, final_loss=0.057303)
+    ✓ 保存(LMT-new): ./model_fore_station60_extreme3_lmt_new.pth
+      [Extreme-FedAvg] [Epoch 1/20] [loss_mse: 0.151736]
+      [Extreme-FedAvg] [Epoch 2/20] [loss_mse: 0.155019]
+      [Extreme-FedAvg] [Epoch 3/20] [loss_mse: 0.146829]
+      [Extreme-FedAvg] [Epoch 4/20] [loss_mse: 0.141807]
+      [Extreme-FedAvg] [Epoch 5/20] [loss_mse: 0.132994]
+      [Extreme-FedAvg] [Epoch 6/20] [loss_mse: 0.135632]
+      [Extreme-FedAvg] [Epoch 7/20] [loss_mse: 0.131496]
+      [Extreme-FedAvg] [Epoch 8/20] [loss_mse: 0.122013]
+      [Extreme-FedAvg] [Epoch 9/20] [loss_mse: 0.127419]
+      [Extreme-FedAvg] [Epoch 10/20] [loss_mse: 0.117099]
+      [Extreme-FedAvg] [Epoch 11/20] [loss_mse: 0.116760]
+      [Extreme-FedAvg] [Epoch 12/20] [loss_mse: 0.112474]
+      [Extreme-FedAvg] [Epoch 13/20] [loss_mse: 0.111630]
+      [Extreme-FedAvg] [Epoch 14/20] [loss_mse: 0.107132]
+      [Extreme-FedAvg] [Epoch 15/20] [loss_mse: 0.104707]
+      [Extreme-FedAvg] [Epoch 16/20] [loss_mse: 0.101080]
+      [Extreme-FedAvg] [Epoch 17/20] [loss_mse: 0.103709]
+      [Extreme-FedAvg] [Epoch 18/20] [loss_mse: 0.103719]
+      [Extreme-FedAvg] [Epoch 19/20] [loss_mse: 0.090266]
+      [Extreme-FedAvg] [Epoch 20/20] [loss_mse: 0.100227]
+  收敛检测[few_shot:Extreme-FedAvg:extreme_fedavg_station60_class3]: 未收敛 (best_epoch=19, best_loss=0.090266, final_loss=0.100227)
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station60_extreme3_extreme_fedavg.pth
+      [Proposed-A] [Epoch 1/20] [loss_mse: 0.137936]
+      [Proposed-A] [Epoch 2/20] [loss_mse: 0.128862]
+      [Proposed-A] [Epoch 3/20] [loss_mse: 0.130801]
+      [Proposed-A] [Epoch 4/20] [loss_mse: 0.124239]
+      [Proposed-A] [Epoch 5/20] [loss_mse: 0.120678]
+      [Proposed-A] [Epoch 6/20] [loss_mse: 0.121849]
+      [Proposed-A] [Epoch 7/20] [loss_mse: 0.109560]
+      [Proposed-A] [Epoch 8/20] [loss_mse: 0.106634]
+      [Proposed-A] [Epoch 9/20] [loss_mse: 0.107577]
+      [Proposed-A] [Epoch 10/20] [loss_mse: 0.102326]
+      [Proposed-A] [Epoch 11/20] [loss_mse: 0.099775]
+      [Proposed-A] [Epoch 12/20] [loss_mse: 0.098296]
+      [Proposed-A] [Epoch 13/20] [loss_mse: 0.096779]
+      [Proposed-A] [Epoch 14/20] [loss_mse: 0.093517]
+      [Proposed-A] [Epoch 15/20] [loss_mse: 0.092088]
+      [Proposed-A] [Epoch 16/20] [loss_mse: 0.089721]
+      [Proposed-A] [Epoch 17/20] [loss_mse: 0.084289]
+      [Proposed-A] [Epoch 18/20] [loss_mse: 0.082287]
+      [Proposed-A] [Epoch 19/20] [loss_mse: 0.081570]
+      [Proposed-A] [Epoch 20/20] [loss_mse: 0.078974]
+  收敛检测[few_shot:Proposed-A:proposed_a_station60_class3]: 未收敛 (best_epoch=20, best_loss=0.078974, final_loss=0.078974)
+    ✓ 保存(Proposed-A): ./model_fore_station60_extreme3.pth
+
+✓ Few-shot训练完成，生成了 36 个个性化模型
+
+======================================================================
+阶段: eval
+  生成所有场站的测试预测结果
+======================================================================
+
+场站 58 预测:
+  ✓ 极端类别1
+  ✓ 极端类别2
+  ✓ 极端类别3
+  ✓ 极端类别4
+  ✓ 元学习模型
+  ✓ 本地预训练模型
+  ✓ 联邦预训练模型
+
+场站 59 预测:
+  ✓ 极端类别1
+  ✓ 极端类别2
+  ✓ 极端类别3
+  ✓ 极端类别4
+  ✓ 元学习模型
+  ✓ 本地预训练模型
+  ✓ 联邦预训练模型
+
+场站 60 预测:
+  ✓ 极端类别1
+  ✓ 极端类别2
+  ✓ 极端类别3
+  ✓ 极端类别4
+  ✓ 元学习模型
+  ✓ 本地预训练模型
+  ✓ 联邦预训练模型
+
+保存所有场站测试结果...
+✓ 已保存: all_stations_test_results.mat
+✓ 收敛检测报告已保存: training_convergence_report.json
+
+======================================================================
+✓✓✓ 训练和测试全部完成！
+生成的模型: 36个个性化模型（Proposed+Local_Meta_Transfer+Transfer_Learning） + 2类元模型 + 联邦/本地预训练模型
+======================================================================
+
+======================================================================
+stage=eval
+env  YEARLY_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_ENABLED=0 YEARLY_PROTOCOL_METADATA_PATH=/root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json USE_FEDERATION=1 TRAIN_META_ONLY_BASELINE=0 META_SUPPORT_SHOTS=10 META_QUERY_SHOTS=10 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=2000 PROPOSED_META_EPOCHS=2000 META_ONLY_META_EPOCHS=2000 FEW_SHOT_EPOCHS=20 PRETRAIN_LOG_INTERVAL=100 META_LOG_INTERVAL=100 FEW_SHOT_LOG_INTERVAL=1
+exec /root/miniconda3/bin/python -u generate_multi_station_results.py
+======================================================================
+
+libgomp: Invalid value for environment variable OMP_NUM_THREADS
+======================================================================
+生成多场站测试结果CSV
+======================================================================
+
+检测到 yearly protocol 模式，切换为逐 (station_id, extreme_class) 任务导出。
+
+station 58:
+
+station 59:
+
+station 60:
+
+======================================================================
+✓✓✓ yearly extreme protocol 结果已生成
+======================================================================
+输出文件: multi_station_performance.csv
+任务行数: 36
+station_id source_station_id extreme_class          Model  support_windows  test_windows  Samples  nMAE_%  nRMSE_%    WD_%  R_p<0.05_%
+        58               058     high_wind        LMT-new                8             9        9 56.3401  58.6803 54.7241     88.8889
+        58               058     high_wind Extreme-FedAvg                8             9        9 53.7811  57.6078 49.2227     88.8889
+        58               058     high_wind     Proposed-A                8             9        9 55.5599  57.8743 53.2676     88.8889
+        58               058     high_temp        LMT-new                1             5        5 21.6243  23.2417 20.8387    100.0000
+        58               058     high_temp Extreme-FedAvg                1             5        5 23.9269  28.3336 22.3834     80.0000
+        58               058     high_temp     Proposed-A                1             5        5 20.2197  22.3399 19.2403     80.0000
+        58               058     cold_wave        LMT-new                1             4        4 43.7889  47.2523 34.9070     75.0000
+        58               058     cold_wave Extreme-FedAvg                1             4        4 47.3592  53.7592 32.9705     75.0000
+        58               058     cold_wave     Proposed-A                1             4        4 44.2656  47.5710 35.9825     75.0000
+        58               058         frost        LMT-new               36            13       13 20.0103  23.3931 19.2502     76.9231
+        58               058         frost Extreme-FedAvg               36            13       13 24.5446  28.8762 19.1733     53.8462
+        58               058         frost     Proposed-A               36            13       13 19.6298  23.2434 17.9065     76.9231
+        59               059     high_wind        LMT-new                7             7        7 30.0197  36.1521 26.2374     85.7143
+        59               059     high_wind Extreme-FedAvg                7             7        7 34.2428  41.5598 28.8323     57.1429
+        59               059     high_wind     Proposed-A                7             7        7 33.8243  38.8794 31.6137     85.7143
+        59               059     high_temp        LMT-new                4             7        7 20.7533  23.2159 16.4260     42.8571
+        59               059     high_temp Extreme-FedAvg                4             7        7 22.7611  26.9731 16.4015     28.5714
+        59               059     high_temp     Proposed-A                4             7        7 21.0631  23.9067 16.1537     28.5714
+        59               059     cold_wave        LMT-new                2             5        5 32.4578  36.6120 30.3046    100.0000
+        59               059     cold_wave Extreme-FedAvg                2             5        5 34.5402  40.1416 31.8744    100.0000
+        59               059     cold_wave     Proposed-A                2             5        5 36.3160  39.0874 34.2752    100.0000
+        59               059         frost        LMT-new               19            13       13 19.9458  23.2241 18.5786     53.8462
+        59               059         frost Extreme-FedAvg               19            13       13 18.1072  21.8737 15.8503     46.1538
+        59               059         frost     Proposed-A               19            13       13 18.9420  22.1537 17.4020     53.8462
+        60               060     high_wind        LMT-new                5             8        8 38.2169  42.6042 29.5701     37.5000
+        60               060     high_wind Extreme-FedAvg                5             8        8 40.2593  46.5644 27.4305     37.5000
+        60               060     high_wind     Proposed-A                5             8        8 36.6958  40.7471 29.0965     37.5000
+        60               060     high_temp        LMT-new                3             8        8 23.5896  26.0842 22.6924     62.5000
+        60               060     high_temp Extreme-FedAvg                3             8        8 23.5996  27.2045 20.7888     37.5000
+        60               060     high_temp     Proposed-A                3             8        8 22.9488  26.0090 21.5704     50.0000
+        60               060     cold_wave        LMT-new                1             4        4 44.6045  48.5818 35.9634     75.0000
+        60               060     cold_wave Extreme-FedAvg                1             4        4 44.3238  50.2918 30.6328     50.0000
+        60               060     cold_wave     Proposed-A                1             4        4 41.2231  45.0224 32.3947     75.0000
+        60               060         frost        LMT-new               28            10       10 23.8579  28.6767 21.2257     60.0000
+        60               060         frost Extreme-FedAvg               28            10       10 22.3187  26.9979 18.1588     30.0000
+        60               060         frost     Proposed-A               28            10       10 22.0605  26.4559 19.4456     50.0000

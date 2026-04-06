@@ -1,0 +1,2407 @@
+
+======================================================================
+stage=build
+env  YEARLY_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_ENABLED=0 YEARLY_PROTOCOL_METADATA_PATH=/root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json USE_FEDERATION=1 RUN_FEDERATED_PRETRAIN=0 TRAIN_META_ONLY_BASELINE=0 META_SUPPORT_SHOTS=10 META_QUERY_SHOTS=10 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=2000 PROPOSED_META_EPOCHS=2000 META_ONLY_META_EPOCHS=2000 FEW_SHOT_EPOCHS=20 PRETRAIN_LOG_INTERVAL=100 META_LOG_INTERVAL=100 FEW_SHOT_LOG_INTERVAL=1
+exec /root/miniconda3/bin/python -u build_three_station_extreme_yearly_protocol.py
+======================================================================
+station 58: support_windows={'high_wind': 8, 'high_temp': 1, 'cold_wave': 1, 'frost': 36}, test_windows={'high_wind': 9, 'high_temp': 5, 'cold_wave': 4, 'frost': 13}
+station 59: support_windows={'high_wind': 7, 'high_temp': 4, 'cold_wave': 2, 'frost': 19}, test_windows={'high_wind': 7, 'high_temp': 7, 'cold_wave': 5, 'frost': 13}
+station 60: support_windows={'high_wind': 5, 'high_temp': 3, 'cold_wave': 1, 'frost': 28}, test_windows={'high_wind': 8, 'high_temp': 8, 'cold_wave': 4, 'frost': 10}
+saved yearly protocol metadata: /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json
+
+======================================================================
+stage=train
+env  YEARLY_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_ENABLED=0 YEARLY_PROTOCOL_METADATA_PATH=/root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json USE_FEDERATION=1 RUN_FEDERATED_PRETRAIN=0 TRAIN_META_ONLY_BASELINE=0 META_SUPPORT_SHOTS=10 META_QUERY_SHOTS=10 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=2000 PROPOSED_META_EPOCHS=2000 META_ONLY_META_EPOCHS=2000 FEW_SHOT_EPOCHS=20 PRETRAIN_LOG_INTERVAL=100 META_LOG_INTERVAL=100 FEW_SHOT_LOG_INTERVAL=1
+exec /root/miniconda3/bin/python -u DemoModelTraining.py
+======================================================================
+
+======================================================================
+运行配置
+  sampler_mode=balanced
+  regime_missing_mode=none
+  pretrain_log_interval=100
+  meta_log_interval=100
+  few_shot_log_interval=1
+======================================================================
+Phase 2 Proposed sampler mode: balanced
+Regime-missing mode: none
+Yearly protocol enabled: /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json
+META_SUPPORT_SHOTS=10, META_QUERY_SHOTS=10
+
+======================================================================
+数据协议: yearly extreme protocol
+  加载3个yearly实验场站
+======================================================================
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/58wf_yearly_protocol.mat...
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/59wf_yearly_protocol.mat...
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/60wf_yearly_protocol.mat...
+
+======================================================================
+阶段: data_preparation
+  准备所有场站的完整数据（元训练+极端天气+测试集）
+======================================================================
+
+准备联邦客户端数据（常规天气）...
+  处理场站 58...
+    shape: (1, 8172, 5) → (1, 8172, 1)
+  处理场站 59...
+    shape: (1, 8354, 5) → (1, 8354, 1)
+  处理场站 60...
+    shape: (1, 8297, 5) → (1, 8297, 1)
+  总数据量: 24823 样本
+
+准备所有场站的元训练和测试数据（3场站一视同仁）...
+
+  场站 58:
+    测试集2023: (730, 12, 1)
+    聚类类别: 10类
+    极端天气: 4类
+
+  场站 59:
+    测试集2023: (730, 12, 1)
+    聚类类别: 10类
+    极端天气: 4类
+
+  场站 60:
+    测试集2023: (730, 12, 1)
+    聚类类别: 10类
+    极端天气: 4类
+
+✓ 所有场站数据准备完成！
+
+======================================================================
+阶段: federated_pretrain_skipped
+  reason=yearly clean ablation uses common local_pretrain + common local_meta backbone
+  stations=58, 59, 60
+======================================================================
+跳过联邦预训练；yearly clean ablation 不使用 federated pretrain 初始化。
+
+======================================================================
+阶段: local_pretrain
+  station_id=58
+  epochs=2000
+  log_interval=100
+======================================================================
+  [local_pretrain:station58] [Epoch 1/2000] [loss_mse: 0.182613]
+  [local_pretrain:station58] [Epoch 2/2000] [loss_mse: 0.181797]
+  [local_pretrain:station58] [Epoch 3/2000] [loss_mse: 0.181405]
+  [local_pretrain:station58] [Epoch 4/2000] [loss_mse: 0.181054]
+  [local_pretrain:station58] [Epoch 5/2000] [loss_mse: 0.180101]
+  [local_pretrain:station58] [Epoch 6/2000] [loss_mse: 0.179795]
+  [local_pretrain:station58] [Epoch 7/2000] [loss_mse: 0.179469]
+  [local_pretrain:station58] [Epoch 8/2000] [loss_mse: 0.178819]
+  [local_pretrain:station58] [Epoch 9/2000] [loss_mse: 0.178371]
+  [local_pretrain:station58] [Epoch 10/2000] [loss_mse: 0.177734]
+  [local_pretrain:station58] [Epoch 100/2000] [loss_mse: 0.109592]
+  [local_pretrain:station58] [Epoch 200/2000] [loss_mse: 0.050895]
+  [local_pretrain:station58] [Epoch 300/2000] [loss_mse: 0.045533]
+  [local_pretrain:station58] [Epoch 400/2000] [loss_mse: 0.042368]
+  [local_pretrain:station58] [Epoch 500/2000] [loss_mse: 0.039775]
+  [local_pretrain:station58] [Epoch 600/2000] [loss_mse: 0.036973]
+  [local_pretrain:station58] [Epoch 700/2000] [loss_mse: 0.036784]
+  [local_pretrain:station58] [Epoch 800/2000] [loss_mse: 0.034922]
+  [local_pretrain:station58] [Epoch 900/2000] [loss_mse: 0.034778]
+  [local_pretrain:station58] [Epoch 1000/2000] [loss_mse: 0.032431]
+  [local_pretrain:station58] [Epoch 1100/2000] [loss_mse: 0.031149]
+  [local_pretrain:station58] [Epoch 1200/2000] [loss_mse: 0.029445]
+  [local_pretrain:station58] [Epoch 1300/2000] [loss_mse: 0.029321]
+  [local_pretrain:station58] [Epoch 1400/2000] [loss_mse: 0.027873]
+  [local_pretrain:station58] [Epoch 1500/2000] [loss_mse: 0.026412]
+  [local_pretrain:station58] [Epoch 1600/2000] [loss_mse: 0.025306]
+  [local_pretrain:station58] [Epoch 1700/2000] [loss_mse: 0.024428]
+  [local_pretrain:station58] [Epoch 1800/2000] [loss_mse: 0.024162]
+  [local_pretrain:station58] [Epoch 1900/2000] [loss_mse: 0.023164]
+  [local_pretrain:station58] [Epoch 2000/2000] [loss_mse: 0.023124]
+  收敛检测[local_pretrain:station58]: 未收敛 (best_epoch=1988, best_loss=0.022278, final_loss=0.023124)
+✓ 场站 58 本地 conventional pretrain 完成: model_fore_pre_station58_local.pth
+
+======================================================================
+阶段: local_pretrain
+  station_id=59
+  epochs=2000
+  log_interval=100
+======================================================================
+  [local_pretrain:station59] [Epoch 1/2000] [loss_mse: 0.244784]
+  [local_pretrain:station59] [Epoch 2/2000] [loss_mse: 0.244033]
+  [local_pretrain:station59] [Epoch 3/2000] [loss_mse: 0.243207]
+  [local_pretrain:station59] [Epoch 4/2000] [loss_mse: 0.242629]
+  [local_pretrain:station59] [Epoch 5/2000] [loss_mse: 0.242172]
+  [local_pretrain:station59] [Epoch 6/2000] [loss_mse: 0.240756]
+  [local_pretrain:station59] [Epoch 7/2000] [loss_mse: 0.240462]
+  [local_pretrain:station59] [Epoch 8/2000] [loss_mse: 0.239827]
+  [local_pretrain:station59] [Epoch 9/2000] [loss_mse: 0.239156]
+  [local_pretrain:station59] [Epoch 10/2000] [loss_mse: 0.238753]
+  [local_pretrain:station59] [Epoch 100/2000] [loss_mse: 0.135570]
+  [local_pretrain:station59] [Epoch 200/2000] [loss_mse: 0.064070]
+  [local_pretrain:station59] [Epoch 300/2000] [loss_mse: 0.054610]
+  [local_pretrain:station59] [Epoch 400/2000] [loss_mse: 0.050065]
+  [local_pretrain:station59] [Epoch 500/2000] [loss_mse: 0.046214]
+  [local_pretrain:station59] [Epoch 600/2000] [loss_mse: 0.042750]
+  [local_pretrain:station59] [Epoch 700/2000] [loss_mse: 0.041625]
+  [local_pretrain:station59] [Epoch 800/2000] [loss_mse: 0.040420]
+  [local_pretrain:station59] [Epoch 900/2000] [loss_mse: 0.038518]
+  [local_pretrain:station59] [Epoch 1000/2000] [loss_mse: 0.037889]
+  [local_pretrain:station59] [Epoch 1100/2000] [loss_mse: 0.036868]
+  [local_pretrain:station59] [Epoch 1200/2000] [loss_mse: 0.035645]
+  [local_pretrain:station59] [Epoch 1300/2000] [loss_mse: 0.035508]
+  [local_pretrain:station59] [Epoch 1400/2000] [loss_mse: 0.034170]
+  [local_pretrain:station59] [Epoch 1500/2000] [loss_mse: 0.034253]
+  [local_pretrain:station59] [Epoch 1600/2000] [loss_mse: 0.034206]
+  [local_pretrain:station59] [Epoch 1700/2000] [loss_mse: 0.032878]
+  [local_pretrain:station59] [Epoch 1800/2000] [loss_mse: 0.033116]
+  [local_pretrain:station59] [Epoch 1900/2000] [loss_mse: 0.033332]
+  [local_pretrain:station59] [Epoch 2000/2000] [loss_mse: 0.032062]
+  收敛检测[local_pretrain:station59]: 未收敛 (best_epoch=1962, best_loss=0.030938, final_loss=0.032062)
+✓ 场站 59 本地 conventional pretrain 完成: model_fore_pre_station59_local.pth
+
+======================================================================
+阶段: local_pretrain
+  station_id=60
+  epochs=2000
+  log_interval=100
+======================================================================
+  [local_pretrain:station60] [Epoch 1/2000] [loss_mse: 0.319520]
+  [local_pretrain:station60] [Epoch 2/2000] [loss_mse: 0.318448]
+  [local_pretrain:station60] [Epoch 3/2000] [loss_mse: 0.317757]
+  [local_pretrain:station60] [Epoch 4/2000] [loss_mse: 0.316649]
+  [local_pretrain:station60] [Epoch 5/2000] [loss_mse: 0.315935]
+  [local_pretrain:station60] [Epoch 6/2000] [loss_mse: 0.314902]
+  [local_pretrain:station60] [Epoch 7/2000] [loss_mse: 0.314070]
+  [local_pretrain:station60] [Epoch 8/2000] [loss_mse: 0.313212]
+  [local_pretrain:station60] [Epoch 9/2000] [loss_mse: 0.312352]
+  [local_pretrain:station60] [Epoch 10/2000] [loss_mse: 0.311431]
+  [local_pretrain:station60] [Epoch 100/2000] [loss_mse: 0.195943]
+  [local_pretrain:station60] [Epoch 200/2000] [loss_mse: 0.055084]
+  [local_pretrain:station60] [Epoch 300/2000] [loss_mse: 0.049943]
+  [local_pretrain:station60] [Epoch 400/2000] [loss_mse: 0.044880]
+  [local_pretrain:station60] [Epoch 500/2000] [loss_mse: 0.044797]
+  [local_pretrain:station60] [Epoch 600/2000] [loss_mse: 0.041700]
+  [local_pretrain:station60] [Epoch 700/2000] [loss_mse: 0.039856]
+  [local_pretrain:station60] [Epoch 800/2000] [loss_mse: 0.040066]
+  [local_pretrain:station60] [Epoch 900/2000] [loss_mse: 0.039201]
+  [local_pretrain:station60] [Epoch 1000/2000] [loss_mse: 0.038164]
+  [local_pretrain:station60] [Epoch 1100/2000] [loss_mse: 0.037823]
+  [local_pretrain:station60] [Epoch 1200/2000] [loss_mse: 0.036611]
+  [local_pretrain:station60] [Epoch 1300/2000] [loss_mse: 0.036331]
+  [local_pretrain:station60] [Epoch 1400/2000] [loss_mse: 0.035394]
+  [local_pretrain:station60] [Epoch 1500/2000] [loss_mse: 0.034831]
+  [local_pretrain:station60] [Epoch 1600/2000] [loss_mse: 0.034686]
+  [local_pretrain:station60] [Epoch 1700/2000] [loss_mse: 0.034851]
+  [local_pretrain:station60] [Epoch 1800/2000] [loss_mse: 0.034183]
+  [local_pretrain:station60] [Epoch 1900/2000] [loss_mse: 0.032783]
+  [local_pretrain:station60] [Epoch 2000/2000] [loss_mse: 0.032193]
+  收敛检测[local_pretrain:station60]: 未收敛 (best_epoch=1953, best_loss=0.032125, final_loss=0.032193)
+✓ 场站 60 本地 conventional pretrain 完成: model_fore_pre_station60_local.pth
+跳过 proposed_station local meta；yearly clean ablation 统一使用 local_meta 作为 common midstream。
+
+======================================================================
+阶段: local_meta
+  station_id=58
+  meta_tag=local_meta_station58
+  epochs=2000
+  log_interval=100
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.0
+  shared_lr_scale=1.0
+  sampler_mode=uniform
+======================================================================
+  tasks_per_epoch=5, station_task_pool=10
+  [local_meta_station58] [Epoch 1/2000] [support_mse: 0.142045] [query_mse: 0.143787] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2/2000] [support_mse: 0.120885] [query_mse: 0.113053] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 3/2000] [support_mse: 0.142215] [query_mse: 0.123339] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 4/2000] [support_mse: 0.068371] [query_mse: 0.062064] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 5/2000] [support_mse: 0.062434] [query_mse: 0.075083] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 6/2000] [support_mse: 0.119093] [query_mse: 0.104453] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 7/2000] [support_mse: 0.110284] [query_mse: 0.101740] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 8/2000] [support_mse: 0.118960] [query_mse: 0.138329] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 9/2000] [support_mse: 0.160431] [query_mse: 0.168897] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 10/2000] [support_mse: 0.115958] [query_mse: 0.120350] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 100/2000] [support_mse: 0.138452] [query_mse: 0.137075] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station58]: 首次达到收敛条件 @ epoch 187 (best_epoch=87, best_loss=0.035770, final_loss=0.119205)
+  [local_meta_station58] [Epoch 200/2000] [support_mse: 0.106363] [query_mse: 0.088368] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 300/2000] [support_mse: 0.097977] [query_mse: 0.110868] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 400/2000] [support_mse: 0.077513] [query_mse: 0.083983] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 500/2000] [support_mse: 0.054523] [query_mse: 0.062857] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 600/2000] [support_mse: 0.093706] [query_mse: 0.098053] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 700/2000] [support_mse: 0.083878] [query_mse: 0.087385] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 800/2000] [support_mse: 0.047488] [query_mse: 0.060277] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station58]: 首次达到收敛条件 @ epoch 861 (best_epoch=761, best_loss=0.035289, final_loss=0.108421)
+  [local_meta_station58] [Epoch 900/2000] [support_mse: 0.081204] [query_mse: 0.072492] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1000/2000] [support_mse: 0.087109] [query_mse: 0.079060] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1100/2000] [support_mse: 0.088259] [query_mse: 0.060317] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1200/2000] [support_mse: 0.097906] [query_mse: 0.063475] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1300/2000] [support_mse: 0.154368] [query_mse: 0.125088] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1400/2000] [support_mse: 0.050685] [query_mse: 0.045417] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1500/2000] [support_mse: 0.073359] [query_mse: 0.096270] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1600/2000] [support_mse: 0.060564] [query_mse: 0.056640] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1700/2000] [support_mse: 0.049273] [query_mse: 0.057131] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1800/2000] [support_mse: 0.067044] [query_mse: 0.052585] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 1900/2000] [support_mse: 0.099641] [query_mse: 0.099896] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station58] [Epoch 2000/2000] [support_mse: 0.073588] [query_mse: 0.102542] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station58]: 已收敛 @ epoch 861 (best_epoch=761, best_loss=0.035289, final_loss=0.102542)
+✓ 场站 58 元训练完成: model_fore_train_task_query_local_meta_station58.pth
+
+======================================================================
+阶段: local_meta
+  station_id=59
+  meta_tag=local_meta_station59
+  epochs=2000
+  log_interval=100
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.0
+  shared_lr_scale=1.0
+  sampler_mode=uniform
+======================================================================
+  tasks_per_epoch=5, station_task_pool=10
+  [local_meta_station59] [Epoch 1/2000] [support_mse: 0.120791] [query_mse: 0.129272] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 2/2000] [support_mse: 0.126583] [query_mse: 0.134195] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 3/2000] [support_mse: 0.118924] [query_mse: 0.122189] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 4/2000] [support_mse: 0.108838] [query_mse: 0.123268] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 5/2000] [support_mse: 0.104604] [query_mse: 0.088780] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 6/2000] [support_mse: 0.079996] [query_mse: 0.103516] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 7/2000] [support_mse: 0.125528] [query_mse: 0.127278] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 8/2000] [support_mse: 0.078399] [query_mse: 0.094535] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 9/2000] [support_mse: 0.142990] [query_mse: 0.127125] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 10/2000] [support_mse: 0.099969] [query_mse: 0.106444] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 100/2000] [support_mse: 0.078802] [query_mse: 0.084513] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station59]: 首次达到收敛条件 @ epoch 114 (best_epoch=14, best_loss=0.069538, final_loss=0.093100)
+  [local_meta_station59] [Epoch 200/2000] [support_mse: 0.086930] [query_mse: 0.107303] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 300/2000] [support_mse: 0.123050] [query_mse: 0.119253] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station59]: 首次达到收敛条件 @ epoch 375 (best_epoch=275, best_loss=0.066498, final_loss=0.166648)
+  [local_meta_station59] [Epoch 400/2000] [support_mse: 0.123248] [query_mse: 0.118526] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 500/2000] [support_mse: 0.121251] [query_mse: 0.130382] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 600/2000] [support_mse: 0.063041] [query_mse: 0.067134] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 700/2000] [support_mse: 0.079131] [query_mse: 0.087874] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station59]: 首次达到收敛条件 @ epoch 793 (best_epoch=693, best_loss=0.062039, final_loss=0.079102)
+  [local_meta_station59] [Epoch 800/2000] [support_mse: 0.082222] [query_mse: 0.101595] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 900/2000] [support_mse: 0.101992] [query_mse: 0.103270] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1000/2000] [support_mse: 0.090901] [query_mse: 0.104052] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station59]: 首次达到收敛条件 @ epoch 1046 (best_epoch=946, best_loss=0.054804, final_loss=0.089404)
+  [local_meta_station59] [Epoch 1100/2000] [support_mse: 0.105866] [query_mse: 0.112156] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1200/2000] [support_mse: 0.104793] [query_mse: 0.111257] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1300/2000] [support_mse: 0.100210] [query_mse: 0.106393] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1400/2000] [support_mse: 0.146162] [query_mse: 0.138191] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1500/2000] [support_mse: 0.109936] [query_mse: 0.112542] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1600/2000] [support_mse: 0.133455] [query_mse: 0.132826] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1700/2000] [support_mse: 0.113427] [query_mse: 0.092287] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1800/2000] [support_mse: 0.082689] [query_mse: 0.080692] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 1900/2000] [support_mse: 0.127102] [query_mse: 0.112108] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station59] [Epoch 2000/2000] [support_mse: 0.080074] [query_mse: 0.076874] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station59]: 已收敛 @ epoch 1046 (best_epoch=946, best_loss=0.054804, final_loss=0.076874)
+✓ 场站 59 元训练完成: model_fore_train_task_query_local_meta_station59.pth
+
+======================================================================
+阶段: local_meta
+  station_id=60
+  meta_tag=local_meta_station60
+  epochs=2000
+  log_interval=100
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.0
+  shared_lr_scale=1.0
+  sampler_mode=uniform
+======================================================================
+  tasks_per_epoch=5, station_task_pool=10
+  [local_meta_station60] [Epoch 1/2000] [support_mse: 0.127859] [query_mse: 0.151742] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 2/2000] [support_mse: 0.130035] [query_mse: 0.125744] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 3/2000] [support_mse: 0.118809] [query_mse: 0.121898] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 4/2000] [support_mse: 0.096452] [query_mse: 0.105874] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 5/2000] [support_mse: 0.122693] [query_mse: 0.121152] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 6/2000] [support_mse: 0.141365] [query_mse: 0.150139] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 7/2000] [support_mse: 0.112116] [query_mse: 0.117445] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 8/2000] [support_mse: 0.119063] [query_mse: 0.105837] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 9/2000] [support_mse: 0.131633] [query_mse: 0.112450] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 10/2000] [support_mse: 0.115314] [query_mse: 0.110434] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 100/2000] [support_mse: 0.143779] [query_mse: 0.138024] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station60]: 首次达到收敛条件 @ epoch 139 (best_epoch=39, best_loss=0.081345, final_loss=0.128226)
+  [local_meta_station60] [Epoch 200/2000] [support_mse: 0.131260] [query_mse: 0.105152] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 300/2000] [support_mse: 0.124643] [query_mse: 0.106616] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 400/2000] [support_mse: 0.077633] [query_mse: 0.096106] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station60]: 首次达到收敛条件 @ epoch 457 (best_epoch=357, best_loss=0.076090, final_loss=0.084858)
+  [local_meta_station60] [Epoch 500/2000] [support_mse: 0.118531] [query_mse: 0.117891] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 600/2000] [support_mse: 0.127791] [query_mse: 0.135147] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station60]: 首次达到收敛条件 @ epoch 657 (best_epoch=557, best_loss=0.072289, final_loss=0.083106)
+  [local_meta_station60] [Epoch 700/2000] [support_mse: 0.114813] [query_mse: 0.116849] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station60]: 首次达到收敛条件 @ epoch 790 (best_epoch=690, best_loss=0.067140, final_loss=0.115922)
+  [local_meta_station60] [Epoch 800/2000] [support_mse: 0.130366] [query_mse: 0.134288] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 900/2000] [support_mse: 0.108013] [query_mse: 0.121623] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1000/2000] [support_mse: 0.123583] [query_mse: 0.100891] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1100/2000] [support_mse: 0.115617] [query_mse: 0.100924] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1200/2000] [support_mse: 0.140487] [query_mse: 0.130910] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1300/2000] [support_mse: 0.140259] [query_mse: 0.130481] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1400/2000] [support_mse: 0.094951] [query_mse: 0.103680] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1500/2000] [support_mse: 0.100409] [query_mse: 0.117425] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1600/2000] [support_mse: 0.132853] [query_mse: 0.126010] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1700/2000] [support_mse: 0.108818] [query_mse: 0.099064] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1800/2000] [support_mse: 0.106855] [query_mse: 0.140214] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 1900/2000] [support_mse: 0.075990] [query_mse: 0.081978] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  [local_meta_station60] [Epoch 2000/2000] [support_mse: 0.122186] [query_mse: 0.119371] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station60]: 已收敛 @ epoch 790 (best_epoch=690, best_loss=0.067140, final_loss=0.119371)
+✓ 场站 60 元训练完成: model_fore_train_task_query_local_meta_station60.pth
+
+======================================================================
+阶段: few_shot
+  few_shot_model_count=36
+  epochs=20
+  log_interval=1
+======================================================================
+
+======================================================================
+场站 58 的Few-shot适应
+======================================================================
+
+  极端天气类别 1:
+    样本数: 8
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.158811]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.161456]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.160406]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.162715]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.165130]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class0]: 首次达到收敛条件 @ epoch 6 (best_epoch=1, best_loss=0.158811, final_loss=0.159365)
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.159365]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.159982]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.157335]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.171134]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.163331]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.156899]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.159858]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.160894]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.161101]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.160038]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class0]: 首次达到收敛条件 @ epoch 16 (best_epoch=11, best_loss=0.156899, final_loss=0.160702)
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.160702]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.160334]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.157476]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.162334]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.163113]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class0]: 已收敛 @ epoch 16 (best_epoch=11, best_loss=0.156899, final_loss=0.163113)
+    ✓ 保存(LMT-new): ./model_fore_station58_extreme0_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=58, samples=8
+      [Extreme-FedAvg:source58] [Epoch 1/20] [loss_mse: 0.164704]
+      [Extreme-FedAvg:source58] [Epoch 2/20] [loss_mse: 0.159358]
+      [Extreme-FedAvg:source58] [Epoch 3/20] [loss_mse: 0.159153]
+      [Extreme-FedAvg:source58] [Epoch 4/20] [loss_mse: 0.163499]
+      [Extreme-FedAvg:source58] [Epoch 5/20] [loss_mse: 0.158859]
+      [Extreme-FedAvg:source58] [Epoch 6/20] [loss_mse: 0.164556]
+      [Extreme-FedAvg:source58] [Epoch 7/20] [loss_mse: 0.159385]
+      [Extreme-FedAvg:source58] [Epoch 8/20] [loss_mse: 0.163947]
+      [Extreme-FedAvg:source58] [Epoch 9/20] [loss_mse: 0.158990]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target58_source58_class0]: 首次达到收敛条件 @ epoch 10 (best_epoch=5, best_loss=0.158859, final_loss=0.163695)
+      [Extreme-FedAvg:source58] [Epoch 10/20] [loss_mse: 0.163695]
+      [Extreme-FedAvg:source58] [Epoch 11/20] [loss_mse: 0.168769]
+      [Extreme-FedAvg:source58] [Epoch 12/20] [loss_mse: 0.164378]
+      [Extreme-FedAvg:source58] [Epoch 13/20] [loss_mse: 0.158292]
+      [Extreme-FedAvg:source58] [Epoch 14/20] [loss_mse: 0.159954]
+      [Extreme-FedAvg:source58] [Epoch 15/20] [loss_mse: 0.156453]
+      [Extreme-FedAvg:source58] [Epoch 16/20] [loss_mse: 0.164378]
+      [Extreme-FedAvg:source58] [Epoch 17/20] [loss_mse: 0.168732]
+      [Extreme-FedAvg:source58] [Epoch 18/20] [loss_mse: 0.165168]
+      [Extreme-FedAvg:source58] [Epoch 19/20] [loss_mse: 0.165504]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target58_source58_class0]: 首次达到收敛条件 @ epoch 20 (best_epoch=15, best_loss=0.156453, final_loss=0.167281)
+      [Extreme-FedAvg:source58] [Epoch 20/20] [loss_mse: 0.167281]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target58_source58_class0]: 已收敛 @ epoch 20 (best_epoch=15, best_loss=0.156453, final_loss=0.167281)
+    [Extreme-FedAvg] source_station=59 -> target_station=58, samples=7
+      [Extreme-FedAvg:source59] [Epoch 1/20] [loss_mse: 0.243864]
+      [Extreme-FedAvg:source59] [Epoch 2/20] [loss_mse: 0.231723]
+      [Extreme-FedAvg:source59] [Epoch 3/20] [loss_mse: 0.231519]
+      [Extreme-FedAvg:source59] [Epoch 4/20] [loss_mse: 0.217315]
+      [Extreme-FedAvg:source59] [Epoch 5/20] [loss_mse: 0.217528]
+      [Extreme-FedAvg:source59] [Epoch 6/20] [loss_mse: 0.213676]
+      [Extreme-FedAvg:source59] [Epoch 7/20] [loss_mse: 0.207438]
+      [Extreme-FedAvg:source59] [Epoch 8/20] [loss_mse: 0.203114]
+      [Extreme-FedAvg:source59] [Epoch 9/20] [loss_mse: 0.204098]
+      [Extreme-FedAvg:source59] [Epoch 10/20] [loss_mse: 0.204709]
+      [Extreme-FedAvg:source59] [Epoch 11/20] [loss_mse: 0.192371]
+      [Extreme-FedAvg:source59] [Epoch 12/20] [loss_mse: 0.184715]
+      [Extreme-FedAvg:source59] [Epoch 13/20] [loss_mse: 0.186547]
+      [Extreme-FedAvg:source59] [Epoch 14/20] [loss_mse: 0.193031]
+      [Extreme-FedAvg:source59] [Epoch 15/20] [loss_mse: 0.165044]
+      [Extreme-FedAvg:source59] [Epoch 16/20] [loss_mse: 0.175622]
+      [Extreme-FedAvg:source59] [Epoch 17/20] [loss_mse: 0.177304]
+      [Extreme-FedAvg:source59] [Epoch 18/20] [loss_mse: 0.166469]
+      [Extreme-FedAvg:source59] [Epoch 19/20] [loss_mse: 0.183853]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target58_source59_class0]: 首次达到收敛条件 @ epoch 20 (best_epoch=15, best_loss=0.165044, final_loss=0.176146)
+      [Extreme-FedAvg:source59] [Epoch 20/20] [loss_mse: 0.176146]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target58_source59_class0]: 已收敛 @ epoch 20 (best_epoch=15, best_loss=0.165044, final_loss=0.176146)
+    [Extreme-FedAvg] source_station=60 -> target_station=58, samples=5
+      [Extreme-FedAvg:source60] [Epoch 1/20] [loss_mse: 0.207103]
+      [Extreme-FedAvg:source60] [Epoch 2/20] [loss_mse: 0.197873]
+      [Extreme-FedAvg:source60] [Epoch 3/20] [loss_mse: 0.202593]
+      [Extreme-FedAvg:source60] [Epoch 4/20] [loss_mse: 0.189605]
+      [Extreme-FedAvg:source60] [Epoch 5/20] [loss_mse: 0.192387]
+      [Extreme-FedAvg:source60] [Epoch 6/20] [loss_mse: 0.180759]
+      [Extreme-FedAvg:source60] [Epoch 7/20] [loss_mse: 0.171739]
+      [Extreme-FedAvg:source60] [Epoch 8/20] [loss_mse: 0.182460]
+      [Extreme-FedAvg:source60] [Epoch 9/20] [loss_mse: 0.178080]
+      [Extreme-FedAvg:source60] [Epoch 10/20] [loss_mse: 0.176197]
+      [Extreme-FedAvg:source60] [Epoch 11/20] [loss_mse: 0.160635]
+      [Extreme-FedAvg:source60] [Epoch 12/20] [loss_mse: 0.160348]
+      [Extreme-FedAvg:source60] [Epoch 13/20] [loss_mse: 0.166781]
+      [Extreme-FedAvg:source60] [Epoch 14/20] [loss_mse: 0.166292]
+      [Extreme-FedAvg:source60] [Epoch 15/20] [loss_mse: 0.169580]
+      [Extreme-FedAvg:source60] [Epoch 16/20] [loss_mse: 0.147331]
+      [Extreme-FedAvg:source60] [Epoch 17/20] [loss_mse: 0.161704]
+      [Extreme-FedAvg:source60] [Epoch 18/20] [loss_mse: 0.147434]
+      [Extreme-FedAvg:source60] [Epoch 19/20] [loss_mse: 0.139932]
+      [Extreme-FedAvg:source60] [Epoch 20/20] [loss_mse: 0.148993]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target58_source60_class0]: 未收敛 (best_epoch=19, best_loss=0.139932, final_loss=0.148993)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station58_extreme0_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=58, samples=8
+      [Proposed-A:source58] [Epoch 1/20] [loss_mse: 0.163113]
+      [Proposed-A:source58] [Epoch 2/20] [loss_mse: 0.164459]
+      [Proposed-A:source58] [Epoch 3/20] [loss_mse: 0.160236]
+      [Proposed-A:source58] [Epoch 4/20] [loss_mse: 0.164009]
+      [Proposed-A:source58] [Epoch 5/20] [loss_mse: 0.159556]
+      [Proposed-A:source58] [Epoch 6/20] [loss_mse: 0.158098]
+      [Proposed-A:source58] [Epoch 7/20] [loss_mse: 0.159429]
+      [Proposed-A:source58] [Epoch 8/20] [loss_mse: 0.159835]
+      [Proposed-A:source58] [Epoch 9/20] [loss_mse: 0.158131]
+      [Proposed-A:source58] [Epoch 10/20] [loss_mse: 0.160294]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target58_source58_class0]: 首次达到收敛条件 @ epoch 11 (best_epoch=6, best_loss=0.158098, final_loss=0.163617)
+      [Proposed-A:source58] [Epoch 11/20] [loss_mse: 0.163617]
+      [Proposed-A:source58] [Epoch 12/20] [loss_mse: 0.163069]
+      [Proposed-A:source58] [Epoch 13/20] [loss_mse: 0.158966]
+      [Proposed-A:source58] [Epoch 14/20] [loss_mse: 0.159349]
+      [Proposed-A:source58] [Epoch 15/20] [loss_mse: 0.163177]
+      [Proposed-A:source58] [Epoch 16/20] [loss_mse: 0.163324]
+      [Proposed-A:source58] [Epoch 17/20] [loss_mse: 0.155180]
+      [Proposed-A:source58] [Epoch 18/20] [loss_mse: 0.164721]
+      [Proposed-A:source58] [Epoch 19/20] [loss_mse: 0.162223]
+      [Proposed-A:source58] [Epoch 20/20] [loss_mse: 0.159566]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target58_source58_class0]: 未收敛 (best_epoch=17, best_loss=0.155180, final_loss=0.159566)
+    [Proposed-A] source_station=59 -> target_station=58, samples=7
+      [Proposed-A:source59] [Epoch 1/20] [loss_mse: 0.244346]
+      [Proposed-A:source59] [Epoch 2/20] [loss_mse: 0.237557]
+      [Proposed-A:source59] [Epoch 3/20] [loss_mse: 0.228033]
+      [Proposed-A:source59] [Epoch 4/20] [loss_mse: 0.223799]
+      [Proposed-A:source59] [Epoch 5/20] [loss_mse: 0.215505]
+      [Proposed-A:source59] [Epoch 6/20] [loss_mse: 0.218630]
+      [Proposed-A:source59] [Epoch 7/20] [loss_mse: 0.207728]
+      [Proposed-A:source59] [Epoch 8/20] [loss_mse: 0.209968]
+      [Proposed-A:source59] [Epoch 9/20] [loss_mse: 0.199832]
+      [Proposed-A:source59] [Epoch 10/20] [loss_mse: 0.196098]
+      [Proposed-A:source59] [Epoch 11/20] [loss_mse: 0.199881]
+      [Proposed-A:source59] [Epoch 12/20] [loss_mse: 0.190900]
+      [Proposed-A:source59] [Epoch 13/20] [loss_mse: 0.184286]
+      [Proposed-A:source59] [Epoch 14/20] [loss_mse: 0.187651]
+      [Proposed-A:source59] [Epoch 15/20] [loss_mse: 0.187802]
+      [Proposed-A:source59] [Epoch 16/20] [loss_mse: 0.191783]
+      [Proposed-A:source59] [Epoch 17/20] [loss_mse: 0.179662]
+      [Proposed-A:source59] [Epoch 18/20] [loss_mse: 0.163056]
+      [Proposed-A:source59] [Epoch 19/20] [loss_mse: 0.171432]
+      [Proposed-A:source59] [Epoch 20/20] [loss_mse: 0.167653]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target58_source59_class0]: 未收敛 (best_epoch=18, best_loss=0.163056, final_loss=0.167653)
+    [Proposed-A] source_station=60 -> target_station=58, samples=5
+      [Proposed-A:source60] [Epoch 1/20] [loss_mse: 0.208506]
+      [Proposed-A:source60] [Epoch 2/20] [loss_mse: 0.214720]
+      [Proposed-A:source60] [Epoch 3/20] [loss_mse: 0.196369]
+      [Proposed-A:source60] [Epoch 4/20] [loss_mse: 0.198161]
+      [Proposed-A:source60] [Epoch 5/20] [loss_mse: 0.196310]
+      [Proposed-A:source60] [Epoch 6/20] [loss_mse: 0.176365]
+      [Proposed-A:source60] [Epoch 7/20] [loss_mse: 0.181445]
+      [Proposed-A:source60] [Epoch 8/20] [loss_mse: 0.188978]
+      [Proposed-A:source60] [Epoch 9/20] [loss_mse: 0.180144]
+      [Proposed-A:source60] [Epoch 10/20] [loss_mse: 0.167395]
+      [Proposed-A:source60] [Epoch 11/20] [loss_mse: 0.171634]
+      [Proposed-A:source60] [Epoch 12/20] [loss_mse: 0.168635]
+      [Proposed-A:source60] [Epoch 13/20] [loss_mse: 0.159277]
+      [Proposed-A:source60] [Epoch 14/20] [loss_mse: 0.162337]
+      [Proposed-A:source60] [Epoch 15/20] [loss_mse: 0.150560]
+      [Proposed-A:source60] [Epoch 16/20] [loss_mse: 0.158573]
+      [Proposed-A:source60] [Epoch 17/20] [loss_mse: 0.157104]
+      [Proposed-A:source60] [Epoch 18/20] [loss_mse: 0.144377]
+      [Proposed-A:source60] [Epoch 19/20] [loss_mse: 0.160347]
+      [Proposed-A:source60] [Epoch 20/20] [loss_mse: 0.129622]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target58_source60_class0]: 未收敛 (best_epoch=20, best_loss=0.129622, final_loss=0.129622)
+    [Proposed-A] 聚合权重: {"58": 0.3598, "59": 0.3378, "60": 0.3024}
+    ✓ 保存(Proposed-A): ./model_fore_station58_extreme0.pth
+
+  极端天气类别 2:
+    样本数: 1
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.039103]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.031268]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.021032]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.032461]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.034089]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.031073]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.025067]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class1]: 首次达到收敛条件 @ epoch 8 (best_epoch=3, best_loss=0.021032, final_loss=0.028098)
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.028098]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.026149]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.019872]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.030176]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.030086]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.026927]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.025617]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class1]: 首次达到收敛条件 @ epoch 15 (best_epoch=10, best_loss=0.019872, final_loss=0.027753)
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.027753]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.027454]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.026621]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.025957]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.024025]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.033589]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class1]: 已收敛 @ epoch 15 (best_epoch=10, best_loss=0.019872, final_loss=0.033589)
+    ✓ 保存(LMT-new): ./model_fore_station58_extreme1_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=58, samples=1
+      [Extreme-FedAvg:source58] [Epoch 1/20] [loss_mse: 0.027483]
+      [Extreme-FedAvg:source58] [Epoch 2/20] [loss_mse: 0.032848]
+      [Extreme-FedAvg:source58] [Epoch 3/20] [loss_mse: 0.036859]
+      [Extreme-FedAvg:source58] [Epoch 4/20] [loss_mse: 0.026475]
+      [Extreme-FedAvg:source58] [Epoch 5/20] [loss_mse: 0.028441]
+      [Extreme-FedAvg:source58] [Epoch 6/20] [loss_mse: 0.025978]
+      [Extreme-FedAvg:source58] [Epoch 7/20] [loss_mse: 0.033941]
+      [Extreme-FedAvg:source58] [Epoch 8/20] [loss_mse: 0.029096]
+      [Extreme-FedAvg:source58] [Epoch 9/20] [loss_mse: 0.034953]
+      [Extreme-FedAvg:source58] [Epoch 10/20] [loss_mse: 0.026053]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target58_source58_class1]: 首次达到收敛条件 @ epoch 11 (best_epoch=6, best_loss=0.025978, final_loss=0.029104)
+      [Extreme-FedAvg:source58] [Epoch 11/20] [loss_mse: 0.029104]
+      [Extreme-FedAvg:source58] [Epoch 12/20] [loss_mse: 0.023473]
+      [Extreme-FedAvg:source58] [Epoch 13/20] [loss_mse: 0.029758]
+      [Extreme-FedAvg:source58] [Epoch 14/20] [loss_mse: 0.031116]
+      [Extreme-FedAvg:source58] [Epoch 15/20] [loss_mse: 0.027840]
+      [Extreme-FedAvg:source58] [Epoch 16/20] [loss_mse: 0.025418]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target58_source58_class1]: 首次达到收敛条件 @ epoch 17 (best_epoch=12, best_loss=0.023473, final_loss=0.027509)
+      [Extreme-FedAvg:source58] [Epoch 17/20] [loss_mse: 0.027509]
+      [Extreme-FedAvg:source58] [Epoch 18/20] [loss_mse: 0.023198]
+      [Extreme-FedAvg:source58] [Epoch 19/20] [loss_mse: 0.022232]
+      [Extreme-FedAvg:source58] [Epoch 20/20] [loss_mse: 0.031408]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target58_source58_class1]: 未收敛 (best_epoch=19, best_loss=0.022232, final_loss=0.031408)
+    [Extreme-FedAvg] source_station=59 -> target_station=58, samples=4
+      [Extreme-FedAvg:source59] [Epoch 1/20] [loss_mse: 0.072651]
+      [Extreme-FedAvg:source59] [Epoch 2/20] [loss_mse: 0.067002]
+      [Extreme-FedAvg:source59] [Epoch 3/20] [loss_mse: 0.065654]
+      [Extreme-FedAvg:source59] [Epoch 4/20] [loss_mse: 0.058621]
+      [Extreme-FedAvg:source59] [Epoch 5/20] [loss_mse: 0.060824]
+      [Extreme-FedAvg:source59] [Epoch 6/20] [loss_mse: 0.056426]
+      [Extreme-FedAvg:source59] [Epoch 7/20] [loss_mse: 0.053339]
+      [Extreme-FedAvg:source59] [Epoch 8/20] [loss_mse: 0.053814]
+      [Extreme-FedAvg:source59] [Epoch 9/20] [loss_mse: 0.050016]
+      [Extreme-FedAvg:source59] [Epoch 10/20] [loss_mse: 0.041367]
+      [Extreme-FedAvg:source59] [Epoch 11/20] [loss_mse: 0.050122]
+      [Extreme-FedAvg:source59] [Epoch 12/20] [loss_mse: 0.036470]
+      [Extreme-FedAvg:source59] [Epoch 13/20] [loss_mse: 0.034851]
+      [Extreme-FedAvg:source59] [Epoch 14/20] [loss_mse: 0.033921]
+      [Extreme-FedAvg:source59] [Epoch 15/20] [loss_mse: 0.032354]
+      [Extreme-FedAvg:source59] [Epoch 16/20] [loss_mse: 0.029365]
+      [Extreme-FedAvg:source59] [Epoch 17/20] [loss_mse: 0.029532]
+      [Extreme-FedAvg:source59] [Epoch 18/20] [loss_mse: 0.029538]
+      [Extreme-FedAvg:source59] [Epoch 19/20] [loss_mse: 0.026929]
+      [Extreme-FedAvg:source59] [Epoch 20/20] [loss_mse: 0.026434]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target58_source59_class1]: 未收敛 (best_epoch=20, best_loss=0.026434, final_loss=0.026434)
+    [Extreme-FedAvg] source_station=60 -> target_station=58, samples=3
+      [Extreme-FedAvg:source60] [Epoch 1/20] [loss_mse: 0.051083]
+      [Extreme-FedAvg:source60] [Epoch 2/20] [loss_mse: 0.054470]
+      [Extreme-FedAvg:source60] [Epoch 3/20] [loss_mse: 0.053765]
+      [Extreme-FedAvg:source60] [Epoch 4/20] [loss_mse: 0.047208]
+      [Extreme-FedAvg:source60] [Epoch 5/20] [loss_mse: 0.042296]
+      [Extreme-FedAvg:source60] [Epoch 6/20] [loss_mse: 0.043466]
+      [Extreme-FedAvg:source60] [Epoch 7/20] [loss_mse: 0.042456]
+      [Extreme-FedAvg:source60] [Epoch 8/20] [loss_mse: 0.039232]
+      [Extreme-FedAvg:source60] [Epoch 9/20] [loss_mse: 0.039661]
+      [Extreme-FedAvg:source60] [Epoch 10/20] [loss_mse: 0.032462]
+      [Extreme-FedAvg:source60] [Epoch 11/20] [loss_mse: 0.029004]
+      [Extreme-FedAvg:source60] [Epoch 12/20] [loss_mse: 0.024929]
+      [Extreme-FedAvg:source60] [Epoch 13/20] [loss_mse: 0.027923]
+      [Extreme-FedAvg:source60] [Epoch 14/20] [loss_mse: 0.024614]
+      [Extreme-FedAvg:source60] [Epoch 15/20] [loss_mse: 0.028291]
+      [Extreme-FedAvg:source60] [Epoch 16/20] [loss_mse: 0.025986]
+      [Extreme-FedAvg:source60] [Epoch 17/20] [loss_mse: 0.025172]
+      [Extreme-FedAvg:source60] [Epoch 18/20] [loss_mse: 0.020585]
+      [Extreme-FedAvg:source60] [Epoch 19/20] [loss_mse: 0.021265]
+      [Extreme-FedAvg:source60] [Epoch 20/20] [loss_mse: 0.024877]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target58_source60_class1]: 未收敛 (best_epoch=18, best_loss=0.020585, final_loss=0.024877)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station58_extreme1_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=58, samples=1
+      [Proposed-A:source58] [Epoch 1/20] [loss_mse: 0.026671]
+      [Proposed-A:source58] [Epoch 2/20] [loss_mse: 0.033838]
+      [Proposed-A:source58] [Epoch 3/20] [loss_mse: 0.034925]
+      [Proposed-A:source58] [Epoch 4/20] [loss_mse: 0.026720]
+      [Proposed-A:source58] [Epoch 5/20] [loss_mse: 0.026345]
+      [Proposed-A:source58] [Epoch 6/20] [loss_mse: 0.022969]
+      [Proposed-A:source58] [Epoch 7/20] [loss_mse: 0.022146]
+      [Proposed-A:source58] [Epoch 8/20] [loss_mse: 0.027427]
+      [Proposed-A:source58] [Epoch 9/20] [loss_mse: 0.023790]
+      [Proposed-A:source58] [Epoch 10/20] [loss_mse: 0.029092]
+      [Proposed-A:source58] [Epoch 11/20] [loss_mse: 0.029764]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target58_source58_class1]: 首次达到收敛条件 @ epoch 12 (best_epoch=7, best_loss=0.022146, final_loss=0.026936)
+      [Proposed-A:source58] [Epoch 12/20] [loss_mse: 0.026936]
+      [Proposed-A:source58] [Epoch 13/20] [loss_mse: 0.022047]
+      [Proposed-A:source58] [Epoch 14/20] [loss_mse: 0.023172]
+      [Proposed-A:source58] [Epoch 15/20] [loss_mse: 0.029912]
+      [Proposed-A:source58] [Epoch 16/20] [loss_mse: 0.026647]
+      [Proposed-A:source58] [Epoch 17/20] [loss_mse: 0.026321]
+      [Proposed-A:source58] [Epoch 18/20] [loss_mse: 0.023346]
+      [Proposed-A:source58] [Epoch 19/20] [loss_mse: 0.024218]
+      [Proposed-A:source58] [Epoch 20/20] [loss_mse: 0.029906]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target58_source58_class1]: 已收敛 @ epoch 12 (best_epoch=7, best_loss=0.022146, final_loss=0.029906)
+    [Proposed-A] source_station=59 -> target_station=58, samples=4
+      [Proposed-A:source59] [Epoch 1/20] [loss_mse: 0.075410]
+      [Proposed-A:source59] [Epoch 2/20] [loss_mse: 0.075499]
+      [Proposed-A:source59] [Epoch 3/20] [loss_mse: 0.071373]
+      [Proposed-A:source59] [Epoch 4/20] [loss_mse: 0.062530]
+      [Proposed-A:source59] [Epoch 5/20] [loss_mse: 0.060900]
+      [Proposed-A:source59] [Epoch 6/20] [loss_mse: 0.055972]
+      [Proposed-A:source59] [Epoch 7/20] [loss_mse: 0.054332]
+      [Proposed-A:source59] [Epoch 8/20] [loss_mse: 0.050032]
+      [Proposed-A:source59] [Epoch 9/20] [loss_mse: 0.046203]
+      [Proposed-A:source59] [Epoch 10/20] [loss_mse: 0.043019]
+      [Proposed-A:source59] [Epoch 11/20] [loss_mse: 0.039856]
+      [Proposed-A:source59] [Epoch 12/20] [loss_mse: 0.049051]
+      [Proposed-A:source59] [Epoch 13/20] [loss_mse: 0.035966]
+      [Proposed-A:source59] [Epoch 14/20] [loss_mse: 0.037416]
+      [Proposed-A:source59] [Epoch 15/20] [loss_mse: 0.031275]
+      [Proposed-A:source59] [Epoch 16/20] [loss_mse: 0.031032]
+      [Proposed-A:source59] [Epoch 17/20] [loss_mse: 0.031065]
+      [Proposed-A:source59] [Epoch 18/20] [loss_mse: 0.034727]
+      [Proposed-A:source59] [Epoch 19/20] [loss_mse: 0.026146]
+      [Proposed-A:source59] [Epoch 20/20] [loss_mse: 0.025060]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target58_source59_class1]: 未收敛 (best_epoch=20, best_loss=0.025060, final_loss=0.025060)
+    [Proposed-A] source_station=60 -> target_station=58, samples=3
+      [Proposed-A:source60] [Epoch 1/20] [loss_mse: 0.056074]
+      [Proposed-A:source60] [Epoch 2/20] [loss_mse: 0.052154]
+      [Proposed-A:source60] [Epoch 3/20] [loss_mse: 0.053761]
+      [Proposed-A:source60] [Epoch 4/20] [loss_mse: 0.044312]
+      [Proposed-A:source60] [Epoch 5/20] [loss_mse: 0.044511]
+      [Proposed-A:source60] [Epoch 6/20] [loss_mse: 0.049821]
+      [Proposed-A:source60] [Epoch 7/20] [loss_mse: 0.040040]
+      [Proposed-A:source60] [Epoch 8/20] [loss_mse: 0.038739]
+      [Proposed-A:source60] [Epoch 9/20] [loss_mse: 0.034140]
+      [Proposed-A:source60] [Epoch 10/20] [loss_mse: 0.040107]
+      [Proposed-A:source60] [Epoch 11/20] [loss_mse: 0.033875]
+      [Proposed-A:source60] [Epoch 12/20] [loss_mse: 0.033494]
+      [Proposed-A:source60] [Epoch 13/20] [loss_mse: 0.028486]
+      [Proposed-A:source60] [Epoch 14/20] [loss_mse: 0.030661]
+      [Proposed-A:source60] [Epoch 15/20] [loss_mse: 0.025180]
+      [Proposed-A:source60] [Epoch 16/20] [loss_mse: 0.022311]
+      [Proposed-A:source60] [Epoch 17/20] [loss_mse: 0.021956]
+      [Proposed-A:source60] [Epoch 18/20] [loss_mse: 0.025507]
+      [Proposed-A:source60] [Epoch 19/20] [loss_mse: 0.025467]
+      [Proposed-A:source60] [Epoch 20/20] [loss_mse: 0.021596]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target58_source60_class1]: 未收敛 (best_epoch=20, best_loss=0.021596, final_loss=0.021596)
+    [Proposed-A] 聚合权重: {"58": 0.1869, "59": 0.4361, "60": 0.377}
+    ✓ 保存(Proposed-A): ./model_fore_station58_extreme1.pth
+
+  极端天气类别 3:
+    样本数: 1
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.176895]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.183274]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.172670]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.160893]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.153404]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.149888]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.142103]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.130942]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.153167]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.125396]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.140980]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.129183]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.110446]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.141328]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.154556]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.138334]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.106329]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.112900]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.134073]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.115320]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class2]: 未收敛 (best_epoch=17, best_loss=0.106329, final_loss=0.115320)
+    ✓ 保存(LMT-new): ./model_fore_station58_extreme2_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=58, samples=1
+      [Extreme-FedAvg:source58] [Epoch 1/20] [loss_mse: 0.168084]
+      [Extreme-FedAvg:source58] [Epoch 2/20] [loss_mse: 0.174204]
+      [Extreme-FedAvg:source58] [Epoch 3/20] [loss_mse: 0.169191]
+      [Extreme-FedAvg:source58] [Epoch 4/20] [loss_mse: 0.157024]
+      [Extreme-FedAvg:source58] [Epoch 5/20] [loss_mse: 0.139251]
+      [Extreme-FedAvg:source58] [Epoch 6/20] [loss_mse: 0.151113]
+      [Extreme-FedAvg:source58] [Epoch 7/20] [loss_mse: 0.163837]
+      [Extreme-FedAvg:source58] [Epoch 8/20] [loss_mse: 0.167455]
+      [Extreme-FedAvg:source58] [Epoch 9/20] [loss_mse: 0.128936]
+      [Extreme-FedAvg:source58] [Epoch 10/20] [loss_mse: 0.123722]
+      [Extreme-FedAvg:source58] [Epoch 11/20] [loss_mse: 0.154695]
+      [Extreme-FedAvg:source58] [Epoch 12/20] [loss_mse: 0.148165]
+      [Extreme-FedAvg:source58] [Epoch 13/20] [loss_mse: 0.132354]
+      [Extreme-FedAvg:source58] [Epoch 14/20] [loss_mse: 0.157048]
+      [Extreme-FedAvg:source58] [Epoch 15/20] [loss_mse: 0.122786]
+      [Extreme-FedAvg:source58] [Epoch 16/20] [loss_mse: 0.122277]
+      [Extreme-FedAvg:source58] [Epoch 17/20] [loss_mse: 0.129813]
+      [Extreme-FedAvg:source58] [Epoch 18/20] [loss_mse: 0.120377]
+      [Extreme-FedAvg:source58] [Epoch 19/20] [loss_mse: 0.112279]
+      [Extreme-FedAvg:source58] [Epoch 20/20] [loss_mse: 0.107035]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target58_source58_class2]: 未收敛 (best_epoch=20, best_loss=0.107035, final_loss=0.107035)
+    [Extreme-FedAvg] source_station=59 -> target_station=58, samples=2
+      [Extreme-FedAvg:source59] [Epoch 1/20] [loss_mse: 0.188788]
+      [Extreme-FedAvg:source59] [Epoch 2/20] [loss_mse: 0.189156]
+      [Extreme-FedAvg:source59] [Epoch 3/20] [loss_mse: 0.178928]
+      [Extreme-FedAvg:source59] [Epoch 4/20] [loss_mse: 0.165726]
+      [Extreme-FedAvg:source59] [Epoch 5/20] [loss_mse: 0.166682]
+      [Extreme-FedAvg:source59] [Epoch 6/20] [loss_mse: 0.167214]
+      [Extreme-FedAvg:source59] [Epoch 7/20] [loss_mse: 0.145434]
+      [Extreme-FedAvg:source59] [Epoch 8/20] [loss_mse: 0.148737]
+      [Extreme-FedAvg:source59] [Epoch 9/20] [loss_mse: 0.136228]
+      [Extreme-FedAvg:source59] [Epoch 10/20] [loss_mse: 0.144348]
+      [Extreme-FedAvg:source59] [Epoch 11/20] [loss_mse: 0.135946]
+      [Extreme-FedAvg:source59] [Epoch 12/20] [loss_mse: 0.131395]
+      [Extreme-FedAvg:source59] [Epoch 13/20] [loss_mse: 0.140495]
+      [Extreme-FedAvg:source59] [Epoch 14/20] [loss_mse: 0.125027]
+      [Extreme-FedAvg:source59] [Epoch 15/20] [loss_mse: 0.127625]
+      [Extreme-FedAvg:source59] [Epoch 16/20] [loss_mse: 0.110062]
+      [Extreme-FedAvg:source59] [Epoch 17/20] [loss_mse: 0.112978]
+      [Extreme-FedAvg:source59] [Epoch 18/20] [loss_mse: 0.113652]
+      [Extreme-FedAvg:source59] [Epoch 19/20] [loss_mse: 0.098635]
+      [Extreme-FedAvg:source59] [Epoch 20/20] [loss_mse: 0.108500]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target58_source59_class2]: 未收敛 (best_epoch=19, best_loss=0.098635, final_loss=0.108500)
+    [Extreme-FedAvg] source_station=60 -> target_station=58, samples=1
+      [Extreme-FedAvg:source60] [Epoch 1/20] [loss_mse: 0.223564]
+      [Extreme-FedAvg:source60] [Epoch 2/20] [loss_mse: 0.223902]
+      [Extreme-FedAvg:source60] [Epoch 3/20] [loss_mse: 0.196074]
+      [Extreme-FedAvg:source60] [Epoch 4/20] [loss_mse: 0.212845]
+      [Extreme-FedAvg:source60] [Epoch 5/20] [loss_mse: 0.188243]
+      [Extreme-FedAvg:source60] [Epoch 6/20] [loss_mse: 0.189503]
+      [Extreme-FedAvg:source60] [Epoch 7/20] [loss_mse: 0.184789]
+      [Extreme-FedAvg:source60] [Epoch 8/20] [loss_mse: 0.168126]
+      [Extreme-FedAvg:source60] [Epoch 9/20] [loss_mse: 0.165203]
+      [Extreme-FedAvg:source60] [Epoch 10/20] [loss_mse: 0.166281]
+      [Extreme-FedAvg:source60] [Epoch 11/20] [loss_mse: 0.154518]
+      [Extreme-FedAvg:source60] [Epoch 12/20] [loss_mse: 0.156001]
+      [Extreme-FedAvg:source60] [Epoch 13/20] [loss_mse: 0.174467]
+      [Extreme-FedAvg:source60] [Epoch 14/20] [loss_mse: 0.136590]
+      [Extreme-FedAvg:source60] [Epoch 15/20] [loss_mse: 0.152309]
+      [Extreme-FedAvg:source60] [Epoch 16/20] [loss_mse: 0.146275]
+      [Extreme-FedAvg:source60] [Epoch 17/20] [loss_mse: 0.147784]
+      [Extreme-FedAvg:source60] [Epoch 18/20] [loss_mse: 0.137717]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target58_source60_class2]: 首次达到收敛条件 @ epoch 19 (best_epoch=14, best_loss=0.136590, final_loss=0.146936)
+      [Extreme-FedAvg:source60] [Epoch 19/20] [loss_mse: 0.146936]
+      [Extreme-FedAvg:source60] [Epoch 20/20] [loss_mse: 0.126502]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target58_source60_class2]: 未收敛 (best_epoch=20, best_loss=0.126502, final_loss=0.126502)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station58_extreme2_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=58, samples=1
+      [Proposed-A:source58] [Epoch 1/20] [loss_mse: 0.188202]
+      [Proposed-A:source58] [Epoch 2/20] [loss_mse: 0.169729]
+      [Proposed-A:source58] [Epoch 3/20] [loss_mse: 0.147805]
+      [Proposed-A:source58] [Epoch 4/20] [loss_mse: 0.163735]
+      [Proposed-A:source58] [Epoch 5/20] [loss_mse: 0.134542]
+      [Proposed-A:source58] [Epoch 6/20] [loss_mse: 0.164449]
+      [Proposed-A:source58] [Epoch 7/20] [loss_mse: 0.137317]
+      [Proposed-A:source58] [Epoch 8/20] [loss_mse: 0.141215]
+      [Proposed-A:source58] [Epoch 9/20] [loss_mse: 0.144913]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target58_source58_class2]: 首次达到收敛条件 @ epoch 10 (best_epoch=5, best_loss=0.134542, final_loss=0.140171)
+      [Proposed-A:source58] [Epoch 10/20] [loss_mse: 0.140171]
+      [Proposed-A:source58] [Epoch 11/20] [loss_mse: 0.138693]
+      [Proposed-A:source58] [Epoch 12/20] [loss_mse: 0.113246]
+      [Proposed-A:source58] [Epoch 13/20] [loss_mse: 0.125779]
+      [Proposed-A:source58] [Epoch 14/20] [loss_mse: 0.172128]
+      [Proposed-A:source58] [Epoch 15/20] [loss_mse: 0.121726]
+      [Proposed-A:source58] [Epoch 16/20] [loss_mse: 0.117554]
+      [Proposed-A:source58] [Epoch 17/20] [loss_mse: 0.111776]
+      [Proposed-A:source58] [Epoch 18/20] [loss_mse: 0.119010]
+      [Proposed-A:source58] [Epoch 19/20] [loss_mse: 0.118999]
+      [Proposed-A:source58] [Epoch 20/20] [loss_mse: 0.098326]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target58_source58_class2]: 未收敛 (best_epoch=20, best_loss=0.098326, final_loss=0.098326)
+    [Proposed-A] source_station=59 -> target_station=58, samples=2
+      [Proposed-A:source59] [Epoch 1/20] [loss_mse: 0.193880]
+      [Proposed-A:source59] [Epoch 2/20] [loss_mse: 0.178665]
+      [Proposed-A:source59] [Epoch 3/20] [loss_mse: 0.175610]
+      [Proposed-A:source59] [Epoch 4/20] [loss_mse: 0.157725]
+      [Proposed-A:source59] [Epoch 5/20] [loss_mse: 0.159990]
+      [Proposed-A:source59] [Epoch 6/20] [loss_mse: 0.157183]
+      [Proposed-A:source59] [Epoch 7/20] [loss_mse: 0.164393]
+      [Proposed-A:source59] [Epoch 8/20] [loss_mse: 0.154462]
+      [Proposed-A:source59] [Epoch 9/20] [loss_mse: 0.146171]
+      [Proposed-A:source59] [Epoch 10/20] [loss_mse: 0.142723]
+      [Proposed-A:source59] [Epoch 11/20] [loss_mse: 0.125425]
+      [Proposed-A:source59] [Epoch 12/20] [loss_mse: 0.135611]
+      [Proposed-A:source59] [Epoch 13/20] [loss_mse: 0.132671]
+      [Proposed-A:source59] [Epoch 14/20] [loss_mse: 0.128765]
+      [Proposed-A:source59] [Epoch 15/20] [loss_mse: 0.103940]
+      [Proposed-A:source59] [Epoch 16/20] [loss_mse: 0.120983]
+      [Proposed-A:source59] [Epoch 17/20] [loss_mse: 0.121426]
+      [Proposed-A:source59] [Epoch 18/20] [loss_mse: 0.115949]
+      [Proposed-A:source59] [Epoch 19/20] [loss_mse: 0.107370]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target58_source59_class2]: 首次达到收敛条件 @ epoch 20 (best_epoch=15, best_loss=0.103940, final_loss=0.108184)
+      [Proposed-A:source59] [Epoch 20/20] [loss_mse: 0.108184]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target58_source59_class2]: 已收敛 @ epoch 20 (best_epoch=15, best_loss=0.103940, final_loss=0.108184)
+    [Proposed-A] source_station=60 -> target_station=58, samples=1
+      [Proposed-A:source60] [Epoch 1/20] [loss_mse: 0.203308]
+      [Proposed-A:source60] [Epoch 2/20] [loss_mse: 0.210200]
+      [Proposed-A:source60] [Epoch 3/20] [loss_mse: 0.193997]
+      [Proposed-A:source60] [Epoch 4/20] [loss_mse: 0.202322]
+      [Proposed-A:source60] [Epoch 5/20] [loss_mse: 0.174530]
+      [Proposed-A:source60] [Epoch 6/20] [loss_mse: 0.184294]
+      [Proposed-A:source60] [Epoch 7/20] [loss_mse: 0.177677]
+      [Proposed-A:source60] [Epoch 8/20] [loss_mse: 0.187986]
+      [Proposed-A:source60] [Epoch 9/20] [loss_mse: 0.188780]
+      [Proposed-A:source60] [Epoch 10/20] [loss_mse: 0.157285]
+      [Proposed-A:source60] [Epoch 11/20] [loss_mse: 0.142891]
+      [Proposed-A:source60] [Epoch 12/20] [loss_mse: 0.152734]
+      [Proposed-A:source60] [Epoch 13/20] [loss_mse: 0.154577]
+      [Proposed-A:source60] [Epoch 14/20] [loss_mse: 0.144824]
+      [Proposed-A:source60] [Epoch 15/20] [loss_mse: 0.144650]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target58_source60_class2]: 首次达到收敛条件 @ epoch 16 (best_epoch=11, best_loss=0.142891, final_loss=0.153581)
+      [Proposed-A:source60] [Epoch 16/20] [loss_mse: 0.153581]
+      [Proposed-A:source60] [Epoch 17/20] [loss_mse: 0.146290]
+      [Proposed-A:source60] [Epoch 18/20] [loss_mse: 0.126327]
+      [Proposed-A:source60] [Epoch 19/20] [loss_mse: 0.124031]
+      [Proposed-A:source60] [Epoch 20/20] [loss_mse: 0.139981]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target58_source60_class2]: 未收敛 (best_epoch=19, best_loss=0.124031, final_loss=0.139981)
+    [Proposed-A] 聚合权重: {"58": 0.2834, "59": 0.4448, "60": 0.2718}
+    ✓ 保存(Proposed-A): ./model_fore_station58_extreme2.pth
+
+  极端天气类别 4:
+    样本数: 36
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.059095]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.054420]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.053245]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.052541]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.051862]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.048828]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.047051]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.045886]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.045613]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.045011]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.042868]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.042676]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.041455]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.040777]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.039920]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.039677]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.039242]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.037517]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.038321]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.037628]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class3]: 未收敛 (best_epoch=18, best_loss=0.037517, final_loss=0.037628)
+    ✓ 保存(LMT-new): ./model_fore_station58_extreme3_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=58, samples=36
+      [Extreme-FedAvg:source58] [Epoch 1/20] [loss_mse: 0.057991]
+      [Extreme-FedAvg:source58] [Epoch 2/20] [loss_mse: 0.055424]
+      [Extreme-FedAvg:source58] [Epoch 3/20] [loss_mse: 0.053358]
+      [Extreme-FedAvg:source58] [Epoch 4/20] [loss_mse: 0.051060]
+      [Extreme-FedAvg:source58] [Epoch 5/20] [loss_mse: 0.050404]
+      [Extreme-FedAvg:source58] [Epoch 6/20] [loss_mse: 0.049096]
+      [Extreme-FedAvg:source58] [Epoch 7/20] [loss_mse: 0.047223]
+      [Extreme-FedAvg:source58] [Epoch 8/20] [loss_mse: 0.046180]
+      [Extreme-FedAvg:source58] [Epoch 9/20] [loss_mse: 0.045572]
+      [Extreme-FedAvg:source58] [Epoch 10/20] [loss_mse: 0.043952]
+      [Extreme-FedAvg:source58] [Epoch 11/20] [loss_mse: 0.043651]
+      [Extreme-FedAvg:source58] [Epoch 12/20] [loss_mse: 0.042620]
+      [Extreme-FedAvg:source58] [Epoch 13/20] [loss_mse: 0.041909]
+      [Extreme-FedAvg:source58] [Epoch 14/20] [loss_mse: 0.041240]
+      [Extreme-FedAvg:source58] [Epoch 15/20] [loss_mse: 0.039838]
+      [Extreme-FedAvg:source58] [Epoch 16/20] [loss_mse: 0.038722]
+      [Extreme-FedAvg:source58] [Epoch 17/20] [loss_mse: 0.038813]
+      [Extreme-FedAvg:source58] [Epoch 18/20] [loss_mse: 0.039162]
+      [Extreme-FedAvg:source58] [Epoch 19/20] [loss_mse: 0.038537]
+      [Extreme-FedAvg:source58] [Epoch 20/20] [loss_mse: 0.037377]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target58_source58_class3]: 未收敛 (best_epoch=20, best_loss=0.037377, final_loss=0.037377)
+    [Extreme-FedAvg] source_station=59 -> target_station=58, samples=19
+      [Extreme-FedAvg:source59] [Epoch 1/20] [loss_mse: 0.091743]
+      [Extreme-FedAvg:source59] [Epoch 2/20] [loss_mse: 0.085603]
+      [Extreme-FedAvg:source59] [Epoch 3/20] [loss_mse: 0.088322]
+      [Extreme-FedAvg:source59] [Epoch 4/20] [loss_mse: 0.086331]
+      [Extreme-FedAvg:source59] [Epoch 5/20] [loss_mse: 0.085378]
+      [Extreme-FedAvg:source59] [Epoch 6/20] [loss_mse: 0.083953]
+      [Extreme-FedAvg:source59] [Epoch 7/20] [loss_mse: 0.081490]
+      [Extreme-FedAvg:source59] [Epoch 8/20] [loss_mse: 0.084072]
+      [Extreme-FedAvg:source59] [Epoch 9/20] [loss_mse: 0.083632]
+      [Extreme-FedAvg:source59] [Epoch 10/20] [loss_mse: 0.079450]
+      [Extreme-FedAvg:source59] [Epoch 11/20] [loss_mse: 0.080808]
+      [Extreme-FedAvg:source59] [Epoch 12/20] [loss_mse: 0.077108]
+      [Extreme-FedAvg:source59] [Epoch 13/20] [loss_mse: 0.077821]
+      [Extreme-FedAvg:source59] [Epoch 14/20] [loss_mse: 0.078539]
+      [Extreme-FedAvg:source59] [Epoch 15/20] [loss_mse: 0.077753]
+      [Extreme-FedAvg:source59] [Epoch 16/20] [loss_mse: 0.078463]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target58_source59_class3]: 首次达到收敛条件 @ epoch 17 (best_epoch=12, best_loss=0.077108, final_loss=0.078271)
+      [Extreme-FedAvg:source59] [Epoch 17/20] [loss_mse: 0.078271]
+      [Extreme-FedAvg:source59] [Epoch 18/20] [loss_mse: 0.077496]
+      [Extreme-FedAvg:source59] [Epoch 19/20] [loss_mse: 0.078168]
+      [Extreme-FedAvg:source59] [Epoch 20/20] [loss_mse: 0.077768]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target58_source59_class3]: 已收敛 @ epoch 17 (best_epoch=12, best_loss=0.077108, final_loss=0.077768)
+    [Extreme-FedAvg] source_station=60 -> target_station=58, samples=28
+      [Extreme-FedAvg:source60] [Epoch 1/20] [loss_mse: 0.106601]
+      [Extreme-FedAvg:source60] [Epoch 2/20] [loss_mse: 0.100051]
+      [Extreme-FedAvg:source60] [Epoch 3/20] [loss_mse: 0.099257]
+      [Extreme-FedAvg:source60] [Epoch 4/20] [loss_mse: 0.096547]
+      [Extreme-FedAvg:source60] [Epoch 5/20] [loss_mse: 0.094771]
+      [Extreme-FedAvg:source60] [Epoch 6/20] [loss_mse: 0.091797]
+      [Extreme-FedAvg:source60] [Epoch 7/20] [loss_mse: 0.088600]
+      [Extreme-FedAvg:source60] [Epoch 8/20] [loss_mse: 0.081044]
+      [Extreme-FedAvg:source60] [Epoch 9/20] [loss_mse: 0.082515]
+      [Extreme-FedAvg:source60] [Epoch 10/20] [loss_mse: 0.078602]
+      [Extreme-FedAvg:source60] [Epoch 11/20] [loss_mse: 0.078226]
+      [Extreme-FedAvg:source60] [Epoch 12/20] [loss_mse: 0.074313]
+      [Extreme-FedAvg:source60] [Epoch 13/20] [loss_mse: 0.074013]
+      [Extreme-FedAvg:source60] [Epoch 14/20] [loss_mse: 0.069794]
+      [Extreme-FedAvg:source60] [Epoch 15/20] [loss_mse: 0.069861]
+      [Extreme-FedAvg:source60] [Epoch 16/20] [loss_mse: 0.067454]
+      [Extreme-FedAvg:source60] [Epoch 17/20] [loss_mse: 0.068812]
+      [Extreme-FedAvg:source60] [Epoch 18/20] [loss_mse: 0.065312]
+      [Extreme-FedAvg:source60] [Epoch 19/20] [loss_mse: 0.063255]
+      [Extreme-FedAvg:source60] [Epoch 20/20] [loss_mse: 0.062007]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target58_source60_class3]: 未收敛 (best_epoch=20, best_loss=0.062007, final_loss=0.062007)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station58_extreme3_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=58, samples=36
+      [Proposed-A:source58] [Epoch 1/20] [loss_mse: 0.057603]
+      [Proposed-A:source58] [Epoch 2/20] [loss_mse: 0.056540]
+      [Proposed-A:source58] [Epoch 3/20] [loss_mse: 0.052700]
+      [Proposed-A:source58] [Epoch 4/20] [loss_mse: 0.051212]
+      [Proposed-A:source58] [Epoch 5/20] [loss_mse: 0.051862]
+      [Proposed-A:source58] [Epoch 6/20] [loss_mse: 0.049416]
+      [Proposed-A:source58] [Epoch 7/20] [loss_mse: 0.047712]
+      [Proposed-A:source58] [Epoch 8/20] [loss_mse: 0.048019]
+      [Proposed-A:source58] [Epoch 9/20] [loss_mse: 0.045321]
+      [Proposed-A:source58] [Epoch 10/20] [loss_mse: 0.044414]
+      [Proposed-A:source58] [Epoch 11/20] [loss_mse: 0.043285]
+      [Proposed-A:source58] [Epoch 12/20] [loss_mse: 0.043552]
+      [Proposed-A:source58] [Epoch 13/20] [loss_mse: 0.042310]
+      [Proposed-A:source58] [Epoch 14/20] [loss_mse: 0.040172]
+      [Proposed-A:source58] [Epoch 15/20] [loss_mse: 0.039684]
+      [Proposed-A:source58] [Epoch 16/20] [loss_mse: 0.039100]
+      [Proposed-A:source58] [Epoch 17/20] [loss_mse: 0.038941]
+      [Proposed-A:source58] [Epoch 18/20] [loss_mse: 0.038535]
+      [Proposed-A:source58] [Epoch 19/20] [loss_mse: 0.037951]
+      [Proposed-A:source58] [Epoch 20/20] [loss_mse: 0.037518]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target58_source58_class3]: 未收敛 (best_epoch=20, best_loss=0.037518, final_loss=0.037518)
+    [Proposed-A] source_station=59 -> target_station=58, samples=19
+      [Proposed-A:source59] [Epoch 1/20] [loss_mse: 0.090199]
+      [Proposed-A:source59] [Epoch 2/20] [loss_mse: 0.089819]
+      [Proposed-A:source59] [Epoch 3/20] [loss_mse: 0.088312]
+      [Proposed-A:source59] [Epoch 4/20] [loss_mse: 0.084672]
+      [Proposed-A:source59] [Epoch 5/20] [loss_mse: 0.083005]
+      [Proposed-A:source59] [Epoch 6/20] [loss_mse: 0.082184]
+      [Proposed-A:source59] [Epoch 7/20] [loss_mse: 0.084114]
+      [Proposed-A:source59] [Epoch 8/20] [loss_mse: 0.082732]
+      [Proposed-A:source59] [Epoch 9/20] [loss_mse: 0.081153]
+      [Proposed-A:source59] [Epoch 10/20] [loss_mse: 0.082225]
+      [Proposed-A:source59] [Epoch 11/20] [loss_mse: 0.077351]
+      [Proposed-A:source59] [Epoch 12/20] [loss_mse: 0.079896]
+      [Proposed-A:source59] [Epoch 13/20] [loss_mse: 0.080087]
+      [Proposed-A:source59] [Epoch 14/20] [loss_mse: 0.078881]
+      [Proposed-A:source59] [Epoch 15/20] [loss_mse: 0.076786]
+      [Proposed-A:source59] [Epoch 16/20] [loss_mse: 0.077571]
+      [Proposed-A:source59] [Epoch 17/20] [loss_mse: 0.080954]
+      [Proposed-A:source59] [Epoch 18/20] [loss_mse: 0.078748]
+      [Proposed-A:source59] [Epoch 19/20] [loss_mse: 0.078606]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target58_source59_class3]: 首次达到收敛条件 @ epoch 20 (best_epoch=15, best_loss=0.076786, final_loss=0.077215)
+      [Proposed-A:source59] [Epoch 20/20] [loss_mse: 0.077215]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target58_source59_class3]: 已收敛 @ epoch 20 (best_epoch=15, best_loss=0.076786, final_loss=0.077215)
+    [Proposed-A] source_station=60 -> target_station=58, samples=28
+      [Proposed-A:source60] [Epoch 1/20] [loss_mse: 0.106316]
+      [Proposed-A:source60] [Epoch 2/20] [loss_mse: 0.102088]
+      [Proposed-A:source60] [Epoch 3/20] [loss_mse: 0.100460]
+      [Proposed-A:source60] [Epoch 4/20] [loss_mse: 0.096735]
+      [Proposed-A:source60] [Epoch 5/20] [loss_mse: 0.091734]
+      [Proposed-A:source60] [Epoch 6/20] [loss_mse: 0.090260]
+      [Proposed-A:source60] [Epoch 7/20] [loss_mse: 0.089404]
+      [Proposed-A:source60] [Epoch 8/20] [loss_mse: 0.086870]
+      [Proposed-A:source60] [Epoch 9/20] [loss_mse: 0.080688]
+      [Proposed-A:source60] [Epoch 10/20] [loss_mse: 0.080786]
+      [Proposed-A:source60] [Epoch 11/20] [loss_mse: 0.078336]
+      [Proposed-A:source60] [Epoch 12/20] [loss_mse: 0.074500]
+      [Proposed-A:source60] [Epoch 13/20] [loss_mse: 0.074376]
+      [Proposed-A:source60] [Epoch 14/20] [loss_mse: 0.071955]
+      [Proposed-A:source60] [Epoch 15/20] [loss_mse: 0.071146]
+      [Proposed-A:source60] [Epoch 16/20] [loss_mse: 0.070456]
+      [Proposed-A:source60] [Epoch 17/20] [loss_mse: 0.067228]
+      [Proposed-A:source60] [Epoch 18/20] [loss_mse: 0.065116]
+      [Proposed-A:source60] [Epoch 19/20] [loss_mse: 0.062652]
+      [Proposed-A:source60] [Epoch 20/20] [loss_mse: 0.065017]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target58_source60_class3]: 未收敛 (best_epoch=19, best_loss=0.062652, final_loss=0.065017)
+    [Proposed-A] 聚合权重: {"58": 0.3697, "59": 0.2948, "60": 0.3354}
+    ✓ 保存(Proposed-A): ./model_fore_station58_extreme3.pth
+
+======================================================================
+场站 59 的Few-shot适应
+======================================================================
+
+  极端天气类别 1:
+    样本数: 7
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.244766]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.239003]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.227739]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.215910]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.222505]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.215165]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.212749]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.204752]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.197266]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.203352]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.193686]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.192226]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.185565]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.182461]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.179838]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.177238]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.178696]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.183746]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.174454]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.174361]
+  收敛检测[few_shot:LMT-new:lmt_new_station59_class0]: 未收敛 (best_epoch=19, best_loss=0.174454, final_loss=0.174361)
+    ✓ 保存(LMT-new): ./model_fore_station59_extreme0_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=59, samples=8
+      [Extreme-FedAvg:source58] [Epoch 1/20] [loss_mse: 0.161717]
+      [Extreme-FedAvg:source58] [Epoch 2/20] [loss_mse: 0.164020]
+      [Extreme-FedAvg:source58] [Epoch 3/20] [loss_mse: 0.162864]
+      [Extreme-FedAvg:source58] [Epoch 4/20] [loss_mse: 0.165609]
+      [Extreme-FedAvg:source58] [Epoch 5/20] [loss_mse: 0.158150]
+      [Extreme-FedAvg:source58] [Epoch 6/20] [loss_mse: 0.162004]
+      [Extreme-FedAvg:source58] [Epoch 7/20] [loss_mse: 0.157208]
+      [Extreme-FedAvg:source58] [Epoch 8/20] [loss_mse: 0.159577]
+      [Extreme-FedAvg:source58] [Epoch 9/20] [loss_mse: 0.162411]
+      [Extreme-FedAvg:source58] [Epoch 10/20] [loss_mse: 0.161881]
+      [Extreme-FedAvg:source58] [Epoch 11/20] [loss_mse: 0.162543]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target59_source58_class0]: 首次达到收敛条件 @ epoch 12 (best_epoch=7, best_loss=0.157208, final_loss=0.161226)
+      [Extreme-FedAvg:source58] [Epoch 12/20] [loss_mse: 0.161226]
+      [Extreme-FedAvg:source58] [Epoch 13/20] [loss_mse: 0.163505]
+      [Extreme-FedAvg:source58] [Epoch 14/20] [loss_mse: 0.159752]
+      [Extreme-FedAvg:source58] [Epoch 15/20] [loss_mse: 0.163776]
+      [Extreme-FedAvg:source58] [Epoch 16/20] [loss_mse: 0.156838]
+      [Extreme-FedAvg:source58] [Epoch 17/20] [loss_mse: 0.162233]
+      [Extreme-FedAvg:source58] [Epoch 18/20] [loss_mse: 0.159521]
+      [Extreme-FedAvg:source58] [Epoch 19/20] [loss_mse: 0.159760]
+      [Extreme-FedAvg:source58] [Epoch 20/20] [loss_mse: 0.160859]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target59_source58_class0]: 未收敛 (best_epoch=16, best_loss=0.156838, final_loss=0.160859)
+    [Extreme-FedAvg] source_station=59 -> target_station=59, samples=7
+      [Extreme-FedAvg:source59] [Epoch 1/20] [loss_mse: 0.238759]
+      [Extreme-FedAvg:source59] [Epoch 2/20] [loss_mse: 0.225034]
+      [Extreme-FedAvg:source59] [Epoch 3/20] [loss_mse: 0.223070]
+      [Extreme-FedAvg:source59] [Epoch 4/20] [loss_mse: 0.217229]
+      [Extreme-FedAvg:source59] [Epoch 5/20] [loss_mse: 0.220596]
+      [Extreme-FedAvg:source59] [Epoch 6/20] [loss_mse: 0.217816]
+      [Extreme-FedAvg:source59] [Epoch 7/20] [loss_mse: 0.212762]
+      [Extreme-FedAvg:source59] [Epoch 8/20] [loss_mse: 0.219142]
+      [Extreme-FedAvg:source59] [Epoch 9/20] [loss_mse: 0.205031]
+      [Extreme-FedAvg:source59] [Epoch 10/20] [loss_mse: 0.188606]
+      [Extreme-FedAvg:source59] [Epoch 11/20] [loss_mse: 0.196450]
+      [Extreme-FedAvg:source59] [Epoch 12/20] [loss_mse: 0.192807]
+      [Extreme-FedAvg:source59] [Epoch 13/20] [loss_mse: 0.180134]
+      [Extreme-FedAvg:source59] [Epoch 14/20] [loss_mse: 0.190543]
+      [Extreme-FedAvg:source59] [Epoch 15/20] [loss_mse: 0.185073]
+      [Extreme-FedAvg:source59] [Epoch 16/20] [loss_mse: 0.181828]
+      [Extreme-FedAvg:source59] [Epoch 17/20] [loss_mse: 0.172952]
+      [Extreme-FedAvg:source59] [Epoch 18/20] [loss_mse: 0.171759]
+      [Extreme-FedAvg:source59] [Epoch 19/20] [loss_mse: 0.172514]
+      [Extreme-FedAvg:source59] [Epoch 20/20] [loss_mse: 0.172579]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target59_source59_class0]: 未收敛 (best_epoch=18, best_loss=0.171759, final_loss=0.172579)
+    [Extreme-FedAvg] source_station=60 -> target_station=59, samples=5
+      [Extreme-FedAvg:source60] [Epoch 1/20] [loss_mse: 0.209050]
+      [Extreme-FedAvg:source60] [Epoch 2/20] [loss_mse: 0.212269]
+      [Extreme-FedAvg:source60] [Epoch 3/20] [loss_mse: 0.202524]
+      [Extreme-FedAvg:source60] [Epoch 4/20] [loss_mse: 0.196918]
+      [Extreme-FedAvg:source60] [Epoch 5/20] [loss_mse: 0.189058]
+      [Extreme-FedAvg:source60] [Epoch 6/20] [loss_mse: 0.187267]
+      [Extreme-FedAvg:source60] [Epoch 7/20] [loss_mse: 0.183440]
+      [Extreme-FedAvg:source60] [Epoch 8/20] [loss_mse: 0.182556]
+      [Extreme-FedAvg:source60] [Epoch 9/20] [loss_mse: 0.169945]
+      [Extreme-FedAvg:source60] [Epoch 10/20] [loss_mse: 0.163018]
+      [Extreme-FedAvg:source60] [Epoch 11/20] [loss_mse: 0.159602]
+      [Extreme-FedAvg:source60] [Epoch 12/20] [loss_mse: 0.169859]
+      [Extreme-FedAvg:source60] [Epoch 13/20] [loss_mse: 0.165578]
+      [Extreme-FedAvg:source60] [Epoch 14/20] [loss_mse: 0.163902]
+      [Extreme-FedAvg:source60] [Epoch 15/20] [loss_mse: 0.156295]
+      [Extreme-FedAvg:source60] [Epoch 16/20] [loss_mse: 0.146646]
+      [Extreme-FedAvg:source60] [Epoch 17/20] [loss_mse: 0.144968]
+      [Extreme-FedAvg:source60] [Epoch 18/20] [loss_mse: 0.143948]
+      [Extreme-FedAvg:source60] [Epoch 19/20] [loss_mse: 0.142808]
+      [Extreme-FedAvg:source60] [Epoch 20/20] [loss_mse: 0.151274]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target59_source60_class0]: 未收敛 (best_epoch=19, best_loss=0.142808, final_loss=0.151274)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station59_extreme0_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=59, samples=8
+      [Proposed-A:source58] [Epoch 1/20] [loss_mse: 0.166922]
+      [Proposed-A:source58] [Epoch 2/20] [loss_mse: 0.161761]
+      [Proposed-A:source58] [Epoch 3/20] [loss_mse: 0.161240]
+      [Proposed-A:source58] [Epoch 4/20] [loss_mse: 0.159138]
+      [Proposed-A:source58] [Epoch 5/20] [loss_mse: 0.163497]
+      [Proposed-A:source58] [Epoch 6/20] [loss_mse: 0.164903]
+      [Proposed-A:source58] [Epoch 7/20] [loss_mse: 0.165077]
+      [Proposed-A:source58] [Epoch 8/20] [loss_mse: 0.158998]
+      [Proposed-A:source58] [Epoch 9/20] [loss_mse: 0.166623]
+      [Proposed-A:source58] [Epoch 10/20] [loss_mse: 0.160620]
+      [Proposed-A:source58] [Epoch 11/20] [loss_mse: 0.163348]
+      [Proposed-A:source58] [Epoch 12/20] [loss_mse: 0.160689]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target59_source58_class0]: 首次达到收敛条件 @ epoch 13 (best_epoch=8, best_loss=0.158998, final_loss=0.164756)
+      [Proposed-A:source58] [Epoch 13/20] [loss_mse: 0.164756]
+      [Proposed-A:source58] [Epoch 14/20] [loss_mse: 0.169697]
+      [Proposed-A:source58] [Epoch 15/20] [loss_mse: 0.161741]
+      [Proposed-A:source58] [Epoch 16/20] [loss_mse: 0.162572]
+      [Proposed-A:source58] [Epoch 17/20] [loss_mse: 0.168331]
+      [Proposed-A:source58] [Epoch 18/20] [loss_mse: 0.162124]
+      [Proposed-A:source58] [Epoch 19/20] [loss_mse: 0.161878]
+      [Proposed-A:source58] [Epoch 20/20] [loss_mse: 0.159780]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target59_source58_class0]: 已收敛 @ epoch 13 (best_epoch=8, best_loss=0.158998, final_loss=0.159780)
+    [Proposed-A] source_station=59 -> target_station=59, samples=7
+      [Proposed-A:source59] [Epoch 1/20] [loss_mse: 0.234800]
+      [Proposed-A:source59] [Epoch 2/20] [loss_mse: 0.231359]
+      [Proposed-A:source59] [Epoch 3/20] [loss_mse: 0.229085]
+      [Proposed-A:source59] [Epoch 4/20] [loss_mse: 0.216233]
+      [Proposed-A:source59] [Epoch 5/20] [loss_mse: 0.215060]
+      [Proposed-A:source59] [Epoch 6/20] [loss_mse: 0.214849]
+      [Proposed-A:source59] [Epoch 7/20] [loss_mse: 0.203484]
+      [Proposed-A:source59] [Epoch 8/20] [loss_mse: 0.206710]
+      [Proposed-A:source59] [Epoch 9/20] [loss_mse: 0.193324]
+      [Proposed-A:source59] [Epoch 10/20] [loss_mse: 0.194221]
+      [Proposed-A:source59] [Epoch 11/20] [loss_mse: 0.185993]
+      [Proposed-A:source59] [Epoch 12/20] [loss_mse: 0.191697]
+      [Proposed-A:source59] [Epoch 13/20] [loss_mse: 0.188733]
+      [Proposed-A:source59] [Epoch 14/20] [loss_mse: 0.184446]
+      [Proposed-A:source59] [Epoch 15/20] [loss_mse: 0.173713]
+      [Proposed-A:source59] [Epoch 16/20] [loss_mse: 0.169744]
+      [Proposed-A:source59] [Epoch 17/20] [loss_mse: 0.178742]
+      [Proposed-A:source59] [Epoch 18/20] [loss_mse: 0.174155]
+      [Proposed-A:source59] [Epoch 19/20] [loss_mse: 0.165492]
+      [Proposed-A:source59] [Epoch 20/20] [loss_mse: 0.166891]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target59_source59_class0]: 未收敛 (best_epoch=19, best_loss=0.165492, final_loss=0.166891)
+    [Proposed-A] source_station=60 -> target_station=59, samples=5
+      [Proposed-A:source60] [Epoch 1/20] [loss_mse: 0.197880]
+      [Proposed-A:source60] [Epoch 2/20] [loss_mse: 0.206387]
+      [Proposed-A:source60] [Epoch 3/20] [loss_mse: 0.198074]
+      [Proposed-A:source60] [Epoch 4/20] [loss_mse: 0.192348]
+      [Proposed-A:source60] [Epoch 5/20] [loss_mse: 0.199456]
+      [Proposed-A:source60] [Epoch 6/20] [loss_mse: 0.192201]
+      [Proposed-A:source60] [Epoch 7/20] [loss_mse: 0.178035]
+      [Proposed-A:source60] [Epoch 8/20] [loss_mse: 0.185830]
+      [Proposed-A:source60] [Epoch 9/20] [loss_mse: 0.170041]
+      [Proposed-A:source60] [Epoch 10/20] [loss_mse: 0.185399]
+      [Proposed-A:source60] [Epoch 11/20] [loss_mse: 0.170555]
+      [Proposed-A:source60] [Epoch 12/20] [loss_mse: 0.176004]
+      [Proposed-A:source60] [Epoch 13/20] [loss_mse: 0.148698]
+      [Proposed-A:source60] [Epoch 14/20] [loss_mse: 0.155568]
+      [Proposed-A:source60] [Epoch 15/20] [loss_mse: 0.163261]
+      [Proposed-A:source60] [Epoch 16/20] [loss_mse: 0.146399]
+      [Proposed-A:source60] [Epoch 17/20] [loss_mse: 0.165371]
+      [Proposed-A:source60] [Epoch 18/20] [loss_mse: 0.147519]
+      [Proposed-A:source60] [Epoch 19/20] [loss_mse: 0.147808]
+      [Proposed-A:source60] [Epoch 20/20] [loss_mse: 0.139572]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target59_source60_class0]: 未收敛 (best_epoch=20, best_loss=0.139572, final_loss=0.139572)
+    [Proposed-A] 聚合权重: {"58": 0.3608, "59": 0.339, "60": 0.3002}
+    ✓ 保存(Proposed-A): ./model_fore_station59_extreme0.pth
+
+  极端天气类别 2:
+    样本数: 4
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.072042]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.077037]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.067873]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.060830]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.057421]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.062269]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.057184]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.048542]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.046354]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.043923]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.038152]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.037894]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.036685]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.036246]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.037469]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.032940]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.031697]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.033808]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.026998]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.025101]
+  收敛检测[few_shot:LMT-new:lmt_new_station59_class1]: 未收敛 (best_epoch=20, best_loss=0.025101, final_loss=0.025101)
+    ✓ 保存(LMT-new): ./model_fore_station59_extreme1_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=59, samples=1
+      [Extreme-FedAvg:source58] [Epoch 1/20] [loss_mse: 0.024706]
+      [Extreme-FedAvg:source58] [Epoch 2/20] [loss_mse: 0.034581]
+      [Extreme-FedAvg:source58] [Epoch 3/20] [loss_mse: 0.024042]
+      [Extreme-FedAvg:source58] [Epoch 4/20] [loss_mse: 0.019668]
+      [Extreme-FedAvg:source58] [Epoch 5/20] [loss_mse: 0.025064]
+      [Extreme-FedAvg:source58] [Epoch 6/20] [loss_mse: 0.023301]
+      [Extreme-FedAvg:source58] [Epoch 7/20] [loss_mse: 0.019214]
+      [Extreme-FedAvg:source58] [Epoch 8/20] [loss_mse: 0.027593]
+      [Extreme-FedAvg:source58] [Epoch 9/20] [loss_mse: 0.033685]
+      [Extreme-FedAvg:source58] [Epoch 10/20] [loss_mse: 0.023660]
+      [Extreme-FedAvg:source58] [Epoch 11/20] [loss_mse: 0.023633]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target59_source58_class1]: 首次达到收敛条件 @ epoch 12 (best_epoch=7, best_loss=0.019214, final_loss=0.031936)
+      [Extreme-FedAvg:source58] [Epoch 12/20] [loss_mse: 0.031936]
+      [Extreme-FedAvg:source58] [Epoch 13/20] [loss_mse: 0.028935]
+      [Extreme-FedAvg:source58] [Epoch 14/20] [loss_mse: 0.032599]
+      [Extreme-FedAvg:source58] [Epoch 15/20] [loss_mse: 0.028867]
+      [Extreme-FedAvg:source58] [Epoch 16/20] [loss_mse: 0.028960]
+      [Extreme-FedAvg:source58] [Epoch 17/20] [loss_mse: 0.022856]
+      [Extreme-FedAvg:source58] [Epoch 18/20] [loss_mse: 0.031934]
+      [Extreme-FedAvg:source58] [Epoch 19/20] [loss_mse: 0.030024]
+      [Extreme-FedAvg:source58] [Epoch 20/20] [loss_mse: 0.024911]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target59_source58_class1]: 已收敛 @ epoch 12 (best_epoch=7, best_loss=0.019214, final_loss=0.024911)
+    [Extreme-FedAvg] source_station=59 -> target_station=59, samples=4
+      [Extreme-FedAvg:source59] [Epoch 1/20] [loss_mse: 0.076026]
+      [Extreme-FedAvg:source59] [Epoch 2/20] [loss_mse: 0.075927]
+      [Extreme-FedAvg:source59] [Epoch 3/20] [loss_mse: 0.076252]
+      [Extreme-FedAvg:source59] [Epoch 4/20] [loss_mse: 0.061336]
+      [Extreme-FedAvg:source59] [Epoch 5/20] [loss_mse: 0.056455]
+      [Extreme-FedAvg:source59] [Epoch 6/20] [loss_mse: 0.058206]
+      [Extreme-FedAvg:source59] [Epoch 7/20] [loss_mse: 0.054143]
+      [Extreme-FedAvg:source59] [Epoch 8/20] [loss_mse: 0.048177]
+      [Extreme-FedAvg:source59] [Epoch 9/20] [loss_mse: 0.044433]
+      [Extreme-FedAvg:source59] [Epoch 10/20] [loss_mse: 0.048121]
+      [Extreme-FedAvg:source59] [Epoch 11/20] [loss_mse: 0.041248]
+      [Extreme-FedAvg:source59] [Epoch 12/20] [loss_mse: 0.039735]
+      [Extreme-FedAvg:source59] [Epoch 13/20] [loss_mse: 0.045534]
+      [Extreme-FedAvg:source59] [Epoch 14/20] [loss_mse: 0.034042]
+      [Extreme-FedAvg:source59] [Epoch 15/20] [loss_mse: 0.032769]
+      [Extreme-FedAvg:source59] [Epoch 16/20] [loss_mse: 0.030321]
+      [Extreme-FedAvg:source59] [Epoch 17/20] [loss_mse: 0.029454]
+      [Extreme-FedAvg:source59] [Epoch 18/20] [loss_mse: 0.027065]
+      [Extreme-FedAvg:source59] [Epoch 19/20] [loss_mse: 0.027527]
+      [Extreme-FedAvg:source59] [Epoch 20/20] [loss_mse: 0.023970]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target59_source59_class1]: 未收敛 (best_epoch=20, best_loss=0.023970, final_loss=0.023970)
+    [Extreme-FedAvg] source_station=60 -> target_station=59, samples=3
+      [Extreme-FedAvg:source60] [Epoch 1/20] [loss_mse: 0.053036]
+      [Extreme-FedAvg:source60] [Epoch 2/20] [loss_mse: 0.054014]
+      [Extreme-FedAvg:source60] [Epoch 3/20] [loss_mse: 0.047369]
+      [Extreme-FedAvg:source60] [Epoch 4/20] [loss_mse: 0.050779]
+      [Extreme-FedAvg:source60] [Epoch 5/20] [loss_mse: 0.048259]
+      [Extreme-FedAvg:source60] [Epoch 6/20] [loss_mse: 0.046855]
+      [Extreme-FedAvg:source60] [Epoch 7/20] [loss_mse: 0.045228]
+      [Extreme-FedAvg:source60] [Epoch 8/20] [loss_mse: 0.043676]
+      [Extreme-FedAvg:source60] [Epoch 9/20] [loss_mse: 0.038914]
+      [Extreme-FedAvg:source60] [Epoch 10/20] [loss_mse: 0.031816]
+      [Extreme-FedAvg:source60] [Epoch 11/20] [loss_mse: 0.031105]
+      [Extreme-FedAvg:source60] [Epoch 12/20] [loss_mse: 0.032816]
+      [Extreme-FedAvg:source60] [Epoch 13/20] [loss_mse: 0.032725]
+      [Extreme-FedAvg:source60] [Epoch 14/20] [loss_mse: 0.025800]
+      [Extreme-FedAvg:source60] [Epoch 15/20] [loss_mse: 0.028546]
+      [Extreme-FedAvg:source60] [Epoch 16/20] [loss_mse: 0.025187]
+      [Extreme-FedAvg:source60] [Epoch 17/20] [loss_mse: 0.024711]
+      [Extreme-FedAvg:source60] [Epoch 18/20] [loss_mse: 0.022788]
+      [Extreme-FedAvg:source60] [Epoch 19/20] [loss_mse: 0.021205]
+      [Extreme-FedAvg:source60] [Epoch 20/20] [loss_mse: 0.023671]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target59_source60_class1]: 未收敛 (best_epoch=19, best_loss=0.021205, final_loss=0.023671)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station59_extreme1_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=59, samples=1
+      [Proposed-A:source58] [Epoch 1/20] [loss_mse: 0.033176]
+      [Proposed-A:source58] [Epoch 2/20] [loss_mse: 0.027250]
+      [Proposed-A:source58] [Epoch 3/20] [loss_mse: 0.027899]
+      [Proposed-A:source58] [Epoch 4/20] [loss_mse: 0.027506]
+      [Proposed-A:source58] [Epoch 5/20] [loss_mse: 0.027298]
+      [Proposed-A:source58] [Epoch 6/20] [loss_mse: 0.020538]
+      [Proposed-A:source58] [Epoch 7/20] [loss_mse: 0.033099]
+      [Proposed-A:source58] [Epoch 8/20] [loss_mse: 0.031035]
+      [Proposed-A:source58] [Epoch 9/20] [loss_mse: 0.026291]
+      [Proposed-A:source58] [Epoch 10/20] [loss_mse: 0.029914]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target59_source58_class1]: 首次达到收敛条件 @ epoch 11 (best_epoch=6, best_loss=0.020538, final_loss=0.027827)
+      [Proposed-A:source58] [Epoch 11/20] [loss_mse: 0.027827]
+      [Proposed-A:source58] [Epoch 12/20] [loss_mse: 0.031839]
+      [Proposed-A:source58] [Epoch 13/20] [loss_mse: 0.024881]
+      [Proposed-A:source58] [Epoch 14/20] [loss_mse: 0.022062]
+      [Proposed-A:source58] [Epoch 15/20] [loss_mse: 0.025570]
+      [Proposed-A:source58] [Epoch 16/20] [loss_mse: 0.028938]
+      [Proposed-A:source58] [Epoch 17/20] [loss_mse: 0.024050]
+      [Proposed-A:source58] [Epoch 18/20] [loss_mse: 0.024936]
+      [Proposed-A:source58] [Epoch 19/20] [loss_mse: 0.034530]
+      [Proposed-A:source58] [Epoch 20/20] [loss_mse: 0.029261]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target59_source58_class1]: 已收敛 @ epoch 11 (best_epoch=6, best_loss=0.020538, final_loss=0.029261)
+    [Proposed-A] source_station=59 -> target_station=59, samples=4
+      [Proposed-A:source59] [Epoch 1/20] [loss_mse: 0.078507]
+      [Proposed-A:source59] [Epoch 2/20] [loss_mse: 0.070701]
+      [Proposed-A:source59] [Epoch 3/20] [loss_mse: 0.073118]
+      [Proposed-A:source59] [Epoch 4/20] [loss_mse: 0.069265]
+      [Proposed-A:source59] [Epoch 5/20] [loss_mse: 0.058464]
+      [Proposed-A:source59] [Epoch 6/20] [loss_mse: 0.055778]
+      [Proposed-A:source59] [Epoch 7/20] [loss_mse: 0.052426]
+      [Proposed-A:source59] [Epoch 8/20] [loss_mse: 0.052522]
+      [Proposed-A:source59] [Epoch 9/20] [loss_mse: 0.046348]
+      [Proposed-A:source59] [Epoch 10/20] [loss_mse: 0.045613]
+      [Proposed-A:source59] [Epoch 11/20] [loss_mse: 0.041000]
+      [Proposed-A:source59] [Epoch 12/20] [loss_mse: 0.036581]
+      [Proposed-A:source59] [Epoch 13/20] [loss_mse: 0.038154]
+      [Proposed-A:source59] [Epoch 14/20] [loss_mse: 0.033658]
+      [Proposed-A:source59] [Epoch 15/20] [loss_mse: 0.033296]
+      [Proposed-A:source59] [Epoch 16/20] [loss_mse: 0.031535]
+      [Proposed-A:source59] [Epoch 17/20] [loss_mse: 0.030685]
+      [Proposed-A:source59] [Epoch 18/20] [loss_mse: 0.026484]
+      [Proposed-A:source59] [Epoch 19/20] [loss_mse: 0.028382]
+      [Proposed-A:source59] [Epoch 20/20] [loss_mse: 0.027979]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target59_source59_class1]: 未收敛 (best_epoch=18, best_loss=0.026484, final_loss=0.027979)
+    [Proposed-A] source_station=60 -> target_station=59, samples=3
+      [Proposed-A:source60] [Epoch 1/20] [loss_mse: 0.063673]
+      [Proposed-A:source60] [Epoch 2/20] [loss_mse: 0.058470]
+      [Proposed-A:source60] [Epoch 3/20] [loss_mse: 0.052347]
+      [Proposed-A:source60] [Epoch 4/20] [loss_mse: 0.046574]
+      [Proposed-A:source60] [Epoch 5/20] [loss_mse: 0.046097]
+      [Proposed-A:source60] [Epoch 6/20] [loss_mse: 0.045370]
+      [Proposed-A:source60] [Epoch 7/20] [loss_mse: 0.040037]
+      [Proposed-A:source60] [Epoch 8/20] [loss_mse: 0.038436]
+      [Proposed-A:source60] [Epoch 9/20] [loss_mse: 0.039932]
+      [Proposed-A:source60] [Epoch 10/20] [loss_mse: 0.031434]
+      [Proposed-A:source60] [Epoch 11/20] [loss_mse: 0.030312]
+      [Proposed-A:source60] [Epoch 12/20] [loss_mse: 0.032265]
+      [Proposed-A:source60] [Epoch 13/20] [loss_mse: 0.032843]
+      [Proposed-A:source60] [Epoch 14/20] [loss_mse: 0.025910]
+      [Proposed-A:source60] [Epoch 15/20] [loss_mse: 0.027190]
+      [Proposed-A:source60] [Epoch 16/20] [loss_mse: 0.025694]
+      [Proposed-A:source60] [Epoch 17/20] [loss_mse: 0.024748]
+      [Proposed-A:source60] [Epoch 18/20] [loss_mse: 0.022083]
+      [Proposed-A:source60] [Epoch 19/20] [loss_mse: 0.025296]
+      [Proposed-A:source60] [Epoch 20/20] [loss_mse: 0.024434]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target59_source60_class1]: 未收敛 (best_epoch=18, best_loss=0.022083, final_loss=0.024434)
+    [Proposed-A] 聚合权重: {"58": 0.1875, "59": 0.4358, "60": 0.3767}
+    ✓ 保存(Proposed-A): ./model_fore_station59_extreme1.pth
+
+  极端天气类别 3:
+    样本数: 2
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.196038]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.176193]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.171425]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.174032]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.181639]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.157734]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.148351]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.160454]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.144632]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.142460]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.144929]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.137446]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.126228]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.113917]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.124637]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.121213]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.110230]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.112667]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.099057]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.104248]
+  收敛检测[few_shot:LMT-new:lmt_new_station59_class2]: 未收敛 (best_epoch=19, best_loss=0.099057, final_loss=0.104248)
+    ✓ 保存(LMT-new): ./model_fore_station59_extreme2_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=59, samples=1
+      [Extreme-FedAvg:source58] [Epoch 1/20] [loss_mse: 0.164801]
+      [Extreme-FedAvg:source58] [Epoch 2/20] [loss_mse: 0.166630]
+      [Extreme-FedAvg:source58] [Epoch 3/20] [loss_mse: 0.153524]
+      [Extreme-FedAvg:source58] [Epoch 4/20] [loss_mse: 0.155787]
+      [Extreme-FedAvg:source58] [Epoch 5/20] [loss_mse: 0.159265]
+      [Extreme-FedAvg:source58] [Epoch 6/20] [loss_mse: 0.164290]
+      [Extreme-FedAvg:source58] [Epoch 7/20] [loss_mse: 0.134692]
+      [Extreme-FedAvg:source58] [Epoch 8/20] [loss_mse: 0.134140]
+      [Extreme-FedAvg:source58] [Epoch 9/20] [loss_mse: 0.163586]
+      [Extreme-FedAvg:source58] [Epoch 10/20] [loss_mse: 0.113363]
+      [Extreme-FedAvg:source58] [Epoch 11/20] [loss_mse: 0.148787]
+      [Extreme-FedAvg:source58] [Epoch 12/20] [loss_mse: 0.134546]
+      [Extreme-FedAvg:source58] [Epoch 13/20] [loss_mse: 0.132092]
+      [Extreme-FedAvg:source58] [Epoch 14/20] [loss_mse: 0.133232]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target59_source58_class2]: 首次达到收敛条件 @ epoch 15 (best_epoch=10, best_loss=0.113363, final_loss=0.123331)
+      [Extreme-FedAvg:source58] [Epoch 15/20] [loss_mse: 0.123331]
+      [Extreme-FedAvg:source58] [Epoch 16/20] [loss_mse: 0.102658]
+      [Extreme-FedAvg:source58] [Epoch 17/20] [loss_mse: 0.111554]
+      [Extreme-FedAvg:source58] [Epoch 18/20] [loss_mse: 0.120312]
+      [Extreme-FedAvg:source58] [Epoch 19/20] [loss_mse: 0.124595]
+      [Extreme-FedAvg:source58] [Epoch 20/20] [loss_mse: 0.089521]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target59_source58_class2]: 未收敛 (best_epoch=20, best_loss=0.089521, final_loss=0.089521)
+    [Extreme-FedAvg] source_station=59 -> target_station=59, samples=2
+      [Extreme-FedAvg:source59] [Epoch 1/20] [loss_mse: 0.183170]
+      [Extreme-FedAvg:source59] [Epoch 2/20] [loss_mse: 0.188355]
+      [Extreme-FedAvg:source59] [Epoch 3/20] [loss_mse: 0.179177]
+      [Extreme-FedAvg:source59] [Epoch 4/20] [loss_mse: 0.181064]
+      [Extreme-FedAvg:source59] [Epoch 5/20] [loss_mse: 0.162282]
+      [Extreme-FedAvg:source59] [Epoch 6/20] [loss_mse: 0.156432]
+      [Extreme-FedAvg:source59] [Epoch 7/20] [loss_mse: 0.157659]
+      [Extreme-FedAvg:source59] [Epoch 8/20] [loss_mse: 0.159462]
+      [Extreme-FedAvg:source59] [Epoch 9/20] [loss_mse: 0.153274]
+      [Extreme-FedAvg:source59] [Epoch 10/20] [loss_mse: 0.142938]
+      [Extreme-FedAvg:source59] [Epoch 11/20] [loss_mse: 0.138313]
+      [Extreme-FedAvg:source59] [Epoch 12/20] [loss_mse: 0.118560]
+      [Extreme-FedAvg:source59] [Epoch 13/20] [loss_mse: 0.128195]
+      [Extreme-FedAvg:source59] [Epoch 14/20] [loss_mse: 0.112711]
+      [Extreme-FedAvg:source59] [Epoch 15/20] [loss_mse: 0.124257]
+      [Extreme-FedAvg:source59] [Epoch 16/20] [loss_mse: 0.116804]
+      [Extreme-FedAvg:source59] [Epoch 17/20] [loss_mse: 0.103034]
+      [Extreme-FedAvg:source59] [Epoch 18/20] [loss_mse: 0.113651]
+      [Extreme-FedAvg:source59] [Epoch 19/20] [loss_mse: 0.112812]
+      [Extreme-FedAvg:source59] [Epoch 20/20] [loss_mse: 0.107302]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target59_source59_class2]: 未收敛 (best_epoch=17, best_loss=0.103034, final_loss=0.107302)
+    [Extreme-FedAvg] source_station=60 -> target_station=59, samples=1
+      [Extreme-FedAvg:source60] [Epoch 1/20] [loss_mse: 0.216287]
+      [Extreme-FedAvg:source60] [Epoch 2/20] [loss_mse: 0.223313]
+      [Extreme-FedAvg:source60] [Epoch 3/20] [loss_mse: 0.207311]
+      [Extreme-FedAvg:source60] [Epoch 4/20] [loss_mse: 0.192895]
+      [Extreme-FedAvg:source60] [Epoch 5/20] [loss_mse: 0.187707]
+      [Extreme-FedAvg:source60] [Epoch 6/20] [loss_mse: 0.191575]
+      [Extreme-FedAvg:source60] [Epoch 7/20] [loss_mse: 0.190338]
+      [Extreme-FedAvg:source60] [Epoch 8/20] [loss_mse: 0.186429]
+      [Extreme-FedAvg:source60] [Epoch 9/20] [loss_mse: 0.159317]
+      [Extreme-FedAvg:source60] [Epoch 10/20] [loss_mse: 0.172160]
+      [Extreme-FedAvg:source60] [Epoch 11/20] [loss_mse: 0.154950]
+      [Extreme-FedAvg:source60] [Epoch 12/20] [loss_mse: 0.159309]
+      [Extreme-FedAvg:source60] [Epoch 13/20] [loss_mse: 0.157311]
+      [Extreme-FedAvg:source60] [Epoch 14/20] [loss_mse: 0.142338]
+      [Extreme-FedAvg:source60] [Epoch 15/20] [loss_mse: 0.149326]
+      [Extreme-FedAvg:source60] [Epoch 16/20] [loss_mse: 0.133712]
+      [Extreme-FedAvg:source60] [Epoch 17/20] [loss_mse: 0.116624]
+      [Extreme-FedAvg:source60] [Epoch 18/20] [loss_mse: 0.135313]
+      [Extreme-FedAvg:source60] [Epoch 19/20] [loss_mse: 0.139280]
+      [Extreme-FedAvg:source60] [Epoch 20/20] [loss_mse: 0.120497]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target59_source60_class2]: 未收敛 (best_epoch=17, best_loss=0.116624, final_loss=0.120497)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station59_extreme2_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=59, samples=1
+      [Proposed-A:source58] [Epoch 1/20] [loss_mse: 0.170417]
+      [Proposed-A:source58] [Epoch 2/20] [loss_mse: 0.165269]
+      [Proposed-A:source58] [Epoch 3/20] [loss_mse: 0.149336]
+      [Proposed-A:source58] [Epoch 4/20] [loss_mse: 0.152062]
+      [Proposed-A:source58] [Epoch 5/20] [loss_mse: 0.151207]
+      [Proposed-A:source58] [Epoch 6/20] [loss_mse: 0.150540]
+      [Proposed-A:source58] [Epoch 7/20] [loss_mse: 0.154032]
+      [Proposed-A:source58] [Epoch 8/20] [loss_mse: 0.131176]
+      [Proposed-A:source58] [Epoch 9/20] [loss_mse: 0.144327]
+      [Proposed-A:source58] [Epoch 10/20] [loss_mse: 0.165930]
+      [Proposed-A:source58] [Epoch 11/20] [loss_mse: 0.112663]
+      [Proposed-A:source58] [Epoch 12/20] [loss_mse: 0.127994]
+      [Proposed-A:source58] [Epoch 13/20] [loss_mse: 0.128065]
+      [Proposed-A:source58] [Epoch 14/20] [loss_mse: 0.131899]
+      [Proposed-A:source58] [Epoch 15/20] [loss_mse: 0.109758]
+      [Proposed-A:source58] [Epoch 16/20] [loss_mse: 0.112608]
+      [Proposed-A:source58] [Epoch 17/20] [loss_mse: 0.105222]
+      [Proposed-A:source58] [Epoch 18/20] [loss_mse: 0.105738]
+      [Proposed-A:source58] [Epoch 19/20] [loss_mse: 0.105663]
+      [Proposed-A:source58] [Epoch 20/20] [loss_mse: 0.124425]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target59_source58_class2]: 未收敛 (best_epoch=17, best_loss=0.105222, final_loss=0.124425)
+    [Proposed-A] source_station=59 -> target_station=59, samples=2
+      [Proposed-A:source59] [Epoch 1/20] [loss_mse: 0.187907]
+      [Proposed-A:source59] [Epoch 2/20] [loss_mse: 0.191365]
+      [Proposed-A:source59] [Epoch 3/20] [loss_mse: 0.188906]
+      [Proposed-A:source59] [Epoch 4/20] [loss_mse: 0.166528]
+      [Proposed-A:source59] [Epoch 5/20] [loss_mse: 0.173619]
+      [Proposed-A:source59] [Epoch 6/20] [loss_mse: 0.162368]
+      [Proposed-A:source59] [Epoch 7/20] [loss_mse: 0.149708]
+      [Proposed-A:source59] [Epoch 8/20] [loss_mse: 0.148963]
+      [Proposed-A:source59] [Epoch 9/20] [loss_mse: 0.142523]
+      [Proposed-A:source59] [Epoch 10/20] [loss_mse: 0.139794]
+      [Proposed-A:source59] [Epoch 11/20] [loss_mse: 0.123905]
+      [Proposed-A:source59] [Epoch 12/20] [loss_mse: 0.121624]
+      [Proposed-A:source59] [Epoch 13/20] [loss_mse: 0.129627]
+      [Proposed-A:source59] [Epoch 14/20] [loss_mse: 0.125715]
+      [Proposed-A:source59] [Epoch 15/20] [loss_mse: 0.111003]
+      [Proposed-A:source59] [Epoch 16/20] [loss_mse: 0.108647]
+      [Proposed-A:source59] [Epoch 17/20] [loss_mse: 0.095978]
+      [Proposed-A:source59] [Epoch 18/20] [loss_mse: 0.104822]
+      [Proposed-A:source59] [Epoch 19/20] [loss_mse: 0.120675]
+      [Proposed-A:source59] [Epoch 20/20] [loss_mse: 0.101137]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target59_source59_class2]: 未收敛 (best_epoch=17, best_loss=0.095978, final_loss=0.101137)
+    [Proposed-A] source_station=60 -> target_station=59, samples=1
+      [Proposed-A:source60] [Epoch 1/20] [loss_mse: 0.206179]
+      [Proposed-A:source60] [Epoch 2/20] [loss_mse: 0.210370]
+      [Proposed-A:source60] [Epoch 3/20] [loss_mse: 0.211134]
+      [Proposed-A:source60] [Epoch 4/20] [loss_mse: 0.176773]
+      [Proposed-A:source60] [Epoch 5/20] [loss_mse: 0.205557]
+      [Proposed-A:source60] [Epoch 6/20] [loss_mse: 0.180581]
+      [Proposed-A:source60] [Epoch 7/20] [loss_mse: 0.185260]
+      [Proposed-A:source60] [Epoch 8/20] [loss_mse: 0.158170]
+      [Proposed-A:source60] [Epoch 9/20] [loss_mse: 0.177190]
+      [Proposed-A:source60] [Epoch 10/20] [loss_mse: 0.165164]
+      [Proposed-A:source60] [Epoch 11/20] [loss_mse: 0.153604]
+      [Proposed-A:source60] [Epoch 12/20] [loss_mse: 0.173829]
+      [Proposed-A:source60] [Epoch 13/20] [loss_mse: 0.166977]
+      [Proposed-A:source60] [Epoch 14/20] [loss_mse: 0.145291]
+      [Proposed-A:source60] [Epoch 15/20] [loss_mse: 0.141362]
+      [Proposed-A:source60] [Epoch 16/20] [loss_mse: 0.143409]
+      [Proposed-A:source60] [Epoch 17/20] [loss_mse: 0.145908]
+      [Proposed-A:source60] [Epoch 18/20] [loss_mse: 0.136204]
+      [Proposed-A:source60] [Epoch 19/20] [loss_mse: 0.126373]
+      [Proposed-A:source60] [Epoch 20/20] [loss_mse: 0.123829]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target59_source60_class2]: 未收敛 (best_epoch=20, best_loss=0.123829, final_loss=0.123829)
+    [Proposed-A] 聚合权重: {"58": 0.276, "59": 0.4478, "60": 0.2762}
+    ✓ 保存(Proposed-A): ./model_fore_station59_extreme2.pth
+
+  极端天气类别 4:
+    样本数: 19
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.092528]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.091986]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.089940]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.086294]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.084913]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.083803]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.084371]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.081662]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.079862]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.080116]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.080076]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.077580]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.077469]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.079272]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.078915]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.078690]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.076424]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.079431]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.077123]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.078028]
+  收敛检测[few_shot:LMT-new:lmt_new_station59_class3]: 未收敛 (best_epoch=17, best_loss=0.076424, final_loss=0.078028)
+    ✓ 保存(LMT-new): ./model_fore_station59_extreme3_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=59, samples=36
+      [Extreme-FedAvg:source58] [Epoch 1/20] [loss_mse: 0.056781]
+      [Extreme-FedAvg:source58] [Epoch 2/20] [loss_mse: 0.054278]
+      [Extreme-FedAvg:source58] [Epoch 3/20] [loss_mse: 0.053135]
+      [Extreme-FedAvg:source58] [Epoch 4/20] [loss_mse: 0.054156]
+      [Extreme-FedAvg:source58] [Epoch 5/20] [loss_mse: 0.050399]
+      [Extreme-FedAvg:source58] [Epoch 6/20] [loss_mse: 0.048935]
+      [Extreme-FedAvg:source58] [Epoch 7/20] [loss_mse: 0.048154]
+      [Extreme-FedAvg:source58] [Epoch 8/20] [loss_mse: 0.046171]
+      [Extreme-FedAvg:source58] [Epoch 9/20] [loss_mse: 0.045997]
+      [Extreme-FedAvg:source58] [Epoch 10/20] [loss_mse: 0.043869]
+      [Extreme-FedAvg:source58] [Epoch 11/20] [loss_mse: 0.043555]
+      [Extreme-FedAvg:source58] [Epoch 12/20] [loss_mse: 0.042346]
+      [Extreme-FedAvg:source58] [Epoch 13/20] [loss_mse: 0.041649]
+      [Extreme-FedAvg:source58] [Epoch 14/20] [loss_mse: 0.039712]
+      [Extreme-FedAvg:source58] [Epoch 15/20] [loss_mse: 0.040128]
+      [Extreme-FedAvg:source58] [Epoch 16/20] [loss_mse: 0.039177]
+      [Extreme-FedAvg:source58] [Epoch 17/20] [loss_mse: 0.039244]
+      [Extreme-FedAvg:source58] [Epoch 18/20] [loss_mse: 0.038233]
+      [Extreme-FedAvg:source58] [Epoch 19/20] [loss_mse: 0.038966]
+      [Extreme-FedAvg:source58] [Epoch 20/20] [loss_mse: 0.037657]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target59_source58_class3]: 未收敛 (best_epoch=20, best_loss=0.037657, final_loss=0.037657)
+    [Extreme-FedAvg] source_station=59 -> target_station=59, samples=19
+      [Extreme-FedAvg:source59] [Epoch 1/20] [loss_mse: 0.094404]
+      [Extreme-FedAvg:source59] [Epoch 2/20] [loss_mse: 0.090068]
+      [Extreme-FedAvg:source59] [Epoch 3/20] [loss_mse: 0.088948]
+      [Extreme-FedAvg:source59] [Epoch 4/20] [loss_mse: 0.090447]
+      [Extreme-FedAvg:source59] [Epoch 5/20] [loss_mse: 0.089541]
+      [Extreme-FedAvg:source59] [Epoch 6/20] [loss_mse: 0.083998]
+      [Extreme-FedAvg:source59] [Epoch 7/20] [loss_mse: 0.084068]
+      [Extreme-FedAvg:source59] [Epoch 8/20] [loss_mse: 0.079272]
+      [Extreme-FedAvg:source59] [Epoch 9/20] [loss_mse: 0.080519]
+      [Extreme-FedAvg:source59] [Epoch 10/20] [loss_mse: 0.077062]
+      [Extreme-FedAvg:source59] [Epoch 11/20] [loss_mse: 0.079289]
+      [Extreme-FedAvg:source59] [Epoch 12/20] [loss_mse: 0.081213]
+      [Extreme-FedAvg:source59] [Epoch 13/20] [loss_mse: 0.079371]
+      [Extreme-FedAvg:source59] [Epoch 14/20] [loss_mse: 0.079105]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target59_source59_class3]: 首次达到收敛条件 @ epoch 15 (best_epoch=10, best_loss=0.077062, final_loss=0.077312)
+      [Extreme-FedAvg:source59] [Epoch 15/20] [loss_mse: 0.077312]
+      [Extreme-FedAvg:source59] [Epoch 16/20] [loss_mse: 0.076861]
+      [Extreme-FedAvg:source59] [Epoch 17/20] [loss_mse: 0.079727]
+      [Extreme-FedAvg:source59] [Epoch 18/20] [loss_mse: 0.079534]
+      [Extreme-FedAvg:source59] [Epoch 19/20] [loss_mse: 0.079868]
+      [Extreme-FedAvg:source59] [Epoch 20/20] [loss_mse: 0.078603]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target59_source59_class3]: 未收敛 (best_epoch=16, best_loss=0.076861, final_loss=0.078603)
+    [Extreme-FedAvg] source_station=60 -> target_station=59, samples=28
+      [Extreme-FedAvg:source60] [Epoch 1/20] [loss_mse: 0.107533]
+      [Extreme-FedAvg:source60] [Epoch 2/20] [loss_mse: 0.104918]
+      [Extreme-FedAvg:source60] [Epoch 3/20] [loss_mse: 0.098331]
+      [Extreme-FedAvg:source60] [Epoch 4/20] [loss_mse: 0.096543]
+      [Extreme-FedAvg:source60] [Epoch 5/20] [loss_mse: 0.091765]
+      [Extreme-FedAvg:source60] [Epoch 6/20] [loss_mse: 0.089423]
+      [Extreme-FedAvg:source60] [Epoch 7/20] [loss_mse: 0.087909]
+      [Extreme-FedAvg:source60] [Epoch 8/20] [loss_mse: 0.086117]
+      [Extreme-FedAvg:source60] [Epoch 9/20] [loss_mse: 0.084124]
+      [Extreme-FedAvg:source60] [Epoch 10/20] [loss_mse: 0.078382]
+      [Extreme-FedAvg:source60] [Epoch 11/20] [loss_mse: 0.078821]
+      [Extreme-FedAvg:source60] [Epoch 12/20] [loss_mse: 0.075116]
+      [Extreme-FedAvg:source60] [Epoch 13/20] [loss_mse: 0.073142]
+      [Extreme-FedAvg:source60] [Epoch 14/20] [loss_mse: 0.072006]
+      [Extreme-FedAvg:source60] [Epoch 15/20] [loss_mse: 0.069604]
+      [Extreme-FedAvg:source60] [Epoch 16/20] [loss_mse: 0.069167]
+      [Extreme-FedAvg:source60] [Epoch 17/20] [loss_mse: 0.068684]
+      [Extreme-FedAvg:source60] [Epoch 18/20] [loss_mse: 0.064735]
+      [Extreme-FedAvg:source60] [Epoch 19/20] [loss_mse: 0.062801]
+      [Extreme-FedAvg:source60] [Epoch 20/20] [loss_mse: 0.064107]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target59_source60_class3]: 未收敛 (best_epoch=19, best_loss=0.062801, final_loss=0.064107)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station59_extreme3_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=59, samples=36
+      [Proposed-A:source58] [Epoch 1/20] [loss_mse: 0.056523]
+      [Proposed-A:source58] [Epoch 2/20] [loss_mse: 0.056274]
+      [Proposed-A:source58] [Epoch 3/20] [loss_mse: 0.054845]
+      [Proposed-A:source58] [Epoch 4/20] [loss_mse: 0.052397]
+      [Proposed-A:source58] [Epoch 5/20] [loss_mse: 0.050141]
+      [Proposed-A:source58] [Epoch 6/20] [loss_mse: 0.048034]
+      [Proposed-A:source58] [Epoch 7/20] [loss_mse: 0.047842]
+      [Proposed-A:source58] [Epoch 8/20] [loss_mse: 0.047381]
+      [Proposed-A:source58] [Epoch 9/20] [loss_mse: 0.045078]
+      [Proposed-A:source58] [Epoch 10/20] [loss_mse: 0.044332]
+      [Proposed-A:source58] [Epoch 11/20] [loss_mse: 0.042883]
+      [Proposed-A:source58] [Epoch 12/20] [loss_mse: 0.043078]
+      [Proposed-A:source58] [Epoch 13/20] [loss_mse: 0.041777]
+      [Proposed-A:source58] [Epoch 14/20] [loss_mse: 0.040512]
+      [Proposed-A:source58] [Epoch 15/20] [loss_mse: 0.040865]
+      [Proposed-A:source58] [Epoch 16/20] [loss_mse: 0.039575]
+      [Proposed-A:source58] [Epoch 17/20] [loss_mse: 0.039786]
+      [Proposed-A:source58] [Epoch 18/20] [loss_mse: 0.038602]
+      [Proposed-A:source58] [Epoch 19/20] [loss_mse: 0.037768]
+      [Proposed-A:source58] [Epoch 20/20] [loss_mse: 0.037262]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target59_source58_class3]: 未收敛 (best_epoch=20, best_loss=0.037262, final_loss=0.037262)
+    [Proposed-A] source_station=59 -> target_station=59, samples=19
+      [Proposed-A:source59] [Epoch 1/20] [loss_mse: 0.091694]
+      [Proposed-A:source59] [Epoch 2/20] [loss_mse: 0.089926]
+      [Proposed-A:source59] [Epoch 3/20] [loss_mse: 0.084667]
+      [Proposed-A:source59] [Epoch 4/20] [loss_mse: 0.089605]
+      [Proposed-A:source59] [Epoch 5/20] [loss_mse: 0.081354]
+      [Proposed-A:source59] [Epoch 6/20] [loss_mse: 0.084827]
+      [Proposed-A:source59] [Epoch 7/20] [loss_mse: 0.081585]
+      [Proposed-A:source59] [Epoch 8/20] [loss_mse: 0.080358]
+      [Proposed-A:source59] [Epoch 9/20] [loss_mse: 0.080518]
+      [Proposed-A:source59] [Epoch 10/20] [loss_mse: 0.082189]
+      [Proposed-A:source59] [Epoch 11/20] [loss_mse: 0.076781]
+      [Proposed-A:source59] [Epoch 12/20] [loss_mse: 0.080511]
+      [Proposed-A:source59] [Epoch 13/20] [loss_mse: 0.077508]
+      [Proposed-A:source59] [Epoch 14/20] [loss_mse: 0.077544]
+      [Proposed-A:source59] [Epoch 15/20] [loss_mse: 0.077162]
+      [Proposed-A:source59] [Epoch 16/20] [loss_mse: 0.076554]
+      [Proposed-A:source59] [Epoch 17/20] [loss_mse: 0.078305]
+      [Proposed-A:source59] [Epoch 18/20] [loss_mse: 0.081243]
+      [Proposed-A:source59] [Epoch 19/20] [loss_mse: 0.076998]
+      [Proposed-A:source59] [Epoch 20/20] [loss_mse: 0.075279]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target59_source59_class3]: 未收敛 (best_epoch=20, best_loss=0.075279, final_loss=0.075279)
+    [Proposed-A] source_station=60 -> target_station=59, samples=28
+      [Proposed-A:source60] [Epoch 1/20] [loss_mse: 0.108242]
+      [Proposed-A:source60] [Epoch 2/20] [loss_mse: 0.105464]
+      [Proposed-A:source60] [Epoch 3/20] [loss_mse: 0.099674]
+      [Proposed-A:source60] [Epoch 4/20] [loss_mse: 0.094950]
+      [Proposed-A:source60] [Epoch 5/20] [loss_mse: 0.091917]
+      [Proposed-A:source60] [Epoch 6/20] [loss_mse: 0.090671]
+      [Proposed-A:source60] [Epoch 7/20] [loss_mse: 0.088957]
+      [Proposed-A:source60] [Epoch 8/20] [loss_mse: 0.087369]
+      [Proposed-A:source60] [Epoch 9/20] [loss_mse: 0.081791]
+      [Proposed-A:source60] [Epoch 10/20] [loss_mse: 0.078117]
+      [Proposed-A:source60] [Epoch 11/20] [loss_mse: 0.078073]
+      [Proposed-A:source60] [Epoch 12/20] [loss_mse: 0.075332]
+      [Proposed-A:source60] [Epoch 13/20] [loss_mse: 0.072655]
+      [Proposed-A:source60] [Epoch 14/20] [loss_mse: 0.072560]
+      [Proposed-A:source60] [Epoch 15/20] [loss_mse: 0.070230]
+      [Proposed-A:source60] [Epoch 16/20] [loss_mse: 0.068809]
+      [Proposed-A:source60] [Epoch 17/20] [loss_mse: 0.065688]
+      [Proposed-A:source60] [Epoch 18/20] [loss_mse: 0.065345]
+      [Proposed-A:source60] [Epoch 19/20] [loss_mse: 0.064684]
+      [Proposed-A:source60] [Epoch 20/20] [loss_mse: 0.062930]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target59_source60_class3]: 未收敛 (best_epoch=20, best_loss=0.062930, final_loss=0.062930)
+    [Proposed-A] 聚合权重: {"58": 0.3693, "59": 0.295, "60": 0.3357}
+    ✓ 保存(Proposed-A): ./model_fore_station59_extreme3.pth
+
+======================================================================
+场站 60 的Few-shot适应
+======================================================================
+
+  极端天气类别 1:
+    样本数: 5
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.198038]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.210567]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.203814]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.188346]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.196956]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.180766]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.187352]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.170551]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.181389]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.168286]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.184032]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.160211]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.169388]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.158503]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.147245]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.151370]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.143649]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.161605]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.143422]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.143573]
+  收敛检测[few_shot:LMT-new:lmt_new_station60_class0]: 未收敛 (best_epoch=19, best_loss=0.143422, final_loss=0.143573)
+    ✓ 保存(LMT-new): ./model_fore_station60_extreme0_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=60, samples=8
+      [Extreme-FedAvg:source58] [Epoch 1/20] [loss_mse: 0.165799]
+      [Extreme-FedAvg:source58] [Epoch 2/20] [loss_mse: 0.161326]
+      [Extreme-FedAvg:source58] [Epoch 3/20] [loss_mse: 0.157304]
+      [Extreme-FedAvg:source58] [Epoch 4/20] [loss_mse: 0.164949]
+      [Extreme-FedAvg:source58] [Epoch 5/20] [loss_mse: 0.159916]
+      [Extreme-FedAvg:source58] [Epoch 6/20] [loss_mse: 0.164682]
+      [Extreme-FedAvg:source58] [Epoch 7/20] [loss_mse: 0.165165]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target60_source58_class0]: 首次达到收敛条件 @ epoch 8 (best_epoch=3, best_loss=0.157304, final_loss=0.166782)
+      [Extreme-FedAvg:source58] [Epoch 8/20] [loss_mse: 0.166782]
+      [Extreme-FedAvg:source58] [Epoch 9/20] [loss_mse: 0.162978]
+      [Extreme-FedAvg:source58] [Epoch 10/20] [loss_mse: 0.159278]
+      [Extreme-FedAvg:source58] [Epoch 11/20] [loss_mse: 0.164168]
+      [Extreme-FedAvg:source58] [Epoch 12/20] [loss_mse: 0.165492]
+      [Extreme-FedAvg:source58] [Epoch 13/20] [loss_mse: 0.165199]
+      [Extreme-FedAvg:source58] [Epoch 14/20] [loss_mse: 0.161858]
+      [Extreme-FedAvg:source58] [Epoch 15/20] [loss_mse: 0.157820]
+      [Extreme-FedAvg:source58] [Epoch 16/20] [loss_mse: 0.158176]
+      [Extreme-FedAvg:source58] [Epoch 17/20] [loss_mse: 0.162615]
+      [Extreme-FedAvg:source58] [Epoch 18/20] [loss_mse: 0.163411]
+      [Extreme-FedAvg:source58] [Epoch 19/20] [loss_mse: 0.164440]
+      [Extreme-FedAvg:source58] [Epoch 20/20] [loss_mse: 0.160733]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target60_source58_class0]: 已收敛 @ epoch 8 (best_epoch=3, best_loss=0.157304, final_loss=0.160733)
+    [Extreme-FedAvg] source_station=59 -> target_station=60, samples=7
+      [Extreme-FedAvg:source59] [Epoch 1/20] [loss_mse: 0.232500]
+      [Extreme-FedAvg:source59] [Epoch 2/20] [loss_mse: 0.234142]
+      [Extreme-FedAvg:source59] [Epoch 3/20] [loss_mse: 0.231792]
+      [Extreme-FedAvg:source59] [Epoch 4/20] [loss_mse: 0.229209]
+      [Extreme-FedAvg:source59] [Epoch 5/20] [loss_mse: 0.213833]
+      [Extreme-FedAvg:source59] [Epoch 6/20] [loss_mse: 0.216980]
+      [Extreme-FedAvg:source59] [Epoch 7/20] [loss_mse: 0.214999]
+      [Extreme-FedAvg:source59] [Epoch 8/20] [loss_mse: 0.198506]
+      [Extreme-FedAvg:source59] [Epoch 9/20] [loss_mse: 0.206420]
+      [Extreme-FedAvg:source59] [Epoch 10/20] [loss_mse: 0.200901]
+      [Extreme-FedAvg:source59] [Epoch 11/20] [loss_mse: 0.199329]
+      [Extreme-FedAvg:source59] [Epoch 12/20] [loss_mse: 0.195572]
+      [Extreme-FedAvg:source59] [Epoch 13/20] [loss_mse: 0.181460]
+      [Extreme-FedAvg:source59] [Epoch 14/20] [loss_mse: 0.182786]
+      [Extreme-FedAvg:source59] [Epoch 15/20] [loss_mse: 0.189789]
+      [Extreme-FedAvg:source59] [Epoch 16/20] [loss_mse: 0.174917]
+      [Extreme-FedAvg:source59] [Epoch 17/20] [loss_mse: 0.177888]
+      [Extreme-FedAvg:source59] [Epoch 18/20] [loss_mse: 0.163942]
+      [Extreme-FedAvg:source59] [Epoch 19/20] [loss_mse: 0.164031]
+      [Extreme-FedAvg:source59] [Epoch 20/20] [loss_mse: 0.169643]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target60_source59_class0]: 未收敛 (best_epoch=18, best_loss=0.163942, final_loss=0.169643)
+    [Extreme-FedAvg] source_station=60 -> target_station=60, samples=5
+      [Extreme-FedAvg:source60] [Epoch 1/20] [loss_mse: 0.204189]
+      [Extreme-FedAvg:source60] [Epoch 2/20] [loss_mse: 0.191060]
+      [Extreme-FedAvg:source60] [Epoch 3/20] [loss_mse: 0.192784]
+      [Extreme-FedAvg:source60] [Epoch 4/20] [loss_mse: 0.189673]
+      [Extreme-FedAvg:source60] [Epoch 5/20] [loss_mse: 0.182669]
+      [Extreme-FedAvg:source60] [Epoch 6/20] [loss_mse: 0.188593]
+      [Extreme-FedAvg:source60] [Epoch 7/20] [loss_mse: 0.175402]
+      [Extreme-FedAvg:source60] [Epoch 8/20] [loss_mse: 0.178642]
+      [Extreme-FedAvg:source60] [Epoch 9/20] [loss_mse: 0.177304]
+      [Extreme-FedAvg:source60] [Epoch 10/20] [loss_mse: 0.185069]
+      [Extreme-FedAvg:source60] [Epoch 11/20] [loss_mse: 0.168449]
+      [Extreme-FedAvg:source60] [Epoch 12/20] [loss_mse: 0.165900]
+      [Extreme-FedAvg:source60] [Epoch 13/20] [loss_mse: 0.169583]
+      [Extreme-FedAvg:source60] [Epoch 14/20] [loss_mse: 0.160394]
+      [Extreme-FedAvg:source60] [Epoch 15/20] [loss_mse: 0.165654]
+      [Extreme-FedAvg:source60] [Epoch 16/20] [loss_mse: 0.146418]
+      [Extreme-FedAvg:source60] [Epoch 17/20] [loss_mse: 0.141081]
+      [Extreme-FedAvg:source60] [Epoch 18/20] [loss_mse: 0.145345]
+      [Extreme-FedAvg:source60] [Epoch 19/20] [loss_mse: 0.136325]
+      [Extreme-FedAvg:source60] [Epoch 20/20] [loss_mse: 0.157157]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target60_source60_class0]: 未收敛 (best_epoch=19, best_loss=0.136325, final_loss=0.157157)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station60_extreme0_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=60, samples=8
+      [Proposed-A:source58] [Epoch 1/20] [loss_mse: 0.158142]
+      [Proposed-A:source58] [Epoch 2/20] [loss_mse: 0.163748]
+      [Proposed-A:source58] [Epoch 3/20] [loss_mse: 0.165489]
+      [Proposed-A:source58] [Epoch 4/20] [loss_mse: 0.163692]
+      [Proposed-A:source58] [Epoch 5/20] [loss_mse: 0.159435]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target60_source58_class0]: 首次达到收敛条件 @ epoch 6 (best_epoch=1, best_loss=0.158142, final_loss=0.161452)
+      [Proposed-A:source58] [Epoch 6/20] [loss_mse: 0.161452]
+      [Proposed-A:source58] [Epoch 7/20] [loss_mse: 0.162844]
+      [Proposed-A:source58] [Epoch 8/20] [loss_mse: 0.163049]
+      [Proposed-A:source58] [Epoch 9/20] [loss_mse: 0.157742]
+      [Proposed-A:source58] [Epoch 10/20] [loss_mse: 0.165544]
+      [Proposed-A:source58] [Epoch 11/20] [loss_mse: 0.159826]
+      [Proposed-A:source58] [Epoch 12/20] [loss_mse: 0.163719]
+      [Proposed-A:source58] [Epoch 13/20] [loss_mse: 0.163684]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target60_source58_class0]: 首次达到收敛条件 @ epoch 14 (best_epoch=9, best_loss=0.157742, final_loss=0.164015)
+      [Proposed-A:source58] [Epoch 14/20] [loss_mse: 0.164015]
+      [Proposed-A:source58] [Epoch 15/20] [loss_mse: 0.164842]
+      [Proposed-A:source58] [Epoch 16/20] [loss_mse: 0.157091]
+      [Proposed-A:source58] [Epoch 17/20] [loss_mse: 0.156796]
+      [Proposed-A:source58] [Epoch 18/20] [loss_mse: 0.159186]
+      [Proposed-A:source58] [Epoch 19/20] [loss_mse: 0.160978]
+      [Proposed-A:source58] [Epoch 20/20] [loss_mse: 0.162129]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target60_source58_class0]: 未收敛 (best_epoch=17, best_loss=0.156796, final_loss=0.162129)
+    [Proposed-A] source_station=59 -> target_station=60, samples=7
+      [Proposed-A:source59] [Epoch 1/20] [loss_mse: 0.233886]
+      [Proposed-A:source59] [Epoch 2/20] [loss_mse: 0.235954]
+      [Proposed-A:source59] [Epoch 3/20] [loss_mse: 0.231416]
+      [Proposed-A:source59] [Epoch 4/20] [loss_mse: 0.222913]
+      [Proposed-A:source59] [Epoch 5/20] [loss_mse: 0.217093]
+      [Proposed-A:source59] [Epoch 6/20] [loss_mse: 0.222681]
+      [Proposed-A:source59] [Epoch 7/20] [loss_mse: 0.211042]
+      [Proposed-A:source59] [Epoch 8/20] [loss_mse: 0.203621]
+      [Proposed-A:source59] [Epoch 9/20] [loss_mse: 0.188860]
+      [Proposed-A:source59] [Epoch 10/20] [loss_mse: 0.191542]
+      [Proposed-A:source59] [Epoch 11/20] [loss_mse: 0.194391]
+      [Proposed-A:source59] [Epoch 12/20] [loss_mse: 0.188865]
+      [Proposed-A:source59] [Epoch 13/20] [loss_mse: 0.185494]
+      [Proposed-A:source59] [Epoch 14/20] [loss_mse: 0.176770]
+      [Proposed-A:source59] [Epoch 15/20] [loss_mse: 0.177545]
+      [Proposed-A:source59] [Epoch 16/20] [loss_mse: 0.176050]
+      [Proposed-A:source59] [Epoch 17/20] [loss_mse: 0.171808]
+      [Proposed-A:source59] [Epoch 18/20] [loss_mse: 0.173859]
+      [Proposed-A:source59] [Epoch 19/20] [loss_mse: 0.172640]
+      [Proposed-A:source59] [Epoch 20/20] [loss_mse: 0.167333]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target60_source59_class0]: 未收敛 (best_epoch=20, best_loss=0.167333, final_loss=0.167333)
+    [Proposed-A] source_station=60 -> target_station=60, samples=5
+      [Proposed-A:source60] [Epoch 1/20] [loss_mse: 0.209236]
+      [Proposed-A:source60] [Epoch 2/20] [loss_mse: 0.216922]
+      [Proposed-A:source60] [Epoch 3/20] [loss_mse: 0.204400]
+      [Proposed-A:source60] [Epoch 4/20] [loss_mse: 0.195847]
+      [Proposed-A:source60] [Epoch 5/20] [loss_mse: 0.184689]
+      [Proposed-A:source60] [Epoch 6/20] [loss_mse: 0.185951]
+      [Proposed-A:source60] [Epoch 7/20] [loss_mse: 0.174820]
+      [Proposed-A:source60] [Epoch 8/20] [loss_mse: 0.186753]
+      [Proposed-A:source60] [Epoch 9/20] [loss_mse: 0.173031]
+      [Proposed-A:source60] [Epoch 10/20] [loss_mse: 0.168534]
+      [Proposed-A:source60] [Epoch 11/20] [loss_mse: 0.164999]
+      [Proposed-A:source60] [Epoch 12/20] [loss_mse: 0.170306]
+      [Proposed-A:source60] [Epoch 13/20] [loss_mse: 0.157477]
+      [Proposed-A:source60] [Epoch 14/20] [loss_mse: 0.150847]
+      [Proposed-A:source60] [Epoch 15/20] [loss_mse: 0.173146]
+      [Proposed-A:source60] [Epoch 16/20] [loss_mse: 0.150398]
+      [Proposed-A:source60] [Epoch 17/20] [loss_mse: 0.152150]
+      [Proposed-A:source60] [Epoch 18/20] [loss_mse: 0.147981]
+      [Proposed-A:source60] [Epoch 19/20] [loss_mse: 0.143818]
+      [Proposed-A:source60] [Epoch 20/20] [loss_mse: 0.151564]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target60_source60_class0]: 未收敛 (best_epoch=19, best_loss=0.143818, final_loss=0.151564)
+    [Proposed-A] 聚合权重: {"58": 0.3616, "59": 0.3404, "60": 0.298}
+    ✓ 保存(Proposed-A): ./model_fore_station60_extreme0.pth
+
+  极端天气类别 2:
+    样本数: 3
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.066296]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.058762]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.054699]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.050088]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.042647]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.052304]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.043178]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.041712]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.035486]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.039409]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.033615]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.032233]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.030552]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.031672]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.025558]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.024521]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.025453]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.024118]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.020302]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.026093]
+  收敛检测[few_shot:LMT-new:lmt_new_station60_class1]: 未收敛 (best_epoch=19, best_loss=0.020302, final_loss=0.026093)
+    ✓ 保存(LMT-new): ./model_fore_station60_extreme1_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=60, samples=1
+      [Extreme-FedAvg:source58] [Epoch 1/20] [loss_mse: 0.030274]
+      [Extreme-FedAvg:source58] [Epoch 2/20] [loss_mse: 0.029048]
+      [Extreme-FedAvg:source58] [Epoch 3/20] [loss_mse: 0.025082]
+      [Extreme-FedAvg:source58] [Epoch 4/20] [loss_mse: 0.027954]
+      [Extreme-FedAvg:source58] [Epoch 5/20] [loss_mse: 0.025871]
+      [Extreme-FedAvg:source58] [Epoch 6/20] [loss_mse: 0.023142]
+      [Extreme-FedAvg:source58] [Epoch 7/20] [loss_mse: 0.028248]
+      [Extreme-FedAvg:source58] [Epoch 8/20] [loss_mse: 0.032107]
+      [Extreme-FedAvg:source58] [Epoch 9/20] [loss_mse: 0.025248]
+      [Extreme-FedAvg:source58] [Epoch 10/20] [loss_mse: 0.030233]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target60_source58_class1]: 首次达到收敛条件 @ epoch 11 (best_epoch=6, best_loss=0.023142, final_loss=0.032485)
+      [Extreme-FedAvg:source58] [Epoch 11/20] [loss_mse: 0.032485]
+      [Extreme-FedAvg:source58] [Epoch 12/20] [loss_mse: 0.032752]
+      [Extreme-FedAvg:source58] [Epoch 13/20] [loss_mse: 0.027212]
+      [Extreme-FedAvg:source58] [Epoch 14/20] [loss_mse: 0.021793]
+      [Extreme-FedAvg:source58] [Epoch 15/20] [loss_mse: 0.029283]
+      [Extreme-FedAvg:source58] [Epoch 16/20] [loss_mse: 0.033755]
+      [Extreme-FedAvg:source58] [Epoch 17/20] [loss_mse: 0.017796]
+      [Extreme-FedAvg:source58] [Epoch 18/20] [loss_mse: 0.026756]
+      [Extreme-FedAvg:source58] [Epoch 19/20] [loss_mse: 0.028009]
+      [Extreme-FedAvg:source58] [Epoch 20/20] [loss_mse: 0.031689]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target60_source58_class1]: 未收敛 (best_epoch=17, best_loss=0.017796, final_loss=0.031689)
+    [Extreme-FedAvg] source_station=59 -> target_station=60, samples=4
+      [Extreme-FedAvg:source59] [Epoch 1/20] [loss_mse: 0.076928]
+      [Extreme-FedAvg:source59] [Epoch 2/20] [loss_mse: 0.064104]
+      [Extreme-FedAvg:source59] [Epoch 3/20] [loss_mse: 0.067254]
+      [Extreme-FedAvg:source59] [Epoch 4/20] [loss_mse: 0.063884]
+      [Extreme-FedAvg:source59] [Epoch 5/20] [loss_mse: 0.062184]
+      [Extreme-FedAvg:source59] [Epoch 6/20] [loss_mse: 0.054960]
+      [Extreme-FedAvg:source59] [Epoch 7/20] [loss_mse: 0.053579]
+      [Extreme-FedAvg:source59] [Epoch 8/20] [loss_mse: 0.050186]
+      [Extreme-FedAvg:source59] [Epoch 9/20] [loss_mse: 0.047386]
+      [Extreme-FedAvg:source59] [Epoch 10/20] [loss_mse: 0.043902]
+      [Extreme-FedAvg:source59] [Epoch 11/20] [loss_mse: 0.045793]
+      [Extreme-FedAvg:source59] [Epoch 12/20] [loss_mse: 0.038759]
+      [Extreme-FedAvg:source59] [Epoch 13/20] [loss_mse: 0.034808]
+      [Extreme-FedAvg:source59] [Epoch 14/20] [loss_mse: 0.036513]
+      [Extreme-FedAvg:source59] [Epoch 15/20] [loss_mse: 0.031917]
+      [Extreme-FedAvg:source59] [Epoch 16/20] [loss_mse: 0.033559]
+      [Extreme-FedAvg:source59] [Epoch 17/20] [loss_mse: 0.028167]
+      [Extreme-FedAvg:source59] [Epoch 18/20] [loss_mse: 0.030127]
+      [Extreme-FedAvg:source59] [Epoch 19/20] [loss_mse: 0.024740]
+      [Extreme-FedAvg:source59] [Epoch 20/20] [loss_mse: 0.026466]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target60_source59_class1]: 未收敛 (best_epoch=19, best_loss=0.024740, final_loss=0.026466)
+    [Extreme-FedAvg] source_station=60 -> target_station=60, samples=3
+      [Extreme-FedAvg:source60] [Epoch 1/20] [loss_mse: 0.059032]
+      [Extreme-FedAvg:source60] [Epoch 2/20] [loss_mse: 0.056223]
+      [Extreme-FedAvg:source60] [Epoch 3/20] [loss_mse: 0.048569]
+      [Extreme-FedAvg:source60] [Epoch 4/20] [loss_mse: 0.047165]
+      [Extreme-FedAvg:source60] [Epoch 5/20] [loss_mse: 0.043945]
+      [Extreme-FedAvg:source60] [Epoch 6/20] [loss_mse: 0.044335]
+      [Extreme-FedAvg:source60] [Epoch 7/20] [loss_mse: 0.045543]
+      [Extreme-FedAvg:source60] [Epoch 8/20] [loss_mse: 0.040209]
+      [Extreme-FedAvg:source60] [Epoch 9/20] [loss_mse: 0.032019]
+      [Extreme-FedAvg:source60] [Epoch 10/20] [loss_mse: 0.036603]
+      [Extreme-FedAvg:source60] [Epoch 11/20] [loss_mse: 0.035581]
+      [Extreme-FedAvg:source60] [Epoch 12/20] [loss_mse: 0.032028]
+      [Extreme-FedAvg:source60] [Epoch 13/20] [loss_mse: 0.030603]
+      [Extreme-FedAvg:source60] [Epoch 14/20] [loss_mse: 0.027369]
+      [Extreme-FedAvg:source60] [Epoch 15/20] [loss_mse: 0.027792]
+      [Extreme-FedAvg:source60] [Epoch 16/20] [loss_mse: 0.024506]
+      [Extreme-FedAvg:source60] [Epoch 17/20] [loss_mse: 0.030545]
+      [Extreme-FedAvg:source60] [Epoch 18/20] [loss_mse: 0.023644]
+      [Extreme-FedAvg:source60] [Epoch 19/20] [loss_mse: 0.022471]
+      [Extreme-FedAvg:source60] [Epoch 20/20] [loss_mse: 0.022410]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target60_source60_class1]: 未收敛 (best_epoch=19, best_loss=0.022471, final_loss=0.022410)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station60_extreme1_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=60, samples=1
+      [Proposed-A:source58] [Epoch 1/20] [loss_mse: 0.030013]
+      [Proposed-A:source58] [Epoch 2/20] [loss_mse: 0.022452]
+      [Proposed-A:source58] [Epoch 3/20] [loss_mse: 0.024338]
+      [Proposed-A:source58] [Epoch 4/20] [loss_mse: 0.024831]
+      [Proposed-A:source58] [Epoch 5/20] [loss_mse: 0.024205]
+      [Proposed-A:source58] [Epoch 6/20] [loss_mse: 0.027449]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target60_source58_class1]: 首次达到收敛条件 @ epoch 7 (best_epoch=2, best_loss=0.022452, final_loss=0.030658)
+      [Proposed-A:source58] [Epoch 7/20] [loss_mse: 0.030658]
+      [Proposed-A:source58] [Epoch 8/20] [loss_mse: 0.041154]
+      [Proposed-A:source58] [Epoch 9/20] [loss_mse: 0.032001]
+      [Proposed-A:source58] [Epoch 10/20] [loss_mse: 0.032864]
+      [Proposed-A:source58] [Epoch 11/20] [loss_mse: 0.025930]
+      [Proposed-A:source58] [Epoch 12/20] [loss_mse: 0.024756]
+      [Proposed-A:source58] [Epoch 13/20] [loss_mse: 0.032617]
+      [Proposed-A:source58] [Epoch 14/20] [loss_mse: 0.025077]
+      [Proposed-A:source58] [Epoch 15/20] [loss_mse: 0.029217]
+      [Proposed-A:source58] [Epoch 16/20] [loss_mse: 0.024476]
+      [Proposed-A:source58] [Epoch 17/20] [loss_mse: 0.020348]
+      [Proposed-A:source58] [Epoch 18/20] [loss_mse: 0.033227]
+      [Proposed-A:source58] [Epoch 19/20] [loss_mse: 0.024801]
+      [Proposed-A:source58] [Epoch 20/20] [loss_mse: 0.029926]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target60_source58_class1]: 未收敛 (best_epoch=17, best_loss=0.020348, final_loss=0.029926)
+    [Proposed-A] source_station=59 -> target_station=60, samples=4
+      [Proposed-A:source59] [Epoch 1/20] [loss_mse: 0.076497]
+      [Proposed-A:source59] [Epoch 2/20] [loss_mse: 0.084700]
+      [Proposed-A:source59] [Epoch 3/20] [loss_mse: 0.064953]
+      [Proposed-A:source59] [Epoch 4/20] [loss_mse: 0.058490]
+      [Proposed-A:source59] [Epoch 5/20] [loss_mse: 0.059927]
+      [Proposed-A:source59] [Epoch 6/20] [loss_mse: 0.055866]
+      [Proposed-A:source59] [Epoch 7/20] [loss_mse: 0.049841]
+      [Proposed-A:source59] [Epoch 8/20] [loss_mse: 0.050215]
+      [Proposed-A:source59] [Epoch 9/20] [loss_mse: 0.050758]
+      [Proposed-A:source59] [Epoch 10/20] [loss_mse: 0.043080]
+      [Proposed-A:source59] [Epoch 11/20] [loss_mse: 0.041713]
+      [Proposed-A:source59] [Epoch 12/20] [loss_mse: 0.039193]
+      [Proposed-A:source59] [Epoch 13/20] [loss_mse: 0.038179]
+      [Proposed-A:source59] [Epoch 14/20] [loss_mse: 0.035353]
+      [Proposed-A:source59] [Epoch 15/20] [loss_mse: 0.035510]
+      [Proposed-A:source59] [Epoch 16/20] [loss_mse: 0.032833]
+      [Proposed-A:source59] [Epoch 17/20] [loss_mse: 0.029587]
+      [Proposed-A:source59] [Epoch 18/20] [loss_mse: 0.025408]
+      [Proposed-A:source59] [Epoch 19/20] [loss_mse: 0.028718]
+      [Proposed-A:source59] [Epoch 20/20] [loss_mse: 0.024641]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target60_source59_class1]: 未收敛 (best_epoch=20, best_loss=0.024641, final_loss=0.024641)
+    [Proposed-A] source_station=60 -> target_station=60, samples=3
+      [Proposed-A:source60] [Epoch 1/20] [loss_mse: 0.065495]
+      [Proposed-A:source60] [Epoch 2/20] [loss_mse: 0.053463]
+      [Proposed-A:source60] [Epoch 3/20] [loss_mse: 0.051676]
+      [Proposed-A:source60] [Epoch 4/20] [loss_mse: 0.047969]
+      [Proposed-A:source60] [Epoch 5/20] [loss_mse: 0.044517]
+      [Proposed-A:source60] [Epoch 6/20] [loss_mse: 0.044150]
+      [Proposed-A:source60] [Epoch 7/20] [loss_mse: 0.039449]
+      [Proposed-A:source60] [Epoch 8/20] [loss_mse: 0.040265]
+      [Proposed-A:source60] [Epoch 9/20] [loss_mse: 0.036565]
+      [Proposed-A:source60] [Epoch 10/20] [loss_mse: 0.036998]
+      [Proposed-A:source60] [Epoch 11/20] [loss_mse: 0.030167]
+      [Proposed-A:source60] [Epoch 12/20] [loss_mse: 0.029099]
+      [Proposed-A:source60] [Epoch 13/20] [loss_mse: 0.032269]
+      [Proposed-A:source60] [Epoch 14/20] [loss_mse: 0.027884]
+      [Proposed-A:source60] [Epoch 15/20] [loss_mse: 0.028637]
+      [Proposed-A:source60] [Epoch 16/20] [loss_mse: 0.024475]
+      [Proposed-A:source60] [Epoch 17/20] [loss_mse: 0.021123]
+      [Proposed-A:source60] [Epoch 18/20] [loss_mse: 0.023753]
+      [Proposed-A:source60] [Epoch 19/20] [loss_mse: 0.022368]
+      [Proposed-A:source60] [Epoch 20/20] [loss_mse: 0.021818]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target60_source60_class1]: 未收敛 (best_epoch=17, best_loss=0.021123, final_loss=0.021818)
+    [Proposed-A] 聚合权重: {"58": 0.1869, "59": 0.4363, "60": 0.3768}
+    ✓ 保存(Proposed-A): ./model_fore_station60_extreme1.pth
+
+  极端天气类别 3:
+    样本数: 1
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.219303]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.207603]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.228041]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.201388]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.180880]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.191402]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.188364]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.162424]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.173466]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.165569]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.153585]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.156215]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.157684]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.137529]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.149765]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.147841]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.121723]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.141005]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.135075]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.121441]
+  收敛检测[few_shot:LMT-new:lmt_new_station60_class2]: 未收敛 (best_epoch=20, best_loss=0.121441, final_loss=0.121441)
+    ✓ 保存(LMT-new): ./model_fore_station60_extreme2_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=60, samples=1
+      [Extreme-FedAvg:source58] [Epoch 1/20] [loss_mse: 0.167358]
+      [Extreme-FedAvg:source58] [Epoch 2/20] [loss_mse: 0.180836]
+      [Extreme-FedAvg:source58] [Epoch 3/20] [loss_mse: 0.162093]
+      [Extreme-FedAvg:source58] [Epoch 4/20] [loss_mse: 0.152693]
+      [Extreme-FedAvg:source58] [Epoch 5/20] [loss_mse: 0.141486]
+      [Extreme-FedAvg:source58] [Epoch 6/20] [loss_mse: 0.169809]
+      [Extreme-FedAvg:source58] [Epoch 7/20] [loss_mse: 0.137298]
+      [Extreme-FedAvg:source58] [Epoch 8/20] [loss_mse: 0.152631]
+      [Extreme-FedAvg:source58] [Epoch 9/20] [loss_mse: 0.129227]
+      [Extreme-FedAvg:source58] [Epoch 10/20] [loss_mse: 0.130377]
+      [Extreme-FedAvg:source58] [Epoch 11/20] [loss_mse: 0.133698]
+      [Extreme-FedAvg:source58] [Epoch 12/20] [loss_mse: 0.140432]
+      [Extreme-FedAvg:source58] [Epoch 13/20] [loss_mse: 0.121035]
+      [Extreme-FedAvg:source58] [Epoch 14/20] [loss_mse: 0.111603]
+      [Extreme-FedAvg:source58] [Epoch 15/20] [loss_mse: 0.132816]
+      [Extreme-FedAvg:source58] [Epoch 16/20] [loss_mse: 0.118700]
+      [Extreme-FedAvg:source58] [Epoch 17/20] [loss_mse: 0.121634]
+      [Extreme-FedAvg:source58] [Epoch 18/20] [loss_mse: 0.142952]
+      [Extreme-FedAvg:source58] [Epoch 19/20] [loss_mse: 0.110010]
+      [Extreme-FedAvg:source58] [Epoch 20/20] [loss_mse: 0.105106]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target60_source58_class2]: 未收敛 (best_epoch=20, best_loss=0.105106, final_loss=0.105106)
+    [Extreme-FedAvg] source_station=59 -> target_station=60, samples=2
+      [Extreme-FedAvg:source59] [Epoch 1/20] [loss_mse: 0.196539]
+      [Extreme-FedAvg:source59] [Epoch 2/20] [loss_mse: 0.188370]
+      [Extreme-FedAvg:source59] [Epoch 3/20] [loss_mse: 0.179108]
+      [Extreme-FedAvg:source59] [Epoch 4/20] [loss_mse: 0.165350]
+      [Extreme-FedAvg:source59] [Epoch 5/20] [loss_mse: 0.173879]
+      [Extreme-FedAvg:source59] [Epoch 6/20] [loss_mse: 0.147115]
+      [Extreme-FedAvg:source59] [Epoch 7/20] [loss_mse: 0.160901]
+      [Extreme-FedAvg:source59] [Epoch 8/20] [loss_mse: 0.164932]
+      [Extreme-FedAvg:source59] [Epoch 9/20] [loss_mse: 0.146355]
+      [Extreme-FedAvg:source59] [Epoch 10/20] [loss_mse: 0.144189]
+      [Extreme-FedAvg:source59] [Epoch 11/20] [loss_mse: 0.135531]
+      [Extreme-FedAvg:source59] [Epoch 12/20] [loss_mse: 0.129385]
+      [Extreme-FedAvg:source59] [Epoch 13/20] [loss_mse: 0.134246]
+      [Extreme-FedAvg:source59] [Epoch 14/20] [loss_mse: 0.133442]
+      [Extreme-FedAvg:source59] [Epoch 15/20] [loss_mse: 0.114075]
+      [Extreme-FedAvg:source59] [Epoch 16/20] [loss_mse: 0.119277]
+      [Extreme-FedAvg:source59] [Epoch 17/20] [loss_mse: 0.101879]
+      [Extreme-FedAvg:source59] [Epoch 18/20] [loss_mse: 0.110860]
+      [Extreme-FedAvg:source59] [Epoch 19/20] [loss_mse: 0.107567]
+      [Extreme-FedAvg:source59] [Epoch 20/20] [loss_mse: 0.109227]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target60_source59_class2]: 未收敛 (best_epoch=17, best_loss=0.101879, final_loss=0.109227)
+    [Extreme-FedAvg] source_station=60 -> target_station=60, samples=1
+      [Extreme-FedAvg:source60] [Epoch 1/20] [loss_mse: 0.221799]
+      [Extreme-FedAvg:source60] [Epoch 2/20] [loss_mse: 0.233757]
+      [Extreme-FedAvg:source60] [Epoch 3/20] [loss_mse: 0.205605]
+      [Extreme-FedAvg:source60] [Epoch 4/20] [loss_mse: 0.185753]
+      [Extreme-FedAvg:source60] [Epoch 5/20] [loss_mse: 0.188389]
+      [Extreme-FedAvg:source60] [Epoch 6/20] [loss_mse: 0.207622]
+      [Extreme-FedAvg:source60] [Epoch 7/20] [loss_mse: 0.177599]
+      [Extreme-FedAvg:source60] [Epoch 8/20] [loss_mse: 0.177785]
+      [Extreme-FedAvg:source60] [Epoch 9/20] [loss_mse: 0.171292]
+      [Extreme-FedAvg:source60] [Epoch 10/20] [loss_mse: 0.170887]
+      [Extreme-FedAvg:source60] [Epoch 11/20] [loss_mse: 0.184222]
+      [Extreme-FedAvg:source60] [Epoch 12/20] [loss_mse: 0.134160]
+      [Extreme-FedAvg:source60] [Epoch 13/20] [loss_mse: 0.134367]
+      [Extreme-FedAvg:source60] [Epoch 14/20] [loss_mse: 0.138620]
+      [Extreme-FedAvg:source60] [Epoch 15/20] [loss_mse: 0.163709]
+      [Extreme-FedAvg:source60] [Epoch 16/20] [loss_mse: 0.136653]
+      [Extreme-FedAvg:source60] [Epoch 17/20] [loss_mse: 0.125736]
+      [Extreme-FedAvg:source60] [Epoch 18/20] [loss_mse: 0.130317]
+      [Extreme-FedAvg:source60] [Epoch 19/20] [loss_mse: 0.123334]
+      [Extreme-FedAvg:source60] [Epoch 20/20] [loss_mse: 0.119499]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target60_source60_class2]: 未收敛 (best_epoch=20, best_loss=0.119499, final_loss=0.119499)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station60_extreme2_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=60, samples=1
+      [Proposed-A:source58] [Epoch 1/20] [loss_mse: 0.168906]
+      [Proposed-A:source58] [Epoch 2/20] [loss_mse: 0.175247]
+      [Proposed-A:source58] [Epoch 3/20] [loss_mse: 0.181884]
+      [Proposed-A:source58] [Epoch 4/20] [loss_mse: 0.144878]
+      [Proposed-A:source58] [Epoch 5/20] [loss_mse: 0.155191]
+      [Proposed-A:source58] [Epoch 6/20] [loss_mse: 0.164308]
+      [Proposed-A:source58] [Epoch 7/20] [loss_mse: 0.158409]
+      [Proposed-A:source58] [Epoch 8/20] [loss_mse: 0.154035]
+      [Proposed-A:source58] [Epoch 9/20] [loss_mse: 0.136021]
+      [Proposed-A:source58] [Epoch 10/20] [loss_mse: 0.132204]
+      [Proposed-A:source58] [Epoch 11/20] [loss_mse: 0.127251]
+      [Proposed-A:source58] [Epoch 12/20] [loss_mse: 0.112558]
+      [Proposed-A:source58] [Epoch 13/20] [loss_mse: 0.123314]
+      [Proposed-A:source58] [Epoch 14/20] [loss_mse: 0.132980]
+      [Proposed-A:source58] [Epoch 15/20] [loss_mse: 0.114459]
+      [Proposed-A:source58] [Epoch 16/20] [loss_mse: 0.100658]
+      [Proposed-A:source58] [Epoch 17/20] [loss_mse: 0.113359]
+      [Proposed-A:source58] [Epoch 18/20] [loss_mse: 0.118068]
+      [Proposed-A:source58] [Epoch 19/20] [loss_mse: 0.088982]
+      [Proposed-A:source58] [Epoch 20/20] [loss_mse: 0.096331]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target60_source58_class2]: 未收敛 (best_epoch=19, best_loss=0.088982, final_loss=0.096331)
+    [Proposed-A] source_station=59 -> target_station=60, samples=2
+      [Proposed-A:source59] [Epoch 1/20] [loss_mse: 0.192816]
+      [Proposed-A:source59] [Epoch 2/20] [loss_mse: 0.188188]
+      [Proposed-A:source59] [Epoch 3/20] [loss_mse: 0.183004]
+      [Proposed-A:source59] [Epoch 4/20] [loss_mse: 0.171134]
+      [Proposed-A:source59] [Epoch 5/20] [loss_mse: 0.169949]
+      [Proposed-A:source59] [Epoch 6/20] [loss_mse: 0.162097]
+      [Proposed-A:source59] [Epoch 7/20] [loss_mse: 0.158736]
+      [Proposed-A:source59] [Epoch 8/20] [loss_mse: 0.154950]
+      [Proposed-A:source59] [Epoch 9/20] [loss_mse: 0.130054]
+      [Proposed-A:source59] [Epoch 10/20] [loss_mse: 0.136237]
+      [Proposed-A:source59] [Epoch 11/20] [loss_mse: 0.132806]
+      [Proposed-A:source59] [Epoch 12/20] [loss_mse: 0.134892]
+      [Proposed-A:source59] [Epoch 13/20] [loss_mse: 0.123246]
+      [Proposed-A:source59] [Epoch 14/20] [loss_mse: 0.124527]
+      [Proposed-A:source59] [Epoch 15/20] [loss_mse: 0.127836]
+      [Proposed-A:source59] [Epoch 16/20] [loss_mse: 0.111605]
+      [Proposed-A:source59] [Epoch 17/20] [loss_mse: 0.104657]
+      [Proposed-A:source59] [Epoch 18/20] [loss_mse: 0.104139]
+      [Proposed-A:source59] [Epoch 19/20] [loss_mse: 0.103932]
+      [Proposed-A:source59] [Epoch 20/20] [loss_mse: 0.096279]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target60_source59_class2]: 未收敛 (best_epoch=20, best_loss=0.096279, final_loss=0.096279)
+    [Proposed-A] source_station=60 -> target_station=60, samples=1
+      [Proposed-A:source60] [Epoch 1/20] [loss_mse: 0.226864]
+      [Proposed-A:source60] [Epoch 2/20] [loss_mse: 0.204745]
+      [Proposed-A:source60] [Epoch 3/20] [loss_mse: 0.212653]
+      [Proposed-A:source60] [Epoch 4/20] [loss_mse: 0.190005]
+      [Proposed-A:source60] [Epoch 5/20] [loss_mse: 0.191503]
+      [Proposed-A:source60] [Epoch 6/20] [loss_mse: 0.187054]
+      [Proposed-A:source60] [Epoch 7/20] [loss_mse: 0.170569]
+      [Proposed-A:source60] [Epoch 8/20] [loss_mse: 0.178163]
+      [Proposed-A:source60] [Epoch 9/20] [loss_mse: 0.187972]
+      [Proposed-A:source60] [Epoch 10/20] [loss_mse: 0.167827]
+      [Proposed-A:source60] [Epoch 11/20] [loss_mse: 0.171442]
+      [Proposed-A:source60] [Epoch 12/20] [loss_mse: 0.141557]
+      [Proposed-A:source60] [Epoch 13/20] [loss_mse: 0.144023]
+      [Proposed-A:source60] [Epoch 14/20] [loss_mse: 0.144328]
+      [Proposed-A:source60] [Epoch 15/20] [loss_mse: 0.147697]
+      [Proposed-A:source60] [Epoch 16/20] [loss_mse: 0.145830]
+      [Proposed-A:source60] [Epoch 17/20] [loss_mse: 0.134436]
+      [Proposed-A:source60] [Epoch 18/20] [loss_mse: 0.145329]
+      [Proposed-A:source60] [Epoch 19/20] [loss_mse: 0.145403]
+      [Proposed-A:source60] [Epoch 20/20] [loss_mse: 0.131701]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target60_source60_class2]: 未收敛 (best_epoch=20, best_loss=0.131701, final_loss=0.131701)
+    [Proposed-A] 聚合权重: {"58": 0.2817, "59": 0.4465, "60": 0.2719}
+    ✓ 保存(Proposed-A): ./model_fore_station60_extreme2.pth
+
+  极端天气类别 4:
+    样本数: 28
+    训练轮数: 20, few-shot loss=MSE
+      [LMT-new] [Epoch 1/20] [loss_mse: 0.110163]
+      [LMT-new] [Epoch 2/20] [loss_mse: 0.104342]
+      [LMT-new] [Epoch 3/20] [loss_mse: 0.099445]
+      [LMT-new] [Epoch 4/20] [loss_mse: 0.095974]
+      [LMT-new] [Epoch 5/20] [loss_mse: 0.095173]
+      [LMT-new] [Epoch 6/20] [loss_mse: 0.090377]
+      [LMT-new] [Epoch 7/20] [loss_mse: 0.088627]
+      [LMT-new] [Epoch 8/20] [loss_mse: 0.084140]
+      [LMT-new] [Epoch 9/20] [loss_mse: 0.081414]
+      [LMT-new] [Epoch 10/20] [loss_mse: 0.079679]
+      [LMT-new] [Epoch 11/20] [loss_mse: 0.077303]
+      [LMT-new] [Epoch 12/20] [loss_mse: 0.075388]
+      [LMT-new] [Epoch 13/20] [loss_mse: 0.073479]
+      [LMT-new] [Epoch 14/20] [loss_mse: 0.070862]
+      [LMT-new] [Epoch 15/20] [loss_mse: 0.068575]
+      [LMT-new] [Epoch 16/20] [loss_mse: 0.068953]
+      [LMT-new] [Epoch 17/20] [loss_mse: 0.067023]
+      [LMT-new] [Epoch 18/20] [loss_mse: 0.065627]
+      [LMT-new] [Epoch 19/20] [loss_mse: 0.064313]
+      [LMT-new] [Epoch 20/20] [loss_mse: 0.063296]
+  收敛检测[few_shot:LMT-new:lmt_new_station60_class3]: 未收敛 (best_epoch=20, best_loss=0.063296, final_loss=0.063296)
+    ✓ 保存(LMT-new): ./model_fore_station60_extreme3_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=60, samples=36
+      [Extreme-FedAvg:source58] [Epoch 1/20] [loss_mse: 0.057564]
+      [Extreme-FedAvg:source58] [Epoch 2/20] [loss_mse: 0.056518]
+      [Extreme-FedAvg:source58] [Epoch 3/20] [loss_mse: 0.053962]
+      [Extreme-FedAvg:source58] [Epoch 4/20] [loss_mse: 0.051454]
+      [Extreme-FedAvg:source58] [Epoch 5/20] [loss_mse: 0.050776]
+      [Extreme-FedAvg:source58] [Epoch 6/20] [loss_mse: 0.048167]
+      [Extreme-FedAvg:source58] [Epoch 7/20] [loss_mse: 0.047106]
+      [Extreme-FedAvg:source58] [Epoch 8/20] [loss_mse: 0.047794]
+      [Extreme-FedAvg:source58] [Epoch 9/20] [loss_mse: 0.045472]
+      [Extreme-FedAvg:source58] [Epoch 10/20] [loss_mse: 0.043228]
+      [Extreme-FedAvg:source58] [Epoch 11/20] [loss_mse: 0.044204]
+      [Extreme-FedAvg:source58] [Epoch 12/20] [loss_mse: 0.041894]
+      [Extreme-FedAvg:source58] [Epoch 13/20] [loss_mse: 0.041317]
+      [Extreme-FedAvg:source58] [Epoch 14/20] [loss_mse: 0.041318]
+      [Extreme-FedAvg:source58] [Epoch 15/20] [loss_mse: 0.040153]
+      [Extreme-FedAvg:source58] [Epoch 16/20] [loss_mse: 0.038747]
+      [Extreme-FedAvg:source58] [Epoch 17/20] [loss_mse: 0.038777]
+      [Extreme-FedAvg:source58] [Epoch 18/20] [loss_mse: 0.039773]
+      [Extreme-FedAvg:source58] [Epoch 19/20] [loss_mse: 0.038509]
+      [Extreme-FedAvg:source58] [Epoch 20/20] [loss_mse: 0.038167]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target60_source58_class3]: 未收敛 (best_epoch=20, best_loss=0.038167, final_loss=0.038167)
+    [Extreme-FedAvg] source_station=59 -> target_station=60, samples=19
+      [Extreme-FedAvg:source59] [Epoch 1/20] [loss_mse: 0.089173]
+      [Extreme-FedAvg:source59] [Epoch 2/20] [loss_mse: 0.090620]
+      [Extreme-FedAvg:source59] [Epoch 3/20] [loss_mse: 0.088222]
+      [Extreme-FedAvg:source59] [Epoch 4/20] [loss_mse: 0.087876]
+      [Extreme-FedAvg:source59] [Epoch 5/20] [loss_mse: 0.087482]
+      [Extreme-FedAvg:source59] [Epoch 6/20] [loss_mse: 0.082720]
+      [Extreme-FedAvg:source59] [Epoch 7/20] [loss_mse: 0.082604]
+      [Extreme-FedAvg:source59] [Epoch 8/20] [loss_mse: 0.080033]
+      [Extreme-FedAvg:source59] [Epoch 9/20] [loss_mse: 0.080902]
+      [Extreme-FedAvg:source59] [Epoch 10/20] [loss_mse: 0.077274]
+      [Extreme-FedAvg:source59] [Epoch 11/20] [loss_mse: 0.079998]
+      [Extreme-FedAvg:source59] [Epoch 12/20] [loss_mse: 0.080601]
+      [Extreme-FedAvg:source59] [Epoch 13/20] [loss_mse: 0.076547]
+      [Extreme-FedAvg:source59] [Epoch 14/20] [loss_mse: 0.078868]
+      [Extreme-FedAvg:source59] [Epoch 15/20] [loss_mse: 0.078659]
+      [Extreme-FedAvg:source59] [Epoch 16/20] [loss_mse: 0.079561]
+      [Extreme-FedAvg:source59] [Epoch 17/20] [loss_mse: 0.079673]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target60_source59_class3]: 首次达到收敛条件 @ epoch 18 (best_epoch=13, best_loss=0.076547, final_loss=0.078541)
+      [Extreme-FedAvg:source59] [Epoch 18/20] [loss_mse: 0.078541]
+      [Extreme-FedAvg:source59] [Epoch 19/20] [loss_mse: 0.076975]
+      [Extreme-FedAvg:source59] [Epoch 20/20] [loss_mse: 0.079145]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target60_source59_class3]: 已收敛 @ epoch 18 (best_epoch=13, best_loss=0.076547, final_loss=0.079145)
+    [Extreme-FedAvg] source_station=60 -> target_station=60, samples=28
+      [Extreme-FedAvg:source60] [Epoch 1/20] [loss_mse: 0.107329]
+      [Extreme-FedAvg:source60] [Epoch 2/20] [loss_mse: 0.101849]
+      [Extreme-FedAvg:source60] [Epoch 3/20] [loss_mse: 0.102072]
+      [Extreme-FedAvg:source60] [Epoch 4/20] [loss_mse: 0.096288]
+      [Extreme-FedAvg:source60] [Epoch 5/20] [loss_mse: 0.095968]
+      [Extreme-FedAvg:source60] [Epoch 6/20] [loss_mse: 0.090044]
+      [Extreme-FedAvg:source60] [Epoch 7/20] [loss_mse: 0.090658]
+      [Extreme-FedAvg:source60] [Epoch 8/20] [loss_mse: 0.084477]
+      [Extreme-FedAvg:source60] [Epoch 9/20] [loss_mse: 0.083668]
+      [Extreme-FedAvg:source60] [Epoch 10/20] [loss_mse: 0.080062]
+      [Extreme-FedAvg:source60] [Epoch 11/20] [loss_mse: 0.075718]
+      [Extreme-FedAvg:source60] [Epoch 12/20] [loss_mse: 0.076220]
+      [Extreme-FedAvg:source60] [Epoch 13/20] [loss_mse: 0.072793]
+      [Extreme-FedAvg:source60] [Epoch 14/20] [loss_mse: 0.071619]
+      [Extreme-FedAvg:source60] [Epoch 15/20] [loss_mse: 0.070493]
+      [Extreme-FedAvg:source60] [Epoch 16/20] [loss_mse: 0.070405]
+      [Extreme-FedAvg:source60] [Epoch 17/20] [loss_mse: 0.067881]
+      [Extreme-FedAvg:source60] [Epoch 18/20] [loss_mse: 0.065785]
+      [Extreme-FedAvg:source60] [Epoch 19/20] [loss_mse: 0.065068]
+      [Extreme-FedAvg:source60] [Epoch 20/20] [loss_mse: 0.063250]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target60_source60_class3]: 未收敛 (best_epoch=20, best_loss=0.063250, final_loss=0.063250)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station60_extreme3_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=60, samples=36
+      [Proposed-A:source58] [Epoch 1/20] [loss_mse: 0.057034]
+      [Proposed-A:source58] [Epoch 2/20] [loss_mse: 0.056132]
+      [Proposed-A:source58] [Epoch 3/20] [loss_mse: 0.051576]
+      [Proposed-A:source58] [Epoch 4/20] [loss_mse: 0.051183]
+      [Proposed-A:source58] [Epoch 5/20] [loss_mse: 0.050721]
+      [Proposed-A:source58] [Epoch 6/20] [loss_mse: 0.049199]
+      [Proposed-A:source58] [Epoch 7/20] [loss_mse: 0.047999]
+      [Proposed-A:source58] [Epoch 8/20] [loss_mse: 0.045959]
+      [Proposed-A:source58] [Epoch 9/20] [loss_mse: 0.045837]
+      [Proposed-A:source58] [Epoch 10/20] [loss_mse: 0.044447]
+      [Proposed-A:source58] [Epoch 11/20] [loss_mse: 0.042868]
+      [Proposed-A:source58] [Epoch 12/20] [loss_mse: 0.041628]
+      [Proposed-A:source58] [Epoch 13/20] [loss_mse: 0.041828]
+      [Proposed-A:source58] [Epoch 14/20] [loss_mse: 0.041315]
+      [Proposed-A:source58] [Epoch 15/20] [loss_mse: 0.039835]
+      [Proposed-A:source58] [Epoch 16/20] [loss_mse: 0.039439]
+      [Proposed-A:source58] [Epoch 17/20] [loss_mse: 0.039112]
+      [Proposed-A:source58] [Epoch 18/20] [loss_mse: 0.038498]
+      [Proposed-A:source58] [Epoch 19/20] [loss_mse: 0.039677]
+      [Proposed-A:source58] [Epoch 20/20] [loss_mse: 0.038202]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target60_source58_class3]: 未收敛 (best_epoch=20, best_loss=0.038202, final_loss=0.038202)
+    [Proposed-A] source_station=59 -> target_station=60, samples=19
+      [Proposed-A:source59] [Epoch 1/20] [loss_mse: 0.091748]
+      [Proposed-A:source59] [Epoch 2/20] [loss_mse: 0.089266]
+      [Proposed-A:source59] [Epoch 3/20] [loss_mse: 0.086623]
+      [Proposed-A:source59] [Epoch 4/20] [loss_mse: 0.082573]
+      [Proposed-A:source59] [Epoch 5/20] [loss_mse: 0.083896]
+      [Proposed-A:source59] [Epoch 6/20] [loss_mse: 0.081465]
+      [Proposed-A:source59] [Epoch 7/20] [loss_mse: 0.084711]
+      [Proposed-A:source59] [Epoch 8/20] [loss_mse: 0.082102]
+      [Proposed-A:source59] [Epoch 9/20] [loss_mse: 0.079374]
+      [Proposed-A:source59] [Epoch 10/20] [loss_mse: 0.077503]
+      [Proposed-A:source59] [Epoch 11/20] [loss_mse: 0.077353]
+      [Proposed-A:source59] [Epoch 12/20] [loss_mse: 0.074853]
+      [Proposed-A:source59] [Epoch 13/20] [loss_mse: 0.077999]
+      [Proposed-A:source59] [Epoch 14/20] [loss_mse: 0.077546]
+      [Proposed-A:source59] [Epoch 15/20] [loss_mse: 0.078428]
+      [Proposed-A:source59] [Epoch 16/20] [loss_mse: 0.078082]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target60_source59_class3]: 首次达到收敛条件 @ epoch 17 (best_epoch=12, best_loss=0.074853, final_loss=0.079312)
+      [Proposed-A:source59] [Epoch 17/20] [loss_mse: 0.079312]
+      [Proposed-A:source59] [Epoch 18/20] [loss_mse: 0.077744]
+      [Proposed-A:source59] [Epoch 19/20] [loss_mse: 0.078808]
+      [Proposed-A:source59] [Epoch 20/20] [loss_mse: 0.080443]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target60_source59_class3]: 已收敛 @ epoch 17 (best_epoch=12, best_loss=0.074853, final_loss=0.080443)
+    [Proposed-A] source_station=60 -> target_station=60, samples=28
+      [Proposed-A:source60] [Epoch 1/20] [loss_mse: 0.105688]
+      [Proposed-A:source60] [Epoch 2/20] [loss_mse: 0.100839]
+      [Proposed-A:source60] [Epoch 3/20] [loss_mse: 0.100491]
+      [Proposed-A:source60] [Epoch 4/20] [loss_mse: 0.100449]
+      [Proposed-A:source60] [Epoch 5/20] [loss_mse: 0.094661]
+      [Proposed-A:source60] [Epoch 6/20] [loss_mse: 0.088997]
+      [Proposed-A:source60] [Epoch 7/20] [loss_mse: 0.087585]
+      [Proposed-A:source60] [Epoch 8/20] [loss_mse: 0.087300]
+      [Proposed-A:source60] [Epoch 9/20] [loss_mse: 0.082379]
+      [Proposed-A:source60] [Epoch 10/20] [loss_mse: 0.081462]
+      [Proposed-A:source60] [Epoch 11/20] [loss_mse: 0.078184]
+      [Proposed-A:source60] [Epoch 12/20] [loss_mse: 0.072290]
+      [Proposed-A:source60] [Epoch 13/20] [loss_mse: 0.075222]
+      [Proposed-A:source60] [Epoch 14/20] [loss_mse: 0.070163]
+      [Proposed-A:source60] [Epoch 15/20] [loss_mse: 0.070388]
+      [Proposed-A:source60] [Epoch 16/20] [loss_mse: 0.068695]
+      [Proposed-A:source60] [Epoch 17/20] [loss_mse: 0.066934]
+      [Proposed-A:source60] [Epoch 18/20] [loss_mse: 0.066137]
+      [Proposed-A:source60] [Epoch 19/20] [loss_mse: 0.063670]
+      [Proposed-A:source60] [Epoch 20/20] [loss_mse: 0.063557]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target60_source60_class3]: 未收敛 (best_epoch=20, best_loss=0.063557, final_loss=0.063557)
+    [Proposed-A] 聚合权重: {"58": 0.3698, "59": 0.2941, "60": 0.3362}
+    ✓ 保存(Proposed-A): ./model_fore_station60_extreme3.pth
+
+✓ Few-shot训练完成，生成了 36 个个性化模型
+
+======================================================================
+阶段: eval
+  生成所有场站的测试预测结果
+======================================================================
+
+场站 58 预测:
+  ✓ 极端类别1
+  ✓ 极端类别2
+  ✓ 极端类别3
+  ✓ 极端类别4
+  ✓ 元学习模型
+  ✓ 本地预训练模型
+
+场站 59 预测:
+  ✓ 极端类别1
+  ✓ 极端类别2
+  ✓ 极端类别3
+  ✓ 极端类别4
+  ✓ 元学习模型
+  ✓ 本地预训练模型
+
+场站 60 预测:
+  ✓ 极端类别1
+  ✓ 极端类别2
+  ✓ 极端类别3
+  ✓ 极端类别4
+  ✓ 元学习模型
+  ✓ 本地预训练模型
+
+保存所有场站测试结果...
+✓ 已保存: all_stations_test_results.mat
+✓ 收敛检测报告已保存: training_convergence_report.json
+
+======================================================================
+✓✓✓ 训练和测试全部完成！
+生成的模型: 36个个性化模型（Proposed+Local_Meta_Transfer+Transfer_Learning） + 2类元模型 + 联邦/本地预训练模型
+======================================================================
+
+======================================================================
+stage=eval
+env  YEARLY_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_ENABLED=0 YEARLY_PROTOCOL_METADATA_PATH=/root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json USE_FEDERATION=1 RUN_FEDERATED_PRETRAIN=0 TRAIN_META_ONLY_BASELINE=0 META_SUPPORT_SHOTS=10 META_QUERY_SHOTS=10 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=2000 PROPOSED_META_EPOCHS=2000 META_ONLY_META_EPOCHS=2000 FEW_SHOT_EPOCHS=20 PRETRAIN_LOG_INTERVAL=100 META_LOG_INTERVAL=100 FEW_SHOT_LOG_INTERVAL=1
+exec /root/miniconda3/bin/python -u generate_multi_station_results.py
+======================================================================
+======================================================================
+生成多场站测试结果CSV
+======================================================================
+
+检测到 yearly protocol 模式，切换为 task-level + TABLE IV 导出。
+
+station 58:
+
+station 59:
+
+station 60:
+
+======================================================================
+✓✓✓ yearly extreme protocol 结果已生成
+======================================================================
+输出文件: multi_station_performance.csv
+附加文件: multi_station_performance_task_level.csv
+task-level 行数: 36
+         Model  HighWind_E_M_%  HighWind_E_R_%  HighWind_WD  HighTemperature_E_M_%  HighTemperature_E_R_%  HighTemperature_WD  ColdWave_E_M_%  ColdWave_E_R_%  ColdWave_WD  Frost_E_M_%  Frost_E_R_%  Frost_WD  Training_duration_s  R_p<0.05_%
+       LMT-new         43.2854         47.2495      38.5013                21.6773                23.9801             19.9564         41.5822         44.9703      35.3769      20.8100      24.7177   19.5359               627.78     68.8172
+Extreme-FedAvg         37.0878         40.7204      33.4508                24.4060                27.0258             22.1688         38.0249         41.3903      34.1621      22.2589      25.8217   19.3400               628.55     66.6667
+    Proposed-A         37.4511         41.0136      34.0608                23.8556                26.5510             21.4505         38.6601         41.9931      34.6719      22.5064      26.0927   19.2825               628.59     65.5914

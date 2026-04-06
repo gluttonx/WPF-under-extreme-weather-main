@@ -71,6 +71,11 @@ SEASONAL_PROTOCOL_METADATA_PATH = os.getenv(
     "SEASONAL_PROTOCOL_METADATA_PATH",
     "seasonal_protocol_data/seasonal_protocol_metadata.json",
 )
+YEARLY_PROTOCOL_ENABLED = os.getenv("YEARLY_PROTOCOL_ENABLED", "0") != "0"
+YEARLY_PROTOCOL_METADATA_PATH = os.getenv(
+    "YEARLY_PROTOCOL_METADATA_PATH",
+    "three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json",
+)
 FED_PRETRAIN_MODEL_PATH = "model_fore_pre_federated.pth"
 LEGACY_PRETRAIN_MODEL_PATH = "model_fore_pre.pth"
 LOCAL_PRETRAIN_MODEL_TEMPLATE = "model_fore_pre_station{station_id}_local.pth"
@@ -80,6 +85,25 @@ STATION_LOCAL_META_ONLY_MODEL_TEMPLATE = "model_fore_train_task_query_meta_only_
 LEGACY_META_ONLY_MODEL_PATH = "model_fore_train_task_query_meta_only.pth"
 STATION_RESULT_TEMPLATE = "station{station_id}_test_results.mat"
 SEASONAL_EXTREME_CLASS_NAMES = ["high_wind", "high_temp", "cold_wave", "frost"]
+YEARLY_EXTREME_CLASS_NAMES = ["high_wind", "high_temp", "cold_wave", "frost"]
+YEARLY_TABLE_IV_COLUMNS = [
+    "Station",
+    "Model",
+    "HighWind_E_M_%",
+    "HighWind_E_R_%",
+    "HighWind_WD",
+    "HighTemperature_E_M_%",
+    "HighTemperature_E_R_%",
+    "HighTemperature_WD",
+    "ColdWave_E_M_%",
+    "ColdWave_E_R_%",
+    "ColdWave_WD",
+    "Frost_E_M_%",
+    "Frost_E_R_%",
+    "Frost_WD",
+    "Training_duration_s",
+    "R_p<0.05_%",
+]
 
 def benjamini_hochberg(p_values):
     """
@@ -196,6 +220,39 @@ def resolve_transfer_learning_model_path(station_id, class_idx):
     return None
 
 
+def resolve_lmt_new_model_path(station_id, class_idx):
+    candidates = [
+        f"model_fore_station{station_id}_extreme{class_idx}_lmt_new_tuned.pth",
+        f"model_fore_station{station_id}_extreme{class_idx}_lmt_new.pth",
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def resolve_extreme_fedavg_model_path(station_id, class_idx):
+    candidates = [
+        f"model_fore_station{station_id}_extreme{class_idx}_extreme_fedavg_tuned.pth",
+        f"model_fore_station{station_id}_extreme{class_idx}_extreme_fedavg.pth",
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def resolve_proposed_a_model_path(station_id, class_idx):
+    candidates = []
+    if PREFER_TUNED_PROPOSED_MODELS:
+        candidates.append(f"model_fore_station{station_id}_extreme{class_idx}_tuned.pth")
+    candidates.append(f"model_fore_station{station_id}_extreme{class_idx}.pth")
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
+
+
 def resolve_output_model_names():
     return [
         'Proposed',
@@ -203,6 +260,14 @@ def resolve_output_model_names():
         'Transfer_Learning',
         'Meta_Learning',
         'Local_PreTraining',
+    ]
+
+
+def resolve_yearly_output_model_names():
+    return [
+        "LMT-new",
+        "Extreme-FedAvg",
+        "Proposed-A",
     ]
 
 
@@ -267,6 +332,31 @@ def load_seasonal_protocol_metadata(metadata_path):
     return metadata
 
 
+def load_yearly_protocol_metadata(metadata_path):
+    with open(metadata_path, "r", encoding="utf-8") as metadata_file:
+        metadata = json.load(metadata_file)
+
+    station_map = {}
+    for station in metadata.get("stations", []):
+        station_copy = dict(station)
+        station_copy["asset_path"] = os.path.join(
+            os.path.dirname(metadata_path),
+            station_copy["asset_path"],
+        )
+        support_counts = station_copy.get("extreme_support_window_counts", {})
+        test_counts = station_copy.get("extreme_test_window_counts", {})
+        valid_class_indices = []
+        for class_index, class_name in enumerate(YEARLY_EXTREME_CLASS_NAMES):
+            if int(support_counts.get(class_name, 0)) > 0 and int(test_counts.get(class_name, 0)) > 0:
+                valid_class_indices.append(class_index)
+        station_copy["valid_class_indices"] = valid_class_indices
+        station_copy["valid_class_index_set"] = set(valid_class_indices)
+        station_map[str(station_copy["station_id"])] = station_copy
+
+    metadata["station_map"] = station_map
+    return metadata
+
+
 def iter_valid_protocol_tasks(client_metadata):
     client_id = str(client_metadata["client_id"])
     for class_index in client_metadata.get("valid_class_indices", []):
@@ -275,6 +365,17 @@ def iter_valid_protocol_tasks(client_metadata):
             "client_id": client_id,
             "extreme_class_index": class_index,
             "extreme_class": SEASONAL_EXTREME_CLASS_NAMES[class_index],
+        }
+
+
+def iter_valid_yearly_protocol_tasks(station_metadata):
+    station_id = str(station_metadata["station_id"])
+    for class_index in station_metadata.get("valid_class_indices", []):
+        class_index = int(class_index)
+        yield {
+            "station_id": station_id,
+            "extreme_class_index": class_index,
+            "extreme_class": YEARLY_EXTREME_CLASS_NAMES[class_index],
         }
 
 
@@ -629,6 +730,323 @@ def run_seasonal_protocol_evaluation():
     print(f"任务行数: {len(results_df)}")
     print(results_df.to_string(index=False))
 
+
+def infer_yearly_training_durations_from_tensorboard(station_ids=None):
+    duration_map = {
+        "LMT-new": np.nan,
+        "Extreme-FedAvg": np.nan,
+        "Proposed-A": np.nan,
+    }
+
+    try:
+        from tensorboard.backend.event_processing import event_accumulator
+    except Exception:
+        return duration_map
+
+    event_files = glob.glob(os.path.join('logs_train', 'loss2', 'events.out.tfevents.*'))
+    if not event_files:
+        return duration_map
+
+    latest_event_file = max(event_files, key=os.path.getmtime)
+    ea = event_accumulator.EventAccumulator(latest_event_file, size_guidance={'scalars': 0})
+    ea.Reload()
+    scalar_tags = set(ea.Tags().get('scalars', []))
+
+    if station_ids is None:
+        station_ids = ['58', '59', '60']
+
+    def span_for_tags(tags):
+        starts = []
+        ends = []
+        for tag in tags:
+            if tag not in scalar_tags:
+                continue
+            events = ea.Scalars(tag)
+            if events:
+                starts.append(events[0].wall_time)
+                ends.append(events[-1].wall_time)
+        if starts and ends:
+            return float(max(ends) - min(starts))
+        return np.nan
+
+    local_pretrain_sec = span_for_tags([
+        f'loss_mse_pre_local_station{station_id}'
+        for station_id in station_ids
+    ])
+    local_meta_sec = span_for_tags([
+        tag
+        for station_id in station_ids
+        for tag in [
+            f'loss_mse_train_task_support_local_meta_station{station_id}',
+            f'loss_mse_train_task_query_local_meta_station{station_id}',
+        ]
+    ])
+    lmt_new_few_shot_sec = span_for_tags(
+        [tag for tag in scalar_tags if tag.startswith('loss_mse_lmt_new_station')]
+    )
+    extreme_fedavg_few_shot_sec = span_for_tags(
+        [tag for tag in scalar_tags if tag.startswith('loss_mse_extreme_fedavg_target')]
+    )
+    proposed_a_few_shot_sec = span_for_tags(
+        [tag for tag in scalar_tags if tag.startswith('loss_mse_proposed_a_target')]
+    )
+
+    if np.isnan(local_pretrain_sec) or np.isnan(local_meta_sec):
+        return duration_map
+
+    shared_prefix_sec = local_pretrain_sec + local_meta_sec
+    duration_map["LMT-new"] = shared_prefix_sec + (0.0 if np.isnan(lmt_new_few_shot_sec) else lmt_new_few_shot_sec)
+    duration_map["Extreme-FedAvg"] = shared_prefix_sec + (0.0 if np.isnan(extreme_fedavg_few_shot_sec) else extreme_fedavg_few_shot_sec)
+    duration_map["Proposed-A"] = shared_prefix_sec + (0.0 if np.isnan(proposed_a_few_shot_sec) else proposed_a_few_shot_sec)
+    return duration_map
+
+
+def build_yearly_task_level_results_df(all_results, model_names, duration_map):
+    results_df = pd.DataFrame(all_results)
+    if results_df.empty:
+        raise RuntimeError("yearly protocol 模式下没有生成任何有效测试任务结果。")
+
+    model_order = {name: index for index, name in enumerate(model_names)}
+    class_order = {name: index for index, name in enumerate(YEARLY_EXTREME_CLASS_NAMES)}
+    results_df["station_sort_key"] = results_df["station_id"].astype(int)
+    results_df["class_sort_key"] = results_df["extreme_class"].map(class_order)
+    results_df["model_sort_key"] = results_df["Model"].map(model_order)
+    results_df = results_df.sort_values(
+        ["station_sort_key", "class_sort_key", "model_sort_key"]
+    ).drop(columns=["station_sort_key", "class_sort_key", "model_sort_key"])
+
+    metric_cols = ['nMAE_%', 'nRMSE_%', 'WD_%', 'R_p<0.05_%']
+    for col in metric_cols:
+        results_df[col] = pd.to_numeric(results_df[col], errors='coerce').round(4)
+    results_df['Training_duration_s'] = pd.to_numeric(
+        results_df['Model'].map(duration_map),
+        errors='coerce',
+    ).round(2)
+
+    output_columns = [
+        'station_id',
+        'source_station_id',
+        'extreme_class',
+        'Model',
+        'support_windows',
+        'test_windows',
+        'Samples',
+        'nMAE_%',
+        'nRMSE_%',
+        'WD_%',
+        'R_p<0.05_%',
+        'Training_duration_s',
+    ]
+    return results_df[output_columns]
+
+
+def build_yearly_table_iv_results_df(station_ids, yearly_task_records, model_names, duration_map, cap_norm=1.0):
+    weather_name_map = {
+        "high_wind": "HighWind",
+        "high_temp": "HighTemperature",
+        "cold_wave": "ColdWave",
+        "frost": "Frost",
+    }
+    station_order = {str(station_id): index for index, station_id in enumerate(station_ids)}
+    model_order = {name: index for index, name in enumerate(model_names)}
+    wide_rows = []
+
+    for station_id in station_ids:
+        station_id = str(station_id)
+        for model_name in model_names:
+            row = {"Station": station_id, "Model": model_name}
+            station_model_records = [
+                record for record in yearly_task_records
+                if record["station_id"] == station_id and record["Model"] == model_name
+            ]
+
+            for extreme_class, weather_key in weather_name_map.items():
+                class_records = [
+                    record for record in station_model_records
+                    if record["extreme_class"] == extreme_class
+                ]
+                if class_records:
+                    true_events = np.concatenate([record["true_events"] for record in class_records], axis=0)
+                    pred_events = np.concatenate([record["pred_events"] for record in class_records], axis=0)
+                    nmae_percent, nrmse_percent, wd_percent, _ = calc_paper_metrics(
+                        true_events,
+                        pred_events,
+                        cap_norm=cap_norm,
+                    )
+                    row[f"{weather_key}_E_M_%"] = round(nmae_percent, 4)
+                    row[f"{weather_key}_E_R_%"] = round(nrmse_percent, 4)
+                    row[f"{weather_key}_WD"] = round(wd_percent, 4)
+                else:
+                    row[f"{weather_key}_E_M_%"] = np.nan
+                    row[f"{weather_key}_E_R_%"] = np.nan
+                    row[f"{weather_key}_WD"] = np.nan
+
+            if station_model_records:
+                true_events = np.concatenate([record["true_events"] for record in station_model_records], axis=0)
+                pred_events = np.concatenate([record["pred_events"] for record in station_model_records], axis=0)
+                _, _, _, rp_less_005_percent = calc_paper_metrics(
+                    true_events,
+                    pred_events,
+                    cap_norm=cap_norm,
+                )
+                row["R_p<0.05_%"] = round(rp_less_005_percent, 4)
+            else:
+                row["R_p<0.05_%"] = np.nan
+
+            row["Training_duration_s"] = duration_map.get(model_name, np.nan)
+            wide_rows.append(row)
+
+    wide_df = pd.DataFrame(wide_rows)
+    wide_df["station_sort_key"] = wide_df["Station"].map(lambda value: station_order.get(str(value), len(station_order)))
+    wide_df["model_sort_key"] = wide_df["Model"].map(lambda value: model_order.get(value, len(model_order)))
+    wide_df = wide_df.sort_values(["station_sort_key", "model_sort_key"]).drop(
+        columns=["station_sort_key", "model_sort_key"]
+    )
+    wide_df = wide_df[YEARLY_TABLE_IV_COLUMNS]
+
+    metric_cols = [col for col in wide_df.columns if col not in {"Station", "Model", "Training_duration_s"}]
+    wide_df[metric_cols] = wide_df[metric_cols].apply(pd.to_numeric, errors='coerce').round(4)
+    wide_df["Station"] = wide_df["Station"].astype(str)
+    wide_df["Training_duration_s"] = pd.to_numeric(wide_df["Training_duration_s"], errors='coerce').round(2)
+    return wide_df
+
+
+def run_yearly_protocol_evaluation():
+    print("\n检测到 yearly protocol 模式，切换为 task-level + TABLE IV 导出。")
+    yearly_protocol_metadata = load_yearly_protocol_metadata(YEARLY_PROTOCOL_METADATA_PATH)
+    station_ids = [str(station["station_id"]) for station in yearly_protocol_metadata.get("stations", [])]
+    model_names = resolve_yearly_output_model_names()
+    duration_map = infer_yearly_training_durations_from_tensorboard(station_ids=station_ids)
+    cap_norm = 1.0
+    dem_realc = 5
+    len_realp = int(yearly_protocol_metadata.get("len_realp", 12))
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device0 = torch.device("cpu")
+
+    model_test = model_fore(
+        input_channel_fore=dem_realc,
+        output_channel_fore=[128, 96, 64, 48, 32, 16, 8],
+        mode='test_task_support',
+    )
+    model_test = model_test.to(device)
+    model_test.eval()
+
+    all_results = []
+    yearly_task_records = []
+
+    for station_id in station_ids:
+        station_metadata = yearly_protocol_metadata["station_map"][station_id]
+        print(f"\nstation {station_id}:")
+        wf_1 = scio.loadmat(station_metadata["asset_path"])
+        reference_nwp = wf_1["nwp_1h"]
+
+        lmt_new_model_files = {}
+        extreme_fedavg_model_files = {}
+        proposed_a_model_files = {}
+        for task in iter_valid_yearly_protocol_tasks(station_metadata):
+            class_index = task["extreme_class_index"]
+            lmt_new_model_files[class_index] = resolve_lmt_new_model_path(station_id, class_index)
+            extreme_fedavg_model_files[class_index] = resolve_extreme_fedavg_model_path(station_id, class_index)
+            proposed_a_model_files[class_index] = resolve_proposed_a_model_path(station_id, class_index)
+
+        for task in iter_valid_yearly_protocol_tasks(station_metadata):
+            class_index = task["extreme_class_index"]
+            p_extre = wf_1[f"p_test_extre_class{class_index+1}"]
+            nwp_extre = wf_1[f"nwp_test_extre_class{class_index+1}_"]
+            num_samples = int(p_extre.shape[0] // len_realp)
+            if num_samples == 0:
+                continue
+
+            nwp_extre_list = []
+            for feature_index in range(dem_realc):
+                nwp_data = nwp_extre[0, feature_index].reshape(-1, 1)
+                scale = float(np.max(np.abs(reference_nwp[:, feature_index]), axis=0))
+                if scale < 1e-8:
+                    scale = 1.0
+                nwp_extre_list.append(nwp_data / scale)
+
+            nwp_extre_concat = np.concatenate(nwp_extre_list, axis=1)
+            nwp_extre_class = nwp_extre_concat[:num_samples * len_realp].reshape(
+                num_samples, len_realp, dem_realc
+            )
+            true_events = p_extre[:num_samples * len_realp].reshape(num_samples, len_realp)
+            input_class_tensor = torch.tensor(nwp_extre_class, dtype=torch.float32)
+
+            for model_name in model_names:
+                if model_name == "LMT-new":
+                    model_file = lmt_new_model_files.get(class_index)
+                elif model_name == "Extreme-FedAvg":
+                    model_file = extreme_fedavg_model_files.get(class_index)
+                else:
+                    model_file = proposed_a_model_files.get(class_index)
+
+                row = {
+                    'station_id': station_id,
+                    'source_station_id': station_metadata.get('source_station_id', station_id),
+                    'extreme_class': task["extreme_class"],
+                    'Model': model_name,
+                    'support_windows': int(station_metadata.get('extreme_support_window_counts', {}).get(task["extreme_class"], 0)),
+                    'test_windows': int(station_metadata.get('extreme_test_window_counts', {}).get(task["extreme_class"], num_samples)),
+                    'Samples': int(num_samples),
+                }
+
+                if model_file is None:
+                    row.update({
+                        'nMAE_%': np.nan,
+                        'nRMSE_%': np.nan,
+                        'WD_%': np.nan,
+                        'R_p<0.05_%': np.nan,
+                    })
+                    all_results.append(row)
+                    continue
+
+                model_test.load_state_dict(torch.load(model_file, map_location=device))
+                model_test.eval()
+                with torch.no_grad():
+                    output_class = model_test(input_class_tensor.to(device))
+                    pred_events = output_class.to(device0).numpy().reshape(num_samples, len_realp)
+
+                nmae_percent, nrmse_percent, wd_percent, rp_less_005_percent = calc_paper_metrics(
+                    true_events,
+                    pred_events,
+                    cap_norm=cap_norm,
+                )
+                row.update({
+                    'nMAE_%': round(nmae_percent, 4),
+                    'nRMSE_%': round(nrmse_percent, 4),
+                    'WD_%': round(wd_percent, 4),
+                    'R_p<0.05_%': round(rp_less_005_percent, 4),
+                })
+                all_results.append(row)
+                yearly_task_records.append(
+                    {
+                        "station_id": station_id,
+                        "extreme_class": task["extreme_class"],
+                        "Model": model_name,
+                        "true_events": true_events,
+                        "pred_events": pred_events,
+                    }
+                )
+
+    task_level_df = build_yearly_task_level_results_df(all_results, model_names, duration_map)
+    table_iv_df = build_yearly_table_iv_results_df(
+        station_ids,
+        yearly_task_records,
+        model_names,
+        duration_map,
+        cap_norm=cap_norm,
+    )
+    task_level_df.to_csv('multi_station_performance_task_level.csv', index=False, encoding='utf-8-sig')
+    table_iv_df.to_csv('multi_station_performance.csv', index=False, encoding='utf-8-sig')
+
+    print("\n" + "=" * 70)
+    print("✓✓✓ yearly extreme protocol 结果已生成")
+    print("=" * 70)
+    print("输出文件: multi_station_performance.csv")
+    print("附加文件: multi_station_performance_task_level.csv")
+    print(f"task-level 行数: {len(task_level_df)}")
+    print(table_iv_df.to_string(index=False))
+
 # 参数
 # 当前训练/评估数据为标幺值，因此按论文公式中的 Cap 取 1.0
 cap_norm = 1.0
@@ -637,6 +1055,13 @@ dem_realp = 1
 len_realp = 12
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device0 = torch.device("cpu")
+
+if YEARLY_PROTOCOL_ENABLED and SEASONAL_PROTOCOL_ENABLED:
+    raise RuntimeError("YEARLY_PROTOCOL_ENABLED 与 SEASONAL_PROTOCOL_ENABLED 不能同时开启。")
+
+if YEARLY_PROTOCOL_ENABLED:
+    run_yearly_protocol_evaluation()
+    raise SystemExit(0)
 
 if SEASONAL_PROTOCOL_ENABLED:
     run_seasonal_protocol_evaluation()

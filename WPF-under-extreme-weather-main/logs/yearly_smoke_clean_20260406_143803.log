@@ -1,0 +1,662 @@
+
+======================================================================
+stage=build
+env  YEARLY_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_ENABLED=0 YEARLY_PROTOCOL_METADATA_PATH=/root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json USE_FEDERATION=1 TRAIN_META_ONLY_BASELINE=0 META_SUPPORT_SHOTS=1 META_QUERY_SHOTS=1 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=1 PROPOSED_META_EPOCHS=1 META_ONLY_META_EPOCHS=1 FEW_SHOT_EPOCHS=1 PRETRAIN_LOG_INTERVAL=1 META_LOG_INTERVAL=1 FEW_SHOT_LOG_INTERVAL=1
+exec /root/miniconda3/bin/python -u build_three_station_extreme_yearly_protocol.py
+======================================================================
+station 58: support_windows={'high_wind': 8, 'high_temp': 1, 'cold_wave': 1, 'frost': 36}, test_windows={'high_wind': 9, 'high_temp': 5, 'cold_wave': 4, 'frost': 13}
+station 59: support_windows={'high_wind': 7, 'high_temp': 4, 'cold_wave': 2, 'frost': 19}, test_windows={'high_wind': 7, 'high_temp': 7, 'cold_wave': 5, 'frost': 13}
+station 60: support_windows={'high_wind': 5, 'high_temp': 3, 'cold_wave': 1, 'frost': 28}, test_windows={'high_wind': 8, 'high_temp': 8, 'cold_wave': 4, 'frost': 10}
+saved yearly protocol metadata: /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json
+
+======================================================================
+stage=train
+env  YEARLY_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_ENABLED=0 YEARLY_PROTOCOL_METADATA_PATH=/root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json USE_FEDERATION=1 TRAIN_META_ONLY_BASELINE=0 META_SUPPORT_SHOTS=1 META_QUERY_SHOTS=1 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=1 PROPOSED_META_EPOCHS=1 META_ONLY_META_EPOCHS=1 FEW_SHOT_EPOCHS=1 PRETRAIN_LOG_INTERVAL=1 META_LOG_INTERVAL=1 FEW_SHOT_LOG_INTERVAL=1
+exec /root/miniconda3/bin/python -u DemoModelTraining.py
+======================================================================
+/root/miniconda3/lib/python3.8/site-packages/torch/cuda/__init__.py:80: UserWarning: CUDA initialization: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS (Triggered internally at  ../c10/cuda/CUDAFunctions.cpp:112.)
+  return torch._C._cuda_getDeviceCount() > 0
+
+======================================================================
+运行配置
+  sampler_mode=balanced
+  regime_missing_mode=none
+  pretrain_log_interval=1
+  meta_log_interval=1
+  few_shot_log_interval=1
+======================================================================
+Phase 2 Proposed sampler mode: balanced
+Regime-missing mode: none
+Yearly protocol enabled: /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json
+META_SUPPORT_SHOTS=1, META_QUERY_SHOTS=1
+
+======================================================================
+数据协议: yearly extreme protocol
+  加载3个yearly实验场站
+======================================================================
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/58wf_yearly_protocol.mat...
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/59wf_yearly_protocol.mat...
+  加载 /root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/60wf_yearly_protocol.mat...
+
+======================================================================
+阶段: data_preparation
+  准备所有场站的完整数据（元训练+极端天气+测试集）
+======================================================================
+
+准备联邦客户端数据（常规天气）...
+  处理场站 58...
+    shape: (1, 8172, 5) → (1, 8172, 1)
+  处理场站 59...
+    shape: (1, 8354, 5) → (1, 8354, 1)
+  处理场站 60...
+    shape: (1, 8297, 5) → (1, 8297, 1)
+  总数据量: 24823 样本
+
+准备所有场站的元训练和测试数据（3场站一视同仁）...
+
+  场站 58:
+    测试集2023: (730, 12, 1)
+    聚类类别: 10类
+    极端天气: 4类
+
+  场站 59:
+    测试集2023: (730, 12, 1)
+    聚类类别: 10类
+    极端天气: 4类
+
+  场站 60:
+    测试集2023: (730, 12, 1)
+    聚类类别: 10类
+    极端天气: 4类
+
+✓ 所有场站数据准备完成！
+
+======================================================================
+阶段: federated_pretrain
+  clients=3
+  stations=58, 59, 60
+  epochs=1
+  log_interval=1
+======================================================================
+  [federated_pretrain] [Epoch 1/1] [loss_mse: 0.245158] [elapsed_sec: 0.440529]
+  收敛检测[federated_pretrain:global]: 未收敛 (best_epoch=1, best_loss=0.245158, final_loss=0.245158)
+
+✓ 联邦预训练完成: model_fore_pre_federated.pth
+
+======================================================================
+阶段: local_pretrain
+  station_id=58
+  epochs=1
+  log_interval=1
+======================================================================
+  [local_pretrain:station58] [Epoch 1/1] [loss_mse: 0.181877]
+  收敛检测[local_pretrain:station58]: 未收敛 (best_epoch=1, best_loss=0.181877, final_loss=0.181877)
+✓ 场站 58 本地 conventional pretrain 完成: model_fore_pre_station58_local.pth
+
+======================================================================
+阶段: local_pretrain
+  station_id=59
+  epochs=1
+  log_interval=1
+======================================================================
+  [local_pretrain:station59] [Epoch 1/1] [loss_mse: 0.256394]
+  收敛检测[local_pretrain:station59]: 未收敛 (best_epoch=1, best_loss=0.256394, final_loss=0.256394)
+✓ 场站 59 本地 conventional pretrain 完成: model_fore_pre_station59_local.pth
+
+======================================================================
+阶段: local_pretrain
+  station_id=60
+  epochs=1
+  log_interval=1
+======================================================================
+  [local_pretrain:station60] [Epoch 1/1] [loss_mse: 0.293765]
+  收敛检测[local_pretrain:station60]: 未收敛 (best_epoch=1, best_loss=0.293765, final_loss=0.293765)
+✓ 场站 60 本地 conventional pretrain 完成: model_fore_pre_station60_local.pth
+
+======================================================================
+阶段: local_meta
+  station_id=58
+  meta_tag=proposed_station58
+  epochs=1
+  log_interval=1
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.01
+  shared_lr_scale=0.3
+  sampler_mode=balanced
+======================================================================
+  tasks_per_epoch=1, station_task_pool=10
+  [proposed_station58] [Epoch 1/1] [support_mse: 0.193919] [query_mse: 0.032563] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:proposed_station58]: 未收敛 (best_epoch=1, best_loss=0.032563, final_loss=0.032563)
+✓ 场站 58 元训练完成: model_fore_train_task_query_proposed_station58.pth
+
+======================================================================
+阶段: local_meta
+  station_id=59
+  meta_tag=proposed_station59
+  epochs=1
+  log_interval=1
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.01
+  shared_lr_scale=0.3
+  sampler_mode=balanced
+======================================================================
+  tasks_per_epoch=1, station_task_pool=10
+  [proposed_station59] [Epoch 1/1] [support_mse: 0.150547] [query_mse: 0.299209] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:proposed_station59]: 未收敛 (best_epoch=1, best_loss=0.299209, final_loss=0.299209)
+✓ 场站 59 元训练完成: model_fore_train_task_query_proposed_station59.pth
+
+======================================================================
+阶段: local_meta
+  station_id=60
+  meta_tag=proposed_station60
+  epochs=1
+  log_interval=1
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.01
+  shared_lr_scale=0.3
+  sampler_mode=balanced
+======================================================================
+  tasks_per_epoch=1, station_task_pool=10
+  [proposed_station60] [Epoch 1/1] [support_mse: 0.040374] [query_mse: 0.068447] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:proposed_station60]: 未收敛 (best_epoch=1, best_loss=0.068447, final_loss=0.068447)
+✓ 场站 60 元训练完成: model_fore_train_task_query_proposed_station60.pth
+
+======================================================================
+阶段: local_meta
+  station_id=58
+  meta_tag=local_meta_station58
+  epochs=1
+  log_interval=1
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.0
+  shared_lr_scale=1.0
+  sampler_mode=uniform
+======================================================================
+  tasks_per_epoch=1, station_task_pool=10
+  [local_meta_station58] [Epoch 1/1] [support_mse: 0.057266] [query_mse: 0.005262] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station58]: 未收敛 (best_epoch=1, best_loss=0.005262, final_loss=0.005262)
+✓ 场站 58 元训练完成: model_fore_train_task_query_local_meta_station58.pth
+
+======================================================================
+阶段: local_meta
+  station_id=59
+  meta_tag=local_meta_station59
+  epochs=1
+  log_interval=1
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.0
+  shared_lr_scale=1.0
+  sampler_mode=uniform
+======================================================================
+  tasks_per_epoch=1, station_task_pool=10
+  [local_meta_station59] [Epoch 1/1] [support_mse: 0.866551] [query_mse: 0.586228] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station59]: 未收敛 (best_epoch=1, best_loss=0.586228, final_loss=0.586228)
+✓ 场站 59 元训练完成: model_fore_train_task_query_local_meta_station59.pth
+
+======================================================================
+阶段: local_meta
+  station_id=60
+  meta_tag=local_meta_station60
+  epochs=1
+  log_interval=1
+  use_cdrm=True
+  train_all_params=False
+  disable_lwp=False
+  shared_anchor_beta=0.0
+  shared_lr_scale=1.0
+  sampler_mode=uniform
+======================================================================
+  tasks_per_epoch=1, station_task_pool=10
+  [local_meta_station60] [Epoch 1/1] [support_mse: 0.137655] [query_mse: 0.082409] [support_anchor: 0.000000] [query_anchor: 0.000000]
+  收敛检测[local_meta:local_meta_station60]: 未收敛 (best_epoch=1, best_loss=0.082409, final_loss=0.082409)
+✓ 场站 60 元训练完成: model_fore_train_task_query_local_meta_station60.pth
+
+======================================================================
+阶段: few_shot
+  few_shot_model_count=36
+  epochs=1
+  log_interval=1
+======================================================================
+
+======================================================================
+场站 58 的Few-shot适应
+======================================================================
+
+  极端天气类别 1:
+    样本数: 8
+    训练轮数: 1, few-shot loss=MSE
+      [LMT-new] [Epoch 1/1] [loss_mse: 0.257244]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class0]: 未收敛 (best_epoch=1, best_loss=0.257244, final_loss=0.257244)
+    ✓ 保存(LMT-new): ./model_fore_station58_extreme0_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=58, samples=8
+      [Extreme-FedAvg:source58] [Epoch 1/1] [loss_mse: 0.259744]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target58_source58_class0]: 未收敛 (best_epoch=1, best_loss=0.259744, final_loss=0.259744)
+    [Extreme-FedAvg] source_station=59 -> target_station=58, samples=7
+      [Extreme-FedAvg:source59] [Epoch 1/1] [loss_mse: 0.617924]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target58_source59_class0]: 未收敛 (best_epoch=1, best_loss=0.617924, final_loss=0.617924)
+    [Extreme-FedAvg] source_station=60 -> target_station=58, samples=5
+      [Extreme-FedAvg:source60] [Epoch 1/1] [loss_mse: 0.646422]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target58_source60_class0]: 未收敛 (best_epoch=1, best_loss=0.646422, final_loss=0.646422)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station58_extreme0_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=58, samples=8
+      [Proposed-A:source58] [Epoch 1/1] [loss_mse: 0.257810]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target58_source58_class0]: 未收敛 (best_epoch=1, best_loss=0.257810, final_loss=0.257810)
+    [Proposed-A] source_station=59 -> target_station=58, samples=7
+      [Proposed-A:source59] [Epoch 1/1] [loss_mse: 0.616203]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target58_source59_class0]: 未收敛 (best_epoch=1, best_loss=0.616203, final_loss=0.616203)
+    [Proposed-A] source_station=60 -> target_station=58, samples=5
+      [Proposed-A:source60] [Epoch 1/1] [loss_mse: 0.650677]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target58_source60_class0]: 未收敛 (best_epoch=1, best_loss=0.650677, final_loss=0.650677)
+    [Proposed-A] 聚合权重: {"58": 0.4521, "59": 0.299, "60": 0.2489}
+    ✓ 保存(Proposed-A): ./model_fore_station58_extreme0.pth
+
+  极端天气类别 2:
+    样本数: 1
+    训练轮数: 1, few-shot loss=MSE
+      [LMT-new] [Epoch 1/1] [loss_mse: 0.086863]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class1]: 未收敛 (best_epoch=1, best_loss=0.086863, final_loss=0.086863)
+    ✓ 保存(LMT-new): ./model_fore_station58_extreme1_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=58, samples=1
+      [Extreme-FedAvg:source58] [Epoch 1/1] [loss_mse: 0.086622]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target58_source58_class1]: 未收敛 (best_epoch=1, best_loss=0.086622, final_loss=0.086622)
+    [Extreme-FedAvg] source_station=59 -> target_station=58, samples=4
+      [Extreme-FedAvg:source59] [Epoch 1/1] [loss_mse: 0.023459]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target58_source59_class1]: 未收敛 (best_epoch=1, best_loss=0.023459, final_loss=0.023459)
+    [Extreme-FedAvg] source_station=60 -> target_station=58, samples=3
+      [Extreme-FedAvg:source60] [Epoch 1/1] [loss_mse: 0.053370]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target58_source60_class1]: 未收敛 (best_epoch=1, best_loss=0.053370, final_loss=0.053370)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station58_extreme1_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=58, samples=1
+      [Proposed-A:source58] [Epoch 1/1] [loss_mse: 0.089718]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target58_source58_class1]: 未收敛 (best_epoch=1, best_loss=0.089718, final_loss=0.089718)
+    [Proposed-A] source_station=59 -> target_station=58, samples=4
+      [Proposed-A:source59] [Epoch 1/1] [loss_mse: 0.024519]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target58_source59_class1]: 未收敛 (best_epoch=1, best_loss=0.024519, final_loss=0.024519)
+    [Proposed-A] source_station=60 -> target_station=58, samples=3
+      [Proposed-A:source60] [Epoch 1/1] [loss_mse: 0.054958]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target58_source60_class1]: 未收敛 (best_epoch=1, best_loss=0.054958, final_loss=0.054958)
+    [Proposed-A] 聚合权重: {"58": 0.1802, "59": 0.4466, "60": 0.3732}
+    ✓ 保存(Proposed-A): ./model_fore_station58_extreme1.pth
+
+  极端天气类别 3:
+    样本数: 1
+    训练轮数: 1, few-shot loss=MSE
+      [LMT-new] [Epoch 1/1] [loss_mse: 0.448697]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class2]: 未收敛 (best_epoch=1, best_loss=0.448697, final_loss=0.448697)
+    ✓ 保存(LMT-new): ./model_fore_station58_extreme2_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=58, samples=1
+      [Extreme-FedAvg:source58] [Epoch 1/1] [loss_mse: 0.443515]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target58_source58_class2]: 未收敛 (best_epoch=1, best_loss=0.443515, final_loss=0.443515)
+    [Extreme-FedAvg] source_station=59 -> target_station=58, samples=2
+      [Extreme-FedAvg:source59] [Epoch 1/1] [loss_mse: 0.610538]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target58_source59_class2]: 未收敛 (best_epoch=1, best_loss=0.610538, final_loss=0.610538)
+    [Extreme-FedAvg] source_station=60 -> target_station=58, samples=1
+      [Extreme-FedAvg:source60] [Epoch 1/1] [loss_mse: 0.728261]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target58_source60_class2]: 未收敛 (best_epoch=1, best_loss=0.728261, final_loss=0.728261)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station58_extreme2_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=58, samples=1
+      [Proposed-A:source58] [Epoch 1/1] [loss_mse: 0.456389]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target58_source58_class2]: 未收敛 (best_epoch=1, best_loss=0.456389, final_loss=0.456389)
+    [Proposed-A] source_station=59 -> target_station=58, samples=2
+      [Proposed-A:source59] [Epoch 1/1] [loss_mse: 0.615665]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target58_source59_class2]: 未收敛 (best_epoch=1, best_loss=0.615665, final_loss=0.615665)
+    [Proposed-A] source_station=60 -> target_station=58, samples=1
+      [Proposed-A:source60] [Epoch 1/1] [loss_mse: 0.723229]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target58_source60_class2]: 未收敛 (best_epoch=1, best_loss=0.723229, final_loss=0.723229)
+    [Proposed-A] 聚合权重: {"58": 0.3208, "59": 0.4336, "60": 0.2457}
+    ✓ 保存(Proposed-A): ./model_fore_station58_extreme2.pth
+
+  极端天气类别 4:
+    样本数: 36
+    训练轮数: 1, few-shot loss=MSE
+      [LMT-new] [Epoch 1/1] [loss_mse: 0.047006]
+  收敛检测[few_shot:LMT-new:lmt_new_station58_class3]: 未收敛 (best_epoch=1, best_loss=0.047006, final_loss=0.047006)
+    ✓ 保存(LMT-new): ./model_fore_station58_extreme3_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=58, samples=36
+      [Extreme-FedAvg:source58] [Epoch 1/1] [loss_mse: 0.046669]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target58_source58_class3]: 未收敛 (best_epoch=1, best_loss=0.046669, final_loss=0.046669)
+    [Extreme-FedAvg] source_station=59 -> target_station=58, samples=19
+      [Extreme-FedAvg:source59] [Epoch 1/1] [loss_mse: 0.140528]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target58_source59_class3]: 未收敛 (best_epoch=1, best_loss=0.140528, final_loss=0.140528)
+    [Extreme-FedAvg] source_station=60 -> target_station=58, samples=28
+      [Extreme-FedAvg:source60] [Epoch 1/1] [loss_mse: 0.072289]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target58_source60_class3]: 未收敛 (best_epoch=1, best_loss=0.072289, final_loss=0.072289)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station58_extreme3_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=58, samples=36
+      [Proposed-A:source58] [Epoch 1/1] [loss_mse: 0.046255]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target58_source58_class3]: 未收敛 (best_epoch=1, best_loss=0.046255, final_loss=0.046255)
+    [Proposed-A] source_station=59 -> target_station=58, samples=19
+      [Proposed-A:source59] [Epoch 1/1] [loss_mse: 0.139603]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target58_source59_class3]: 未收敛 (best_epoch=1, best_loss=0.139603, final_loss=0.139603)
+    [Proposed-A] source_station=60 -> target_station=58, samples=28
+      [Proposed-A:source60] [Epoch 1/1] [loss_mse: 0.072638]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target58_source60_class3]: 未收敛 (best_epoch=1, best_loss=0.072638, final_loss=0.072638)
+    [Proposed-A] 聚合权重: {"58": 0.3754, "59": 0.2837, "60": 0.3409}
+    ✓ 保存(Proposed-A): ./model_fore_station58_extreme3.pth
+
+======================================================================
+场站 59 的Few-shot适应
+======================================================================
+
+  极端天气类别 1:
+    样本数: 7
+    训练轮数: 1, few-shot loss=MSE
+      [LMT-new] [Epoch 1/1] [loss_mse: 0.614886]
+  收敛检测[few_shot:LMT-new:lmt_new_station59_class0]: 未收敛 (best_epoch=1, best_loss=0.614886, final_loss=0.614886)
+    ✓ 保存(LMT-new): ./model_fore_station59_extreme0_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=59, samples=8
+      [Extreme-FedAvg:source58] [Epoch 1/1] [loss_mse: 0.259185]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target59_source58_class0]: 未收敛 (best_epoch=1, best_loss=0.259185, final_loss=0.259185)
+    [Extreme-FedAvg] source_station=59 -> target_station=59, samples=7
+      [Extreme-FedAvg:source59] [Epoch 1/1] [loss_mse: 0.616861]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target59_source59_class0]: 未收敛 (best_epoch=1, best_loss=0.616861, final_loss=0.616861)
+    [Extreme-FedAvg] source_station=60 -> target_station=59, samples=5
+      [Extreme-FedAvg:source60] [Epoch 1/1] [loss_mse: 0.649819]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target59_source60_class0]: 未收敛 (best_epoch=1, best_loss=0.649819, final_loss=0.649819)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station59_extreme0_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=59, samples=8
+      [Proposed-A:source58] [Epoch 1/1] [loss_mse: 0.259215]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target59_source58_class0]: 未收敛 (best_epoch=1, best_loss=0.259215, final_loss=0.259215)
+    [Proposed-A] source_station=59 -> target_station=59, samples=7
+      [Proposed-A:source59] [Epoch 1/1] [loss_mse: 0.617659]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target59_source59_class0]: 未收敛 (best_epoch=1, best_loss=0.617659, final_loss=0.617659)
+    [Proposed-A] source_station=60 -> target_station=59, samples=5
+      [Proposed-A:source60] [Epoch 1/1] [loss_mse: 0.650145]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target59_source60_class0]: 未收敛 (best_epoch=1, best_loss=0.650145, final_loss=0.650145)
+    [Proposed-A] 聚合权重: {"58": 0.4519, "59": 0.2988, "60": 0.2493}
+    ✓ 保存(Proposed-A): ./model_fore_station59_extreme0.pth
+
+  极端天气类别 2:
+    样本数: 4
+    训练轮数: 1, few-shot loss=MSE
+      [LMT-new] [Epoch 1/1] [loss_mse: 0.023311]
+  收敛检测[few_shot:LMT-new:lmt_new_station59_class1]: 未收敛 (best_epoch=1, best_loss=0.023311, final_loss=0.023311)
+    ✓ 保存(LMT-new): ./model_fore_station59_extreme1_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=59, samples=1
+      [Extreme-FedAvg:source58] [Epoch 1/1] [loss_mse: 0.089223]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target59_source58_class1]: 未收敛 (best_epoch=1, best_loss=0.089223, final_loss=0.089223)
+    [Extreme-FedAvg] source_station=59 -> target_station=59, samples=4
+      [Extreme-FedAvg:source59] [Epoch 1/1] [loss_mse: 0.024293]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target59_source59_class1]: 未收敛 (best_epoch=1, best_loss=0.024293, final_loss=0.024293)
+    [Extreme-FedAvg] source_station=60 -> target_station=59, samples=3
+      [Extreme-FedAvg:source60] [Epoch 1/1] [loss_mse: 0.053310]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target59_source60_class1]: 未收敛 (best_epoch=1, best_loss=0.053310, final_loss=0.053310)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station59_extreme1_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=59, samples=1
+      [Proposed-A:source58] [Epoch 1/1] [loss_mse: 0.083860]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target59_source58_class1]: 未收敛 (best_epoch=1, best_loss=0.083860, final_loss=0.083860)
+    [Proposed-A] source_station=59 -> target_station=59, samples=4
+      [Proposed-A:source59] [Epoch 1/1] [loss_mse: 0.024132]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target59_source59_class1]: 未收敛 (best_epoch=1, best_loss=0.024132, final_loss=0.024132)
+    [Proposed-A] source_station=60 -> target_station=59, samples=3
+      [Proposed-A:source60] [Epoch 1/1] [loss_mse: 0.053402]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target59_source60_class1]: 未收敛 (best_epoch=1, best_loss=0.053402, final_loss=0.053402)
+    [Proposed-A] 聚合权重: {"58": 0.1809, "59": 0.446, "60": 0.3731}
+    ✓ 保存(Proposed-A): ./model_fore_station59_extreme1.pth
+
+  极端天气类别 3:
+    样本数: 2
+    训练轮数: 1, few-shot loss=MSE
+      [LMT-new] [Epoch 1/1] [loss_mse: 0.613513]
+  收敛检测[few_shot:LMT-new:lmt_new_station59_class2]: 未收敛 (best_epoch=1, best_loss=0.613513, final_loss=0.613513)
+    ✓ 保存(LMT-new): ./model_fore_station59_extreme2_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=59, samples=1
+      [Extreme-FedAvg:source58] [Epoch 1/1] [loss_mse: 0.453726]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target59_source58_class2]: 未收敛 (best_epoch=1, best_loss=0.453726, final_loss=0.453726)
+    [Extreme-FedAvg] source_station=59 -> target_station=59, samples=2
+      [Extreme-FedAvg:source59] [Epoch 1/1] [loss_mse: 0.609449]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target59_source59_class2]: 未收敛 (best_epoch=1, best_loss=0.609449, final_loss=0.609449)
+    [Extreme-FedAvg] source_station=60 -> target_station=59, samples=1
+      [Extreme-FedAvg:source60] [Epoch 1/1] [loss_mse: 0.719464]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target59_source60_class2]: 未收敛 (best_epoch=1, best_loss=0.719464, final_loss=0.719464)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station59_extreme2_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=59, samples=1
+      [Proposed-A:source58] [Epoch 1/1] [loss_mse: 0.449452]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target59_source58_class2]: 未收敛 (best_epoch=1, best_loss=0.449452, final_loss=0.449452)
+    [Proposed-A] source_station=59 -> target_station=59, samples=2
+      [Proposed-A:source59] [Epoch 1/1] [loss_mse: 0.608884]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target59_source59_class2]: 未收敛 (best_epoch=1, best_loss=0.608884, final_loss=0.608884)
+    [Proposed-A] source_station=60 -> target_station=59, samples=1
+      [Proposed-A:source60] [Epoch 1/1] [loss_mse: 0.719043]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target59_source60_class2]: 未收敛 (best_epoch=1, best_loss=0.719043, final_loss=0.719043)
+    [Proposed-A] 聚合权重: {"58": 0.321, "59": 0.4338, "60": 0.2452}
+    ✓ 保存(Proposed-A): ./model_fore_station59_extreme2.pth
+
+  极端天气类别 4:
+    样本数: 19
+    训练轮数: 1, few-shot loss=MSE
+      [LMT-new] [Epoch 1/1] [loss_mse: 0.140372]
+  收敛检测[few_shot:LMT-new:lmt_new_station59_class3]: 未收敛 (best_epoch=1, best_loss=0.140372, final_loss=0.140372)
+    ✓ 保存(LMT-new): ./model_fore_station59_extreme3_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=59, samples=36
+      [Extreme-FedAvg:source58] [Epoch 1/1] [loss_mse: 0.046643]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target59_source58_class3]: 未收敛 (best_epoch=1, best_loss=0.046643, final_loss=0.046643)
+    [Extreme-FedAvg] source_station=59 -> target_station=59, samples=19
+      [Extreme-FedAvg:source59] [Epoch 1/1] [loss_mse: 0.140492]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target59_source59_class3]: 未收敛 (best_epoch=1, best_loss=0.140492, final_loss=0.140492)
+    [Extreme-FedAvg] source_station=60 -> target_station=59, samples=28
+      [Extreme-FedAvg:source60] [Epoch 1/1] [loss_mse: 0.073120]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target59_source60_class3]: 未收敛 (best_epoch=1, best_loss=0.073120, final_loss=0.073120)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station59_extreme3_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=59, samples=36
+      [Proposed-A:source58] [Epoch 1/1] [loss_mse: 0.047466]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target59_source58_class3]: 未收敛 (best_epoch=1, best_loss=0.047466, final_loss=0.047466)
+    [Proposed-A] source_station=59 -> target_station=59, samples=19
+      [Proposed-A:source59] [Epoch 1/1] [loss_mse: 0.140293]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target59_source59_class3]: 未收敛 (best_epoch=1, best_loss=0.140293, final_loss=0.140293)
+    [Proposed-A] source_station=60 -> target_station=59, samples=28
+      [Proposed-A:source60] [Epoch 1/1] [loss_mse: 0.072902]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target59_source60_class3]: 未收敛 (best_epoch=1, best_loss=0.072902, final_loss=0.072902)
+    [Proposed-A] 聚合权重: {"58": 0.3752, "59": 0.2837, "60": 0.3411}
+    ✓ 保存(Proposed-A): ./model_fore_station59_extreme3.pth
+
+======================================================================
+场站 60 的Few-shot适应
+======================================================================
+
+  极端天气类别 1:
+    样本数: 5
+    训练轮数: 1, few-shot loss=MSE
+      [LMT-new] [Epoch 1/1] [loss_mse: 0.650989]
+  收敛检测[few_shot:LMT-new:lmt_new_station60_class0]: 未收敛 (best_epoch=1, best_loss=0.650989, final_loss=0.650989)
+    ✓ 保存(LMT-new): ./model_fore_station60_extreme0_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=60, samples=8
+      [Extreme-FedAvg:source58] [Epoch 1/1] [loss_mse: 0.259975]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target60_source58_class0]: 未收敛 (best_epoch=1, best_loss=0.259975, final_loss=0.259975)
+    [Extreme-FedAvg] source_station=59 -> target_station=60, samples=7
+      [Extreme-FedAvg:source59] [Epoch 1/1] [loss_mse: 0.619542]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target60_source59_class0]: 未收敛 (best_epoch=1, best_loss=0.619542, final_loss=0.619542)
+    [Extreme-FedAvg] source_station=60 -> target_station=60, samples=5
+      [Extreme-FedAvg:source60] [Epoch 1/1] [loss_mse: 0.654176]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target60_source60_class0]: 未收敛 (best_epoch=1, best_loss=0.654176, final_loss=0.654176)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station60_extreme0_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=60, samples=8
+      [Proposed-A:source58] [Epoch 1/1] [loss_mse: 0.260877]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target60_source58_class0]: 未收敛 (best_epoch=1, best_loss=0.260877, final_loss=0.260877)
+    [Proposed-A] source_station=59 -> target_station=60, samples=7
+      [Proposed-A:source59] [Epoch 1/1] [loss_mse: 0.616988]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target60_source59_class0]: 未收敛 (best_epoch=1, best_loss=0.616988, final_loss=0.616988)
+    [Proposed-A] source_station=60 -> target_station=60, samples=5
+      [Proposed-A:source60] [Epoch 1/1] [loss_mse: 0.653701]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target60_source60_class0]: 未收敛 (best_epoch=1, best_loss=0.653701, final_loss=0.653701)
+    [Proposed-A] 聚合权重: {"58": 0.4518, "59": 0.2995, "60": 0.2487}
+    ✓ 保存(Proposed-A): ./model_fore_station60_extreme0.pth
+
+  极端天气类别 2:
+    样本数: 3
+    训练轮数: 1, few-shot loss=MSE
+      [LMT-new] [Epoch 1/1] [loss_mse: 0.053939]
+  收敛检测[few_shot:LMT-new:lmt_new_station60_class1]: 未收敛 (best_epoch=1, best_loss=0.053939, final_loss=0.053939)
+    ✓ 保存(LMT-new): ./model_fore_station60_extreme1_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=60, samples=1
+      [Extreme-FedAvg:source58] [Epoch 1/1] [loss_mse: 0.087899]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target60_source58_class1]: 未收敛 (best_epoch=1, best_loss=0.087899, final_loss=0.087899)
+    [Extreme-FedAvg] source_station=59 -> target_station=60, samples=4
+      [Extreme-FedAvg:source59] [Epoch 1/1] [loss_mse: 0.023831]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target60_source59_class1]: 未收敛 (best_epoch=1, best_loss=0.023831, final_loss=0.023831)
+    [Extreme-FedAvg] source_station=60 -> target_station=60, samples=3
+      [Extreme-FedAvg:source60] [Epoch 1/1] [loss_mse: 0.053739]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target60_source60_class1]: 未收敛 (best_epoch=1, best_loss=0.053739, final_loss=0.053739)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station60_extreme1_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=60, samples=1
+      [Proposed-A:source58] [Epoch 1/1] [loss_mse: 0.084103]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target60_source58_class1]: 未收敛 (best_epoch=1, best_loss=0.084103, final_loss=0.084103)
+    [Proposed-A] source_station=59 -> target_station=60, samples=4
+      [Proposed-A:source59] [Epoch 1/1] [loss_mse: 0.023663]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target60_source59_class1]: 未收敛 (best_epoch=1, best_loss=0.023663, final_loss=0.023663)
+    [Proposed-A] source_station=60 -> target_station=60, samples=3
+      [Proposed-A:source60] [Epoch 1/1] [loss_mse: 0.054928]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target60_source60_class1]: 未收敛 (best_epoch=1, best_loss=0.054928, final_loss=0.054928)
+    [Proposed-A] 聚合权重: {"58": 0.181, "59": 0.4464, "60": 0.3727}
+    ✓ 保存(Proposed-A): ./model_fore_station60_extreme1.pth
+
+  极端天气类别 3:
+    样本数: 1
+    训练轮数: 1, few-shot loss=MSE
+      [LMT-new] [Epoch 1/1] [loss_mse: 0.717303]
+  收敛检测[few_shot:LMT-new:lmt_new_station60_class2]: 未收敛 (best_epoch=1, best_loss=0.717303, final_loss=0.717303)
+    ✓ 保存(LMT-new): ./model_fore_station60_extreme2_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=60, samples=1
+      [Extreme-FedAvg:source58] [Epoch 1/1] [loss_mse: 0.456545]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target60_source58_class2]: 未收敛 (best_epoch=1, best_loss=0.456545, final_loss=0.456545)
+    [Extreme-FedAvg] source_station=59 -> target_station=60, samples=2
+      [Extreme-FedAvg:source59] [Epoch 1/1] [loss_mse: 0.612950]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target60_source59_class2]: 未收敛 (best_epoch=1, best_loss=0.612950, final_loss=0.612950)
+    [Extreme-FedAvg] source_station=60 -> target_station=60, samples=1
+      [Extreme-FedAvg:source60] [Epoch 1/1] [loss_mse: 0.730647]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target60_source60_class2]: 未收敛 (best_epoch=1, best_loss=0.730647, final_loss=0.730647)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station60_extreme2_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=60, samples=1
+      [Proposed-A:source58] [Epoch 1/1] [loss_mse: 0.447767]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target60_source58_class2]: 未收敛 (best_epoch=1, best_loss=0.447767, final_loss=0.447767)
+    [Proposed-A] source_station=59 -> target_station=60, samples=2
+      [Proposed-A:source59] [Epoch 1/1] [loss_mse: 0.606957]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target60_source59_class2]: 未收敛 (best_epoch=1, best_loss=0.606957, final_loss=0.606957)
+    [Proposed-A] source_station=60 -> target_station=60, samples=1
+      [Proposed-A:source60] [Epoch 1/1] [loss_mse: 0.712979]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target60_source60_class2]: 未收敛 (best_epoch=1, best_loss=0.712979, final_loss=0.712979)
+    [Proposed-A] 聚合权重: {"58": 0.3206, "59": 0.4334, "60": 0.2459}
+    ✓ 保存(Proposed-A): ./model_fore_station60_extreme2.pth
+
+  极端天气类别 4:
+    样本数: 28
+    训练轮数: 1, few-shot loss=MSE
+      [LMT-new] [Epoch 1/1] [loss_mse: 0.072741]
+  收敛检测[few_shot:LMT-new:lmt_new_station60_class3]: 未收敛 (best_epoch=1, best_loss=0.072741, final_loss=0.072741)
+    ✓ 保存(LMT-new): ./model_fore_station60_extreme3_lmt_new.pth
+    [Extreme-FedAvg] source_station=58 -> target_station=60, samples=36
+      [Extreme-FedAvg:source58] [Epoch 1/1] [loss_mse: 0.046968]
+  收敛检测[few_shot:Extreme-FedAvg:source58:extreme_fedavg_target60_source58_class3]: 未收敛 (best_epoch=1, best_loss=0.046968, final_loss=0.046968)
+    [Extreme-FedAvg] source_station=59 -> target_station=60, samples=19
+      [Extreme-FedAvg:source59] [Epoch 1/1] [loss_mse: 0.140844]
+  收敛检测[few_shot:Extreme-FedAvg:source59:extreme_fedavg_target60_source59_class3]: 未收敛 (best_epoch=1, best_loss=0.140844, final_loss=0.140844)
+    [Extreme-FedAvg] source_station=60 -> target_station=60, samples=28
+      [Extreme-FedAvg:source60] [Epoch 1/1] [loss_mse: 0.072557]
+  收敛检测[few_shot:Extreme-FedAvg:source60:extreme_fedavg_target60_source60_class3]: 未收敛 (best_epoch=1, best_loss=0.072557, final_loss=0.072557)
+    [Extreme-FedAvg] 聚合权重: {"58": 0.3333, "59": 0.3333, "60": 0.3333}
+    ✓ 保存(Extreme-FedAvg): ./model_fore_station60_extreme3_extreme_fedavg.pth
+    [Proposed-A] source_station=58 -> target_station=60, samples=36
+      [Proposed-A:source58] [Epoch 1/1] [loss_mse: 0.047181]
+  收敛检测[few_shot:Proposed-A:source58:proposed_a_target60_source58_class3]: 未收敛 (best_epoch=1, best_loss=0.047181, final_loss=0.047181)
+    [Proposed-A] source_station=59 -> target_station=60, samples=19
+      [Proposed-A:source59] [Epoch 1/1] [loss_mse: 0.140287]
+  收敛检测[few_shot:Proposed-A:source59:proposed_a_target60_source59_class3]: 未收敛 (best_epoch=1, best_loss=0.140287, final_loss=0.140287)
+    [Proposed-A] source_station=60 -> target_station=60, samples=28
+      [Proposed-A:source60] [Epoch 1/1] [loss_mse: 0.072955]
+  收敛检测[few_shot:Proposed-A:source60:proposed_a_target60_source60_class3]: 未收敛 (best_epoch=1, best_loss=0.072955, final_loss=0.072955)
+    [Proposed-A] 聚合权重: {"58": 0.3753, "59": 0.2837, "60": 0.3411}
+    ✓ 保存(Proposed-A): ./model_fore_station60_extreme3.pth
+
+✓ Few-shot训练完成，生成了 36 个个性化模型
+
+======================================================================
+阶段: eval
+  生成所有场站的测试预测结果
+======================================================================
+
+场站 58 预测:
+  ✓ 极端类别1
+  ✓ 极端类别2
+  ✓ 极端类别3
+  ✓ 极端类别4
+  ✓ 元学习模型
+  ✓ 本地预训练模型
+  ✓ 联邦预训练模型
+
+场站 59 预测:
+  ✓ 极端类别1
+  ✓ 极端类别2
+  ✓ 极端类别3
+  ✓ 极端类别4
+  ✓ 元学习模型
+  ✓ 本地预训练模型
+  ✓ 联邦预训练模型
+
+场站 60 预测:
+  ✓ 极端类别1
+  ✓ 极端类别2
+  ✓ 极端类别3
+  ✓ 极端类别4
+  ✓ 元学习模型
+  ✓ 本地预训练模型
+  ✓ 联邦预训练模型
+
+保存所有场站测试结果...
+✓ 已保存: all_stations_test_results.mat
+✓ 收敛检测报告已保存: training_convergence_report.json
+
+======================================================================
+✓✓✓ 训练和测试全部完成！
+生成的模型: 36个个性化模型（Proposed+Local_Meta_Transfer+Transfer_Learning） + 2类元模型 + 联邦/本地预训练模型
+======================================================================
+
+======================================================================
+stage=eval
+env  YEARLY_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_ENABLED=0 YEARLY_PROTOCOL_METADATA_PATH=/root/WPF-under-extreme-weather-main/WPF-under-extreme-weather-main/three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json USE_FEDERATION=1 TRAIN_META_ONLY_BASELINE=0 META_SUPPORT_SHOTS=1 META_QUERY_SHOTS=1 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=1 PROPOSED_META_EPOCHS=1 META_ONLY_META_EPOCHS=1 FEW_SHOT_EPOCHS=1 PRETRAIN_LOG_INTERVAL=1 META_LOG_INTERVAL=1 FEW_SHOT_LOG_INTERVAL=1
+exec /root/miniconda3/bin/python -u generate_multi_station_results.py
+======================================================================
+======================================================================
+生成多场站测试结果CSV
+======================================================================
+/root/miniconda3/lib/python3.8/site-packages/torch/cuda/__init__.py:80: UserWarning: CUDA initialization: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS (Triggered internally at  ../c10/cuda/CUDAFunctions.cpp:112.)
+  return torch._C._cuda_getDeviceCount() > 0
+
+检测到 yearly protocol 模式，切换为 task-level + TABLE IV 导出。
+
+station 58:
+
+station 59:
+
+station 60:
+
+======================================================================
+✓✓✓ yearly extreme protocol 结果已生成
+======================================================================
+输出文件: multi_station_performance.csv
+附加文件: multi_station_performance_task_level.csv
+task-level 行数: 36
+         Model  HighWind_E_M_%  HighWind_E_R_%  HighWind_WD  HighTemperature_E_M_%  HighTemperature_E_R_%  HighTemperature_WD  ColdWave_E_M_%  ColdWave_E_R_%  ColdWave_WD  Frost_E_M_%  Frost_E_R_%  Frost_WD  Training_duration_s  R_p<0.05_%
+       LMT-new         78.8729         81.9378      78.8136                30.9984                35.4735             30.8835         70.5364         75.5897      70.4407      31.7599      38.0963   31.5990                 3.43     90.3226
+Extreme-FedAvg         78.8067         81.8723      78.7997                31.2157                35.6089             31.1327         70.4657         75.5335      70.4456      31.7064      38.1076   31.4732                 3.51     90.3226
+    Proposed-A         79.0221         82.0712      78.9979                31.1177                35.5511             31.0193         70.5620         75.6763      70.5018      31.6634      38.0499   31.4815                 3.45     90.3226
