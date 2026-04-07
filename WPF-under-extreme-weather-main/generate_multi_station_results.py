@@ -142,9 +142,17 @@ def calc_paper_metrics(true_events, pred_events, cap_norm=1.0):
     )
 
 
-def resolve_proposed_model_path(station_id, class_idx):
+def get_local_pretrain_model_path(station_id):
+    return f"model_fore_pre_station{station_id}_local.pth"
+
+
+def get_local_meta_only_model_path(station_id):
+    return f"model_fore_train_task_query_meta_only_station{station_id}.pth"
+
+
+def resolve_lmt_model_path(station_id, class_idx):
     """
-    Proposed 子模型优先级：
+    LMT 子模型优先级：
     1) *_tuned.pth（若存在）
     2) 默认 few-shot 模型
     """
@@ -162,7 +170,7 @@ def resolve_proposed_model_path(station_id, class_idx):
 def validate_paper_ablation_order(wide_df, weather_order):
     """
     论文消融排序校验（误差类指标越小越好）：
-    Proposed <= Pre_Training <= Meta_Learning
+    LMT <= Pre_Training <= Meta_Learning
     """
     metric_suffixes = ["nMAE_%", "nRMSE_%", "WD_%"]
     issues = []
@@ -173,20 +181,20 @@ def validate_paper_ablation_order(wide_df, weather_order):
             continue
 
         station_rows = wide_df[wide_df["Station"].astype(str) == station_id].set_index("Model")
-        required_models = {"Proposed", "Pre_Training", "Meta_Learning"}
+        required_models = {"LMT", "Pre_Training", "Meta_Learning"}
         if not required_models.issubset(set(station_rows.index)):
             continue
 
         for weather in weather_order:
             for metric_suffix in metric_suffixes:
                 col = f"{weather}_{metric_suffix}"
-                proposed_v = float(station_rows.loc["Proposed", col])
+                proposed_v = float(station_rows.loc["LMT", col])
                 pre_v = float(station_rows.loc["Pre_Training", col])
                 meta_v = float(station_rows.loc["Meta_Learning", col])
 
                 if proposed_v > pre_v:
                     issues.append(
-                        f"Station {station_id} {col}: Proposed({proposed_v:.4f}) > Pre_Training({pre_v:.4f})"
+                        f"Station {station_id} {col}: LMT({proposed_v:.4f}) > Pre_Training({pre_v:.4f})"
                     )
                 if meta_v < pre_v:
                     issues.append(
@@ -202,10 +210,10 @@ def infer_training_durations_from_tensorboard():
     口径：
     - Pre_Training = pre-train 阶段时长
     - Meta_Learning = meta-only 阶段时长
-    - Proposed = pre-train + proposed meta-training + few-shot 适配总时长
+    - LMT = local pre-train + local meta-training + few-shot 适配总时长
     """
     duration_map = {
-        'Proposed': np.nan,
+        'LMT': np.nan,
         'Meta_Learning': np.nan,
         'Pre_Training': np.nan
     }
@@ -241,9 +249,22 @@ def infer_training_durations_from_tensorboard():
         tag_span_seconds('loss_mse_train_task_support_proposed'),
         tag_span_seconds('loss_mse_train_task_query_proposed')
     )
+    local_meta_tags = sorted([t for t in scalar_tags if t.startswith('loss_mse_train_task_query_local_meta_station')])
+    local_meta_support_tags = sorted([t for t in scalar_tags if t.startswith('loss_mse_train_task_support_local_meta_station')])
+    local_meta_sec = max_valid(
+        *[tag_span_seconds(t) for t in local_meta_tags],
+        *[tag_span_seconds(t) for t in local_meta_support_tags]
+    )
     meta_only_sec = max_valid(
         tag_span_seconds('loss_mse_train_task_support_meta_only'),
         tag_span_seconds('loss_mse_train_task_query_meta_only')
+    )
+    local_meta_only_query_tags = sorted([t for t in scalar_tags if t.startswith('loss_mse_train_task_query_meta_only_station')])
+    local_meta_only_support_tags = sorted([t for t in scalar_tags if t.startswith('loss_mse_train_task_support_meta_only_station')])
+    meta_only_sec = max_valid(
+        meta_only_sec,
+        *[tag_span_seconds(t) for t in local_meta_only_query_tags],
+        *[tag_span_seconds(t) for t in local_meta_only_support_tags]
     )
 
     few_shot_tags = sorted([t for t in scalar_tags if t.startswith('loss_mse_station')])
@@ -259,10 +280,17 @@ def infer_training_durations_from_tensorboard():
         if starts and ends:
             few_shot_sec = float(max(ends) - min(starts))
 
-    duration_map['Pre_Training'] = pretrain_sec
+    local_pretrain_tags = sorted([t for t in scalar_tags if t.startswith('loss_mse_pre_station')])
+    local_pretrain_sec = max_valid(
+        pretrain_sec,
+        *[tag_span_seconds(t) for t in local_pretrain_tags]
+    )
+
+    duration_map['Pre_Training'] = local_pretrain_sec
     duration_map['Meta_Learning'] = meta_only_sec
-    if not np.isnan(pretrain_sec) and not np.isnan(proposed_meta_sec):
-        duration_map['Proposed'] = pretrain_sec + proposed_meta_sec + (0.0 if np.isnan(few_shot_sec) else few_shot_sec)
+    lmt_meta_sec = max_valid(proposed_meta_sec, local_meta_sec)
+    if not np.isnan(local_pretrain_sec) and not np.isnan(lmt_meta_sec):
+        duration_map['LMT'] = local_pretrain_sec + lmt_meta_sec + (0.0 if np.isnan(few_shot_sec) else few_shot_sec)
 
     return duration_map
 
@@ -287,7 +315,7 @@ station_ids = ['58', '59', '60']
 
 # 输出到表格的模型名称（按论文表风格）
 model_names = [
-    'Proposed',
+    'LMT',
     'Meta_Learning',
     'Pre_Training'
 ]
@@ -322,20 +350,20 @@ for station_id in station_ids:
             P_nwp = np.concatenate((P_nwp,P_nwp1[:,nwp_index[i]].reshape(np.size(P_nwp1,axis=0),-1)),axis=1)
     
     # 生成该场站模型文件映射
-    # Proposed 在各天气类别上使用对应的 class 模型
+    # LMT 在各天气类别上使用对应的 class 模型
     proposed_model_files = {}
 
-    # 1-4: 类别对应的 Proposed 子模型（优先 tuned）
+    # 1-4: 类别对应的 LMT 子模型（优先 tuned）
     for i_class in range(4):
-        model_file = resolve_proposed_model_path(station_id, i_class)
+        model_file = resolve_lmt_model_path(station_id, i_class)
         proposed_model_files[i_class] = model_file
         if model_file is not None:
             if model_file.endswith("_tuned.pth"):
-                print(f"  ✓ Proposed(Class{i_class+1}) 使用 tuned: {model_file}")
+                print(f"  ✓ LMT(Class{i_class+1}) 使用 tuned: {model_file}")
             else:
-                print(f"  ✓ Proposed(Class{i_class+1}) 使用默认: {model_file}")
+                print(f"  ✓ LMT(Class{i_class+1}) 使用默认: {model_file}")
         else:
-            print(f"  ✗ Proposed(Class{i_class+1}) 模型不存在（默认/调优均缺失）")
+            print(f"  ✗ LMT(Class{i_class+1}) 模型不存在（默认/调优均缺失）")
 
     baseline_model_files = {}
 
@@ -345,6 +373,7 @@ for station_id in station_ids:
         meta_model_candidates = [
             f"model_fore_station{station_id}_extreme{i_class}_meta_only_tuned.pth",
             f"model_fore_station{station_id}_extreme{i_class}_meta_only.pth",
+            get_local_meta_only_model_path(station_id),
             'model_fore_train_task_query_meta_only.pth',
             'model_fore_meta_only.pth',
             'model_fore_train_task_query.pth'
@@ -361,12 +390,21 @@ for station_id in station_ids:
             print(f"  ✗ Meta_Learning(Class{i_class+1}) 模型不存在（尝试: {meta_model_candidates}）")
 
     # Pre-training
-    pre_model_file = 'model_fore_pre_federated.pth' if os.path.exists('model_fore_pre_federated.pth') else 'model_fore_pre.pth'
-    baseline_model_files['Pre_Training'] = pre_model_file if os.path.exists(pre_model_file) else None
+    pre_model_candidates = [
+        f'model_fore_pre_station{station_id}_local.pth',
+        'model_fore_pre_federated.pth',
+        'model_fore_pre.pth',
+    ]
+    pre_model_file = None
+    for cand in pre_model_candidates:
+        if os.path.exists(cand):
+            pre_model_file = cand
+            break
+    baseline_model_files['Pre_Training'] = pre_model_file
     if baseline_model_files['Pre_Training'] is None:
-        print(f"  ✗ {pre_model_file} 不存在")
+        print(f"  ✗ Pre_Training 模型不存在（尝试: {pre_model_candidates}）")
     else:
-        print("  ✓ Pre_Training")
+        print(f"  ✓ Pre_Training 使用: {pre_model_file}")
 
     # 论文口径：在每个极端天气类别子集上评估各方法
     for eval_class in range(4):
@@ -390,7 +428,7 @@ for station_id in station_ids:
         input_class_tensor = torch.tensor(nwp_extre_class, dtype=torch.float32)
         
         for model_name in model_names:
-            if model_name == 'Proposed':
+            if model_name == 'LMT':
                 model_file = proposed_model_files.get(eval_class)
             elif model_name == 'Meta_Learning':
                 model_file = meta_model_files.get(eval_class)
@@ -493,7 +531,7 @@ wide_df = wide_df[output_cols]
 paper_order_issues = validate_paper_ablation_order(wide_df, weather_order)
 if paper_order_issues:
     print("\n" + "=" * 70)
-    print("WARNING: 论文消融排序校验未通过（Proposed <= Pre <= Meta）")
+    print("WARNING: 论文消融排序校验未通过（LMT <= Pre <= Meta）")
     print("=" * 70)
     for issue in paper_order_issues[:30]:
         print(" - " + issue)

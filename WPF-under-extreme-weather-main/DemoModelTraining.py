@@ -10,20 +10,23 @@ import random
 import model
 from torch.nn.utils import weight_norm
 
-# ========== [联邦新增] 联邦学习开关 ==========
-USE_FEDERATION = True  # True=联邦多场站, False=单场站原方法
+# ========== [多场站运行开关] ==========
+USE_FEDERATION = True  # True=多场站, False=单场站原方法
 # 说明：设为False时完全退化为原始单场站元学习方法
+
+# ========== [基线重置开关] ==========
+USE_PSEUDO_FED = False  # False=去掉 shared pretrain/shared meta，恢复 local LMT 基线
 
 # ========== 论文口径关键开关 ==========
 TRAIN_META_ONLY_BASELINE = True  # 新增：训练真正的 meta-learning only 基线
-FEW_SHOT_EPOCHS = 50             # 论文口径：每个极端天气 fine-tune 50 epochs
+FEW_SHOT_EPOCHS = int(os.getenv("FEW_SHOT_EPOCHS", "50"))             # 论文口径：每个极端天气 fine-tune 50 epochs
 FEW_SHOT_USE_CDRM = False
 FEW_SHOT_CDRM_WEIGHT = 5.0
 # 联邦场景下保持3场站，但按论文口径保持每轮总任务数 k*=5
 META_TASKS_PER_EPOCH = 5
-PRETRAIN_EPOCHS = 35000
-PROPOSED_META_EPOCHS = 30000
-META_ONLY_META_EPOCHS = 30000
+PRETRAIN_EPOCHS = int(os.getenv("PRETRAIN_EPOCHS", "35000"))
+PROPOSED_META_EPOCHS = int(os.getenv("PROPOSED_META_EPOCHS", "30000"))
+META_ONLY_META_EPOCHS = int(os.getenv("META_ONLY_META_EPOCHS", "30000"))
 # 论文消融口径：Meta-only = 去掉 pre-training，其余训练机制保持一致
 META_ONLY_USE_CDRM = True
 META_ONLY_TRAIN_ALL_PARAMS = False
@@ -48,8 +51,9 @@ def seed_torch(seed=1029):
     os.environ['PYTHONHASHSEED'] = str(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
 
 
 ## data processing
@@ -113,15 +117,35 @@ for i in range(np.size(nwp_conven_class_00)):
 
 
 # Define training equipment
-device=torch.device("cuda")
+device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device0=torch.device("cpu")
 
-# 模型文件路径（避免混淆）
+# 模型文件路径（兼容保留）
 PRETRAIN_MODEL_PATH = "model_fore_pre_federated.pth" if USE_FEDERATION else "model_fore_pre.pth"
 PROPOSED_SUPPORT_MODEL_PATH = "model_fore_train_task_support_proposed.pth"
 PROPOSED_META_MODEL_PATH = "model_fore_train_task_query_proposed.pth"
 META_ONLY_SUPPORT_MODEL_PATH = "model_fore_train_task_support_meta_only.pth"
 META_ONLY_MODEL_PATH = "model_fore_train_task_query_meta_only.pth"
+
+
+def get_local_pretrain_model_path(station_id):
+    return f"model_fore_pre_station{station_id}_local.pth"
+
+
+def get_local_meta_support_model_path(station_id):
+    return f"model_fore_train_task_support_local_meta_station{station_id}.pth"
+
+
+def get_local_meta_model_path(station_id):
+    return f"model_fore_train_task_query_local_meta_station{station_id}.pth"
+
+
+def get_local_meta_only_support_model_path(station_id):
+    return f"model_fore_train_task_support_meta_only_station{station_id}.pth"
+
+
+def get_local_meta_only_model_path(station_id):
+    return f"model_fore_train_task_query_meta_only_station{station_id}.pth"
 
 
 # Define Parameters
@@ -321,13 +345,14 @@ model_fore_train_task_query = model_fore(input_channel_fore=dem_realc, output_ch
 model_fore_test_task_support = model_fore(input_channel_fore=dem_realc, output_channel_fore=[128, 96, 64, 48, 32, 16, 8],mode='test_task_support')
 model_fore_test_task_query = model_fore(input_channel_fore=dem_realc, output_channel_fore=[128, 96, 64, 48, 32, 16, 8],mode='test_task_support')
 # 保存一份随机初始化权重，供 meta-learning only 使用（不经过 pre-train）
+pretrain_random_init_state = copy.deepcopy(model_fore_pre.state_dict())
 meta_only_random_init_state = copy.deepcopy(model_fore_train_task_query.state_dict())
 
 
 ## Define loss
 loss_fn_1=nn.MSELoss()
 def penalty(logits, y):
-    scale = torch.tensor(1.).cuda().requires_grad_()
+    scale = torch.tensor(1., device=device).requires_grad_()
     loss1 = loss_fn_1(logits[0::2] * scale, y[0::2])
     loss2 = loss_fn_1(logits[1::2] * scale, y[1::2])
     # grad = torch.autograd.grad(loss, [scale], create_graph=True)[0]
@@ -370,104 +395,154 @@ model_fore_test_task_query = model_fore_test_task_query.to(device)
 
 
 ## pre-train
-if USE_FEDERATION:
+if USE_FEDERATION and USE_PSEUDO_FED:
     print("#########################################################################——————————联邦预训练（Federation Pre-train）——————————############################################################")
     print(f"客户端数量: {task_num}, 场站: {', '.join(station_ids)}")
+elif USE_FEDERATION:
+    print("#########################################################################——————————本地预训练（Local Pre-train）——————————############################################################")
+    print(f"场站数量: {task_num}, 场站: {', '.join(station_ids)}")
 else:
-    print( "#########################################################################——————————预训练（Pre-train）——————————############################################################")
+    print("#########################################################################——————————预训练（Pre-train）——————————############################################################")
 
-total_train_step=0
-total_test_step=0
+total_train_step = 0
+total_test_step = 0
 epoch1_pre = PRETRAIN_EPOCHS
-writer1=SummaryWriter("./logs_train/loss1")
-writer2=SummaryWriter("./logs_train/loss2")
-start_time=time.time()
+writer1 = SummaryWriter("./logs_train/loss1")
+writer2 = SummaryWriter("./logs_train/loss2")
 
-for i in range(epoch1_pre):
-    # [原代码保留] penalty系数调度
-    if i<10000:
-        k = 0
-    elif 10000<=i<20000:
-        k = 1
-    elif 20000<=i<30000:
-        k = 5
-    elif 30000 <= i:
-        k = 10
-    
+
+def get_pretrain_penalty_weight(epoch_idx):
+    if epoch_idx < 10000:
+        return 0
+    if epoch_idx < 20000:
+        return 1
+    if epoch_idx < 30000:
+        return 5
+    return 10
+
+
+def run_single_pretrain_epoch(train_input, train_target, optimizer, penalty_weight):
     model_fore_pre.train()
-    
-    if USE_FEDERATION:
-        # ========== [联邦核心] 联邦梯度平均 ==========
+    train_input = train_input.to(device)
+    train_target = train_target.to(device)
+    train_outputs_pre = model_fore_pre(train_input)
+    loss1 = penalty(train_outputs_pre, train_target)
+    loss2 = loss_fn_1(train_outputs_pre, train_target)
+    loss_en = penalty_weight * loss1 + loss2
+    optimizer.zero_grad()
+    loss_en.backward()
+    optimizer.step()
+    return loss1.item(), loss2.item()
+
+
+def run_federated_pretraining():
+    start_time = time.time()
+    for i in range(epoch1_pre):
+        penalty_weight = get_pretrain_penalty_weight(i)
+        model_fore_pre.train()
         optimizer_fore_pre.zero_grad()
-        total_loss1 = 0
-        total_loss2 = 0
-        
-        # [联邦关键] 遍历所有客户端，累积梯度
+        total_loss1 = 0.0
+        total_loss2 = 0.0
+
         for station_id in station_ids:
-            Train_target = clients_train_tensor[station_id]['target'].to(device)
-            Train_input = clients_train_tensor[station_id]['input'].to(device)
-            
-            # [原代码保留] 相同的前向传播和loss计算
-            Train_outputs_pre = model_fore_pre(Train_input)
-            loss1 = penalty(Train_outputs_pre, Train_target)
-            loss2 = loss_fn_1(Train_outputs_pre, Train_target)
-            loss_en = k * loss1 + loss2
-            
-            # [联邦关键] 除以客户端数量实现联邦平均
-            # 公式: θ = θ - α × (1/K) × Σ∇L_k
-            loss_en_avg = loss_en / task_num  # ← 联邦平均的核心
-            loss_en_avg.backward()  # 累积梯度，不清零
-            
+            train_target = clients_train_tensor[station_id]['target'].to(device)
+            train_input = clients_train_tensor[station_id]['input'].to(device)
+            train_outputs_pre = model_fore_pre(train_input)
+            loss1 = penalty(train_outputs_pre, train_target)
+            loss2 = loss_fn_1(train_outputs_pre, train_target)
+            loss_en = penalty_weight * loss1 + loss2
+            (loss_en / task_num).backward()
             total_loss1 += loss1.item()
             total_loss2 += loss2.item()
-        
-        # [联邦关键] 统一更新全局模型（包含所有客户端的平均梯度）
-        optimizer_fore_pre.step()
-        
-        # 用于显示的平均loss
-        loss1_display = total_loss1 / task_num
-        loss2_display = total_loss2 / task_num
-        
-    else:
-        # ========== [原代码保留] 单场站训练逻辑 ==========
-        Train_target_p = Train_target_p.to(device)
-        Train_input_c = Train_input_c.to(device)
-        
-        Train_outputs_pre=model_fore_pre(Train_input_c)
-        loss1 = penalty(Train_outputs_pre,Train_target_p)
-        loss2=loss_fn_1(Train_outputs_pre,Train_target_p)
-        loss_en=k * loss1 + loss2
-        
-        optimizer_fore_pre.zero_grad()
-        loss_en.backward()
-        optimizer_fore_pre.step()
-        
-        loss1_display = loss1.item()
-        loss2_display = loss2.item()
-    
-    # [原代码保留] 日志记录
-    if (i + 1) % 100 == 0:
-        end_time = time.time()
-        print(end_time - start_time)
-        print("[Epoch %d/%d] [loss_mse: %f] " % (i, epoch1_pre, loss2_display))
-        writer1.add_scalar("loss_mse_pre", loss1_display, i)
-        writer2.add_scalar("loss_mse_pre", loss2_display, i)
 
-model_fore_pre.eval()
+        optimizer_fore_pre.step()
 
-# [联邦修改] 根据模式保存不同的模型文件
-if USE_FEDERATION:
+        if (i + 1) % 100 == 0:
+            end_time = time.time()
+            loss1_display = total_loss1 / task_num
+            loss2_display = total_loss2 / task_num
+            print(end_time - start_time)
+            print("[Epoch %d/%d] [loss_mse: %f] " % (i, epoch1_pre, loss2_display))
+            writer1.add_scalar("loss_mse_pre", loss1_display, i)
+            writer2.add_scalar("loss_mse_pre", loss2_display, i)
+
+    model_fore_pre.eval()
     torch.save(model_fore_pre.state_dict(), PRETRAIN_MODEL_PATH)
     print(f"\n✓ 联邦预训练完成: {PRETRAIN_MODEL_PATH}")
+
+
+def run_local_pretraining():
+    for station_id in station_ids:
+        print("\n" + "=" * 70)
+        print(f"开始本地预训练: station {station_id}")
+        print("=" * 70)
+
+        model_fore_pre.load_state_dict(copy.deepcopy(pretrain_random_init_state))
+        optimizer_local = torch.optim.Adam(
+            model_fore_pre.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999)
+        )
+        start_time = time.time()
+        train_input = clients_train_tensor[station_id]['input']
+        train_target = clients_train_tensor[station_id]['target']
+
+        for i in range(epoch1_pre):
+            penalty_weight = get_pretrain_penalty_weight(i)
+            loss1_display, loss2_display = run_single_pretrain_epoch(
+                train_input,
+                train_target,
+                optimizer_local,
+                penalty_weight,
+            )
+
+            if (i + 1) % 100 == 0:
+                end_time = time.time()
+                print(end_time - start_time)
+                print(
+                    f"[station {station_id}] [Epoch {i}/{epoch1_pre}] [loss_mse: {loss2_display:.6f}] "
+                )
+                writer1.add_scalar(f"loss_mse_pre_station{station_id}", loss1_display, i)
+                writer2.add_scalar(f"loss_mse_pre_station{station_id}", loss2_display, i)
+
+        model_fore_pre.eval()
+        save_path = get_local_pretrain_model_path(station_id)
+        torch.save(model_fore_pre.state_dict(), save_path)
+        print(f"✓ 本地预训练完成: {save_path}")
+
+
+if USE_FEDERATION and USE_PSEUDO_FED:
+    run_federated_pretraining()
+elif USE_FEDERATION:
+    run_local_pretraining()
 else:
+    start_time = time.time()
+    for i in range(epoch1_pre):
+        penalty_weight = get_pretrain_penalty_weight(i)
+        loss1_display, loss2_display = run_single_pretrain_epoch(
+            Train_input_c,
+            Train_target_p,
+            optimizer_fore_pre,
+            penalty_weight,
+        )
+
+        if (i + 1) % 100 == 0:
+            end_time = time.time()
+            print(end_time - start_time)
+            print("[Epoch %d/%d] [loss_mse: %f] " % (i, epoch1_pre, loss2_display))
+            writer1.add_scalar("loss_mse_pre", loss1_display, i)
+            writer2.add_scalar("loss_mse_pre", loss2_display, i)
+
+    model_fore_pre.eval()
     torch.save(model_fore_pre.state_dict(), PRETRAIN_MODEL_PATH)
     print(f"\n✓ 预训练完成: {PRETRAIN_MODEL_PATH}")
 
 
-def sample_meta_batch():
-    """联邦任务池采样：3场站背景下，每轮总计 k*=5 个task（论文口径）。"""
+def sample_meta_batch(sample_station_ids=None):
+    """按给定场站范围采样 meta 任务。"""
+    if sample_station_ids is None:
+        sample_station_ids = station_ids
+
     task_pool = []
-    for station_id in station_ids:
+    for station_id in sample_station_ids:
         p_conven_class_st = all_stations_full_data[station_id]['p_conven_class']
         total_station_classes = np.size(p_conven_class_st, axis=1)
         for i_class in range(total_station_classes):
@@ -566,7 +641,8 @@ def run_meta_training(
     epoch_train_task=70000,
     use_cdrm=True,
     train_all_params=False,
-    disable_lwp=False
+    disable_lwp=False,
+    sample_station_ids=None
 ):
     """
     单次元训练过程：
@@ -576,8 +652,13 @@ def run_meta_training(
     print("\n" + "=" * 70)
     print(f"开始元训练: {meta_tag}")
     print(f"  use_cdrm={use_cdrm}, train_all_params={train_all_params}, disable_lwp={disable_lwp}")
-    total_task_pool = sum(np.size(all_stations_full_data[s]['p_conven_class'], axis=1) for s in station_ids)
-    print(f"  tasks_per_epoch={META_TASKS_PER_EPOCH}, task_pool={total_task_pool} ({len(station_ids)} stations)")
+    if sample_station_ids is None:
+        sample_station_ids = station_ids
+    total_task_pool = sum(np.size(all_stations_full_data[s]['p_conven_class'], axis=1) for s in sample_station_ids)
+    print(
+        f"  tasks_per_epoch={META_TASKS_PER_EPOCH}, task_pool={total_task_pool} "
+        f"({len(sample_station_ids)} stations: {', '.join(sample_station_ids)})"
+    )
     print("=" * 70)
 
     support_params = get_meta_trainable_params(
@@ -595,7 +676,9 @@ def run_meta_training(
     optimizer_query = torch.optim.Adam(query_params, lr=0.0002, betas=(0.5, 0.999))
 
     for i_t in range(epoch_train_task):
-        Train_target_support, Train_input_support, Train_target_query, Train_input_query = sample_meta_batch()
+        Train_target_support, Train_input_support, Train_target_query, Train_input_query = sample_meta_batch(
+            sample_station_ids=sample_station_ids
+        )
 
         print(
             "[##################################################################"
@@ -666,31 +749,69 @@ def run_meta_training(
     print(f"✓ 元训练完成: {query_model_path}")
 
 
-# 1) Proposed: Pre-train 初始化后再 Meta-training（单次训练阶段的一部分）
-proposed_init_state = torch.load(PRETRAIN_MODEL_PATH)
-run_meta_training(
-    meta_tag="proposed",
-    init_state_dict=proposed_init_state,
-    support_model_path=PROPOSED_SUPPORT_MODEL_PATH,
-    query_model_path=PROPOSED_META_MODEL_PATH,
-    epoch_train_task=PROPOSED_META_EPOCHS,
-    use_cdrm=True,
-    train_all_params=False,
-    disable_lwp=False
-)
-
-# 2) Meta-only: 随机初始化后直接 Meta-training（严格按论文消融，不继承Proposed稳定化策略）
-if TRAIN_META_ONLY_BASELINE:
+def run_shared_meta_training():
+    proposed_init_state = torch.load(PRETRAIN_MODEL_PATH)
     run_meta_training(
-        meta_tag="meta_only",
-        init_state_dict=meta_only_random_init_state,
-        support_model_path=META_ONLY_SUPPORT_MODEL_PATH,
-        query_model_path=META_ONLY_MODEL_PATH,
-        epoch_train_task=META_ONLY_META_EPOCHS,
-        use_cdrm=META_ONLY_USE_CDRM,
-        train_all_params=META_ONLY_TRAIN_ALL_PARAMS,
-        disable_lwp=META_ONLY_DISABLE_LWP
+        meta_tag="proposed",
+        init_state_dict=proposed_init_state,
+        support_model_path=PROPOSED_SUPPORT_MODEL_PATH,
+        query_model_path=PROPOSED_META_MODEL_PATH,
+        epoch_train_task=PROPOSED_META_EPOCHS,
+        use_cdrm=True,
+        train_all_params=False,
+        disable_lwp=False
     )
+
+    if TRAIN_META_ONLY_BASELINE:
+        run_meta_training(
+            meta_tag="meta_only",
+            init_state_dict=meta_only_random_init_state,
+            support_model_path=META_ONLY_SUPPORT_MODEL_PATH,
+            query_model_path=META_ONLY_MODEL_PATH,
+            epoch_train_task=META_ONLY_META_EPOCHS,
+            use_cdrm=META_ONLY_USE_CDRM,
+            train_all_params=META_ONLY_TRAIN_ALL_PARAMS,
+            disable_lwp=META_ONLY_DISABLE_LWP
+        )
+
+
+def run_local_meta_training():
+    for station_id in station_ids:
+        print("\n" + "=" * 70)
+        print(f"开始本地元训练: station {station_id}")
+        print("=" * 70)
+
+        local_pretrain_path = get_local_pretrain_model_path(station_id)
+        run_meta_training(
+            meta_tag=f"local_meta_station{station_id}",
+            init_state_dict=torch.load(local_pretrain_path),
+            support_model_path=get_local_meta_support_model_path(station_id),
+            query_model_path=get_local_meta_model_path(station_id),
+            epoch_train_task=PROPOSED_META_EPOCHS,
+            use_cdrm=True,
+            train_all_params=False,
+            disable_lwp=False,
+            sample_station_ids=[station_id]
+        )
+
+        if TRAIN_META_ONLY_BASELINE:
+            run_meta_training(
+                meta_tag=f"meta_only_station{station_id}",
+                init_state_dict=meta_only_random_init_state,
+                support_model_path=get_local_meta_only_support_model_path(station_id),
+                query_model_path=get_local_meta_only_model_path(station_id),
+                epoch_train_task=META_ONLY_META_EPOCHS,
+                use_cdrm=META_ONLY_USE_CDRM,
+                train_all_params=META_ONLY_TRAIN_ALL_PARAMS,
+                disable_lwp=META_ONLY_DISABLE_LWP,
+                sample_station_ids=[station_id]
+            )
+
+
+if USE_FEDERATION and not USE_PSEUDO_FED:
+    run_local_meta_training()
+else:
+    run_shared_meta_training()
 
 
 ## test_task_support
@@ -702,7 +823,7 @@ all_personalized_models = {}  # 存储所有个性化模型
 
 def run_few_shot_adaptation(base_model_path, save_path, log_tag, model_label, test_input_tensor, test_target_tensor):
     """针对某个初始化模型执行一次 few-shot 适应并保存。"""
-    model_fore_test_task_support.load_state_dict(torch.load(base_model_path))
+    model_fore_test_task_support.load_state_dict(torch.load(base_model_path, map_location=device))
     optimizer = torch.optim.Adam(
         model_fore_test_task_support.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999)
     )
@@ -724,7 +845,7 @@ def run_few_shot_adaptation(base_model_path, save_path, log_tag, model_label, te
                 f"      [{model_label}] [Epoch {i+1}/{FEW_SHOT_EPOCHS}] "
                 f"[loss_mse: {loss2.item():.6f}]"
             )
-            writer1.add_scalar(f"loss_penalty_{log_tag}", loss1.item(), i)
+            writer1.add_scalar(f"loss_penalty_{log_tag}", 0.0, i)
             writer2.add_scalar(f"loss_mse_{log_tag}", loss2.item(), i)
 
     model_fore_test_task_support.eval()
@@ -770,23 +891,23 @@ for station_id in station_ids:
             f"few-shot loss={'CDRM+MSE' if FEW_SHOT_USE_CDRM else 'MSE'}"
         )
 
-        # Proposed：按论文流程用 proposed meta-model 做 per-class few-shot
-        proposed_model_name = f"./model_fore_station{station_id}_extreme{i_class}.pth"
+        # LMT：old Proposed 去掉 pseudo-fed 后的 per-station local 版本
+        lmt_model_name = f"./model_fore_station{station_id}_extreme{i_class}.pth"
         run_few_shot_adaptation(
-            base_model_path=PROPOSED_META_MODEL_PATH,
-            save_path=proposed_model_name,
+            base_model_path=get_local_meta_model_path(station_id) if USE_FEDERATION and not USE_PSEUDO_FED else PROPOSED_META_MODEL_PATH,
+            save_path=lmt_model_name,
             log_tag=f"station{station_id}_class{i_class}",
-            model_label="Proposed",
+            model_label="LMT" if USE_FEDERATION and not USE_PSEUDO_FED else "Proposed",
             test_input_tensor=Test_input_support,
             test_target_tensor=Test_target_support
         )
-        all_personalized_models[f'proposed_{station_id}_class{i_class}'] = proposed_model_name
+        all_personalized_models[f'lmt_{station_id}_class{i_class}'] = lmt_model_name
 
         # Meta-only：同口径执行 step-11 few-shot，确保与论文消融对齐
         if TRAIN_META_ONLY_BASELINE:
             meta_only_model_name = f"./model_fore_station{station_id}_extreme{i_class}_meta_only.pth"
             run_few_shot_adaptation(
-                base_model_path=META_ONLY_MODEL_PATH,
+                base_model_path=get_local_meta_only_model_path(station_id) if USE_FEDERATION and not USE_PSEUDO_FED else META_ONLY_MODEL_PATH,
                 save_path=meta_only_model_name,
                 log_tag=f"meta_only_station{station_id}_class{i_class}",
                 model_label="Meta-only",
@@ -833,8 +954,12 @@ for station_id in station_ids:
         print(f"  ✓ 极端类别{i_class+1}")
     
     # 预测：元学习模型（meta-only baseline）
-    meta_model_path = META_ONLY_MODEL_PATH if TRAIN_META_ONLY_BASELINE else PROPOSED_META_MODEL_PATH
-    model_fore_test_task_query.load_state_dict(torch.load(meta_model_path))
+    meta_model_path = (
+        get_local_meta_only_model_path(station_id)
+        if TRAIN_META_ONLY_BASELINE and USE_FEDERATION and not USE_PSEUDO_FED
+        else (META_ONLY_MODEL_PATH if TRAIN_META_ONLY_BASELINE else PROPOSED_META_MODEL_PATH)
+    )
+    model_fore_test_task_query.load_state_dict(torch.load(meta_model_path, map_location=device))
     with torch.no_grad():
         Test_input_device = Test_input_c_st.to(device)
         Test_output = model_fore_test_task_query(Test_input_device)
@@ -844,7 +969,12 @@ for station_id in station_ids:
     print(f"  ✓ 元学习模型")
     
     # 预测：预训练模型
-    model_fore_test_task_query.load_state_dict(torch.load(PRETRAIN_MODEL_PATH))
+    pretrain_model_path = (
+        get_local_pretrain_model_path(station_id)
+        if USE_FEDERATION and not USE_PSEUDO_FED
+        else PRETRAIN_MODEL_PATH
+    )
+    model_fore_test_task_query.load_state_dict(torch.load(pretrain_model_path, map_location=device))
     with torch.no_grad():
         Test_input_device = Test_input_c_st.to(device)
         Test_output = model_fore_test_task_query(Test_input_device)
@@ -861,9 +991,9 @@ print("✓ 已保存: all_stations_test_results.mat")
 print("\n" + "="*70)
 print("✓✓✓ 训练和测试全部完成！")
 if TRAIN_META_ONLY_BASELINE:
-    print(f"生成的模型: {len(all_personalized_models)}个个性化模型（Proposed+Meta-only） + 2个元模型 + 1个预训练模型")
+    print(f"生成的模型: {len(all_personalized_models)}个个性化模型（LMT+Meta-only） + 元模型 + 预训练模型")
 else:
-    print(f"生成的模型: {len(all_personalized_models)}个个性化模型 + Proposed元模型 + 1个预训练模型")
+    print(f"生成的模型: {len(all_personalized_models)}个个性化模型 + LMT元模型 + 预训练模型")
 print("="*70)
 
 # [删除] 原来的单场站保存代码
