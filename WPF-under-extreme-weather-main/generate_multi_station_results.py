@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 生成多场站测试结果CSV
-支持3场站×6模型的完整评估
+支持3场站 extreme 主表评估
 """
 import os
 import glob
@@ -64,7 +64,6 @@ print("生成多场站测试结果CSV")
 print("="*70)
 
 PREFER_TUNED_PROPOSED_MODELS = os.getenv("PREFER_TUNED_PROPOSED_MODELS", "0") != "0"
-STRICT_PAPER_ORDER = os.getenv("STRICT_PAPER_ORDER", "1") != "0"
 
 def benjamini_hochberg(p_values):
     """
@@ -146,10 +145,6 @@ def get_local_pretrain_model_path(station_id):
     return f"model_fore_pre_station{station_id}_local.pth"
 
 
-def get_local_meta_only_model_path(station_id):
-    return f"model_fore_train_task_query_meta_only_station{station_id}.pth"
-
-
 def resolve_lmt_model_path(station_id, class_idx):
     """
     LMT 子模型优先级：
@@ -167,55 +162,26 @@ def resolve_lmt_model_path(station_id, class_idx):
     return None
 
 
-def validate_paper_ablation_order(wide_df, weather_order):
-    """
-    论文消融排序校验（误差类指标越小越好）：
-    LMT <= Pre_Training <= Meta_Learning
-    """
-    metric_suffixes = ["nMAE_%", "nRMSE_%", "WD_%"]
-    issues = []
+def get_extreme_fedavg_model_path(station_id, class_idx):
+    return f"model_fore_station{station_id}_extreme{class_idx}_extreme_fedavg.pth"
 
-    station_values = [str(s) for s in wide_df["Station"].astype(str).tolist()]
-    for station_id in sorted(set(station_values)):
-        if station_id == "Overall_Average":
-            continue
 
-        station_rows = wide_df[wide_df["Station"].astype(str) == station_id].set_index("Model")
-        required_models = {"LMT", "Pre_Training", "Meta_Learning"}
-        if not required_models.issubset(set(station_rows.index)):
-            continue
-
-        for weather in weather_order:
-            for metric_suffix in metric_suffixes:
-                col = f"{weather}_{metric_suffix}"
-                proposed_v = float(station_rows.loc["LMT", col])
-                pre_v = float(station_rows.loc["Pre_Training", col])
-                meta_v = float(station_rows.loc["Meta_Learning", col])
-
-                if proposed_v > pre_v:
-                    issues.append(
-                        f"Station {station_id} {col}: LMT({proposed_v:.4f}) > Pre_Training({pre_v:.4f})"
-                    )
-                if meta_v < pre_v:
-                    issues.append(
-                        f"Station {station_id} {col}: Meta_Learning({meta_v:.4f}) < Pre_Training({pre_v:.4f})"
-                    )
-
-    return issues
+def get_proposed_a_model_path(station_id, class_idx):
+    return f"model_fore_station{station_id}_extreme{class_idx}_proposed_a.pth"
 
 
 def infer_training_durations_from_tensorboard():
     """
     从最新 TensorBoard 事件文件推断训练时长（秒）。
     口径：
-    - Pre_Training = pre-train 阶段时长
-    - Meta_Learning = meta-only 阶段时长
-    - LMT = local pre-train + local meta-training + few-shot 适配总时长
+    - LMT = local pre-train + local meta-training + target-only extreme few-shot
+    - Extreme-FedAvg = shared prefix + source update + fedavg target refine
+    - Proposed-A = shared prefix + source update + proposed target refine
     """
     duration_map = {
         'LMT': np.nan,
-        'Meta_Learning': np.nan,
-        'Pre_Training': np.nan
+        'Extreme-FedAvg': np.nan,
+        'Proposed-A': np.nan
     }
 
     try:
@@ -245,40 +211,12 @@ def infer_training_durations_from_tensorboard():
         return float(max(valid)) if valid else np.nan
 
     pretrain_sec = tag_span_seconds('loss_mse_pre')
-    proposed_meta_sec = max_valid(
-        tag_span_seconds('loss_mse_train_task_support_proposed'),
-        tag_span_seconds('loss_mse_train_task_query_proposed')
-    )
     local_meta_tags = sorted([t for t in scalar_tags if t.startswith('loss_mse_train_task_query_local_meta_station')])
     local_meta_support_tags = sorted([t for t in scalar_tags if t.startswith('loss_mse_train_task_support_local_meta_station')])
     local_meta_sec = max_valid(
         *[tag_span_seconds(t) for t in local_meta_tags],
         *[tag_span_seconds(t) for t in local_meta_support_tags]
     )
-    meta_only_sec = max_valid(
-        tag_span_seconds('loss_mse_train_task_support_meta_only'),
-        tag_span_seconds('loss_mse_train_task_query_meta_only')
-    )
-    local_meta_only_query_tags = sorted([t for t in scalar_tags if t.startswith('loss_mse_train_task_query_meta_only_station')])
-    local_meta_only_support_tags = sorted([t for t in scalar_tags if t.startswith('loss_mse_train_task_support_meta_only_station')])
-    meta_only_sec = max_valid(
-        meta_only_sec,
-        *[tag_span_seconds(t) for t in local_meta_only_query_tags],
-        *[tag_span_seconds(t) for t in local_meta_only_support_tags]
-    )
-
-    few_shot_tags = sorted([t for t in scalar_tags if t.startswith('loss_mse_station')])
-    few_shot_sec = np.nan
-    if few_shot_tags:
-        starts = []
-        ends = []
-        for t in few_shot_tags:
-            events = ea.Scalars(t)
-            if events:
-                starts.append(events[0].wall_time)
-                ends.append(events[-1].wall_time)
-        if starts and ends:
-            few_shot_sec = float(max(ends) - min(starts))
 
     local_pretrain_tags = sorted([t for t in scalar_tags if t.startswith('loss_mse_pre_station')])
     local_pretrain_sec = max_valid(
@@ -286,11 +224,31 @@ def infer_training_durations_from_tensorboard():
         *[tag_span_seconds(t) for t in local_pretrain_tags]
     )
 
-    duration_map['Pre_Training'] = local_pretrain_sec
-    duration_map['Meta_Learning'] = meta_only_sec
-    lmt_meta_sec = max_valid(proposed_meta_sec, local_meta_sec)
-    if not np.isnan(local_pretrain_sec) and not np.isnan(lmt_meta_sec):
-        duration_map['LMT'] = local_pretrain_sec + lmt_meta_sec + (0.0 if np.isnan(few_shot_sec) else few_shot_sec)
+    def prefix_span_seconds(prefix):
+        matched_tags = sorted([t for t in scalar_tags if t.startswith(prefix)])
+        if not matched_tags:
+            return np.nan
+        starts = []
+        ends = []
+        for tag in matched_tags:
+            events = ea.Scalars(tag)
+            if events:
+                starts.append(events[0].wall_time)
+                ends.append(events[-1].wall_time)
+        if not starts or not ends:
+            return np.nan
+        return float(max(ends) - min(starts))
+
+    lmt_few_shot_sec = prefix_span_seconds('loss_mse_lmt_station')
+    shared_source_update_sec = prefix_span_seconds('loss_mse_extreme_source_station')
+    fedavg_refine_sec = prefix_span_seconds('loss_mse_extreme_fedavg_station')
+    proposed_refine_sec = prefix_span_seconds('loss_mse_proposed_a_station')
+
+    if not np.isnan(local_pretrain_sec) and not np.isnan(local_meta_sec):
+        shared_prefix_sec = local_pretrain_sec + local_meta_sec
+        duration_map['LMT'] = shared_prefix_sec + (0.0 if np.isnan(lmt_few_shot_sec) else lmt_few_shot_sec)
+        duration_map['Extreme-FedAvg'] = shared_prefix_sec + (0.0 if np.isnan(shared_source_update_sec) else shared_source_update_sec) + (0.0 if np.isnan(fedavg_refine_sec) else fedavg_refine_sec)
+        duration_map['Proposed-A'] = shared_prefix_sec + (0.0 if np.isnan(shared_source_update_sec) else shared_source_update_sec) + (0.0 if np.isnan(proposed_refine_sec) else proposed_refine_sec)
 
     return duration_map
 
@@ -316,8 +274,8 @@ station_ids = ['58', '59', '60']
 # 输出到表格的模型名称（按论文表风格）
 model_names = [
     'LMT',
-    'Meta_Learning',
-    'Pre_Training'
+    'Extreme-FedAvg',
+    'Proposed-A'
 ]
 
 # 创建模型
@@ -349,14 +307,14 @@ for station_id in station_ids:
         else:
             P_nwp = np.concatenate((P_nwp,P_nwp1[:,nwp_index[i]].reshape(np.size(P_nwp1,axis=0),-1)),axis=1)
     
-    # 生成该场站模型文件映射
-    # LMT 在各天气类别上使用对应的 class 模型
-    proposed_model_files = {}
+    lmt_model_files = {}
+    extreme_fedavg_model_files = {}
+    proposed_a_model_files = {}
 
     # 1-4: 类别对应的 LMT 子模型（优先 tuned）
     for i_class in range(4):
         model_file = resolve_lmt_model_path(station_id, i_class)
-        proposed_model_files[i_class] = model_file
+        lmt_model_files[i_class] = model_file
         if model_file is not None:
             if model_file.endswith("_tuned.pth"):
                 print(f"  ✓ LMT(Class{i_class+1}) 使用 tuned: {model_file}")
@@ -365,46 +323,19 @@ for station_id in station_ids:
         else:
             print(f"  ✗ LMT(Class{i_class+1}) 模型不存在（默认/调优均缺失）")
 
-    baseline_model_files = {}
-
-    # Meta-learning（论文 Table IV: meta-learning only + step-11 fine-tune）
-    meta_model_files = {}
     for i_class in range(4):
-        meta_model_candidates = [
-            f"model_fore_station{station_id}_extreme{i_class}_meta_only_tuned.pth",
-            f"model_fore_station{station_id}_extreme{i_class}_meta_only.pth",
-            get_local_meta_only_model_path(station_id),
-            'model_fore_train_task_query_meta_only.pth',
-            'model_fore_meta_only.pth',
-            'model_fore_train_task_query.pth'
-        ]
-        meta_model_file = None
-        for cand in meta_model_candidates:
-            if os.path.exists(cand):
-                meta_model_file = cand
-                break
-        meta_model_files[i_class] = meta_model_file
-        if meta_model_file is not None:
-            print(f"  ✓ Meta_Learning(Class{i_class+1}) 使用: {meta_model_file}")
+        fedavg_model_file = get_extreme_fedavg_model_path(station_id, i_class)
+        proposed_model_file = get_proposed_a_model_path(station_id, i_class)
+        extreme_fedavg_model_files[i_class] = fedavg_model_file if os.path.exists(fedavg_model_file) else None
+        proposed_a_model_files[i_class] = proposed_model_file if os.path.exists(proposed_model_file) else None
+        if extreme_fedavg_model_files[i_class] is not None:
+            print(f"  ✓ Extreme-FedAvg(Class{i_class+1}) 使用: {fedavg_model_file}")
         else:
-            print(f"  ✗ Meta_Learning(Class{i_class+1}) 模型不存在（尝试: {meta_model_candidates}）")
-
-    # Pre-training
-    pre_model_candidates = [
-        f'model_fore_pre_station{station_id}_local.pth',
-        'model_fore_pre_federated.pth',
-        'model_fore_pre.pth',
-    ]
-    pre_model_file = None
-    for cand in pre_model_candidates:
-        if os.path.exists(cand):
-            pre_model_file = cand
-            break
-    baseline_model_files['Pre_Training'] = pre_model_file
-    if baseline_model_files['Pre_Training'] is None:
-        print(f"  ✗ Pre_Training 模型不存在（尝试: {pre_model_candidates}）")
-    else:
-        print(f"  ✓ Pre_Training 使用: {pre_model_file}")
+            print(f"  ✗ Extreme-FedAvg(Class{i_class+1}) 模型不存在: {fedavg_model_file}")
+        if proposed_a_model_files[i_class] is not None:
+            print(f"  ✓ Proposed-A(Class{i_class+1}) 使用: {proposed_model_file}")
+        else:
+            print(f"  ✗ Proposed-A(Class{i_class+1}) 模型不存在: {proposed_model_file}")
 
     # 论文口径：在每个极端天气类别子集上评估各方法
     for eval_class in range(4):
@@ -429,11 +360,11 @@ for station_id in station_ids:
         
         for model_name in model_names:
             if model_name == 'LMT':
-                model_file = proposed_model_files.get(eval_class)
-            elif model_name == 'Meta_Learning':
-                model_file = meta_model_files.get(eval_class)
+                model_file = lmt_model_files.get(eval_class)
+            elif model_name == 'Extreme-FedAvg':
+                model_file = extreme_fedavg_model_files.get(eval_class)
             else:
-                model_file = baseline_model_files.get(model_name)
+                model_file = proposed_a_model_files.get(eval_class)
             if model_file is None:
                 pred_events = np.zeros_like(true_events)
             else:
@@ -526,22 +457,6 @@ for weather in weather_order:
         output_cols.append(f'{weather}_{metric}')
 output_cols.extend(['Training_duration_s', 'R_p<0.05_%'])
 wide_df = wide_df[output_cols]
-
-# 论文消融关系一致性检查
-paper_order_issues = validate_paper_ablation_order(wide_df, weather_order)
-if paper_order_issues:
-    print("\n" + "=" * 70)
-    print("WARNING: 论文消融排序校验未通过（LMT <= Pre <= Meta）")
-    print("=" * 70)
-    for issue in paper_order_issues[:30]:
-        print(" - " + issue)
-    if len(paper_order_issues) > 30:
-        print(f" - ... 其余 {len(paper_order_issues) - 30} 条省略")
-    if STRICT_PAPER_ORDER:
-        raise RuntimeError(
-            "检测到与论文消融排序冲突的结果。请先重训/更新基线模型后再生成CSV，"
-            "或将 STRICT_PAPER_ORDER 设为 False。"
-        )
 
 # 保存为CSV（论文表格风格）
 metric_cols = [c for c in wide_df.columns if c not in ['Station', 'Model', 'Training_duration_s']]

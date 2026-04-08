@@ -14,23 +14,17 @@ class LocalizedLMTContractTest(unittest.TestCase):
         self.assertIn("def get_local_pretrain_model_path(station_id):", text)
         self.assertIn("def get_local_meta_model_path(station_id):", text)
         self.assertIn("def get_local_meta_only_model_path(station_id):", text)
-        self.assertIn('base_model_path=get_local_meta_model_path(station_id)', text)
-        self.assertNotIn('base_model_path=PROPOSED_META_MODEL_PATH', text)
+        self.assertIn("get_local_meta_model_path(station_id) if USE_FEDERATION and not USE_PSEUDO_FED else PROPOSED_META_MODEL_PATH", text)
+        self.assertIn('model_label="LMT"', text)
 
-    def test_results_export_uses_lmt_and_station_local_pretrain(self):
+    def test_results_export_uses_three_model_main_table(self):
         text = RESULTS_FILE.read_text(encoding="utf-8")
         self.assertRegex(
             text,
-            r"model_names\s*=\s*\[\s*'LMT'\s*,\s*'Meta_Learning'\s*,\s*'Pre_Training'\s*\]",
+            r"model_names\s*=\s*\[\s*'LMT'\s*,\s*'Extreme-FedAvg'\s*,\s*'Proposed-A'\s*\]",
         )
-        self.assertIn(
-            "pre_model_candidates = [",
-            text,
-        )
-        self.assertIn(
-            "f'model_fore_pre_station{station_id}_local.pth'",
-            text,
-        )
+        self.assertNotIn("'Meta_Learning'", text)
+        self.assertNotIn("'Pre_Training'", text)
 
 
 if __name__ == "__main__":

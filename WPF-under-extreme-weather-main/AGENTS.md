@@ -105,3 +105,79 @@
   - `fine-tuning` 使用 `experience loss`，不继续叠加 `CDRM penalty`
 - 影响：
   - 现有 `.pth` 不再代表最新论文口径，需要重新训练后再看 `multi_station_performance.csv`
+
+### 2026-04-07 - baseline-reset-9699391 分支上的 extreme 主线收敛
+- 当前分支以 `9699391` 为锚点恢复 `LMT` 基线语义，并保留 `few-shot = MSE-only`。
+- `TRAIN_META_ONLY_BASELINE` 在本分支默认关闭：
+  - 当前论文主表不再单独比较 `Meta_Learning` 与 `Pre_Training`；
+  - 训练和导出主线只保留 `LMT / Extreme-FedAvg / Proposed-A` 三条方法。
+- `Extreme-FedAvg` 与 `Proposed-A` 的实现前提固定为：
+  - 共同 backbone：`local_pretrain -> local_meta -> extreme adaptation`
+  - 共同初始化：目标场站 `local_meta`
+  - 两个 source 场站都参与，但先做 source-quality gate 与 target-conditioned usefulness screening
+  - `Extreme-FedAvg` 使用等权聚合；
+  - `Proposed-A` 使用 `m / q / t + beta_self` 的 reliability-aware 聚合。
+- `generate_multi_station_results.py` 恢复为 `fb2c67a` 风格主表：
+  - 每站仅输出 `LMT / Extreme-FedAvg / Proposed-A`
+  - `Overall_Average` 也仅保留三行
+  - 不再输出 `Meta_Learning / Pre_Training` 行
+- 2026-04-07 smoke 已验证：
+  - 三模型训练链路可端到端运行
+  - `multi_station_performance.csv` 已按三模型宽表格式导出
+  - smoke 数值仅用于链路验证，不能替代 4090 pilot/formal 判定
+
+### 2026-04-07 - high-budget group2 已确认当前问题在 transfer 强度而非方法失效
+- 在 `baseline-reset-9699391` 分支上，`5000 / 5000 / 50` + `EXTREME_WEIGHT_BETA_SELF=0.6` + `EXTREME_SOURCE_BORROW_BUDGET_GAMMA=0.75` 的组 2 已完成。
+- 相比上一轮标准 `pilot-medium (2000 / 2000 / 50)`，`Overall_Average` 上的 `Proposed-A` 已从“弱于 LMT”翻转为三方法最优：
+  - `HighWind`: `33.1594 / 38.2587 / 26.0850 -> 31.5156 / 35.6771 / 24.9356`
+  - `HighTemperature`: `19.3356 / 21.9926 / 17.4949 -> 19.1632 / 21.5116 / 17.6187`
+  - `ColdWave`: `33.0192 / 37.2428 / 28.1317 -> 29.8046 / 33.4745 / 25.5822`
+  - `Frost`: `18.5906 / 21.3499 / 17.5811 -> 18.2768 / 20.9314 / 17.5658`
+- 当前解释固定为：
+  - earlier negative transfer 的主因不是 `Proposed-A` 机制失效；
+  - 而是 source borrowing 在较低预算/较激进权重下过强；
+  - 当提高上游预算并提高 `beta_self`、降低 borrowing budget 后，`Proposed-A` 会稳定优于 `Extreme-FedAvg`，并在 `Overall_Average` 的四类天气三项主误差上全部优于 `LMT`。
+- 当前默认推荐配置更新为：
+  - `EXTREME_WEIGHT_BETA_SELF=0.6`
+  - `EXTREME_SOURCE_BORROW_BUDGET_GAMMA=0.75`
+- `group1 (0.5, 1.0)` 与 `group3 (0.7, 0.5)` 当前降级为“可选确认实验”，不再是进入下一阶段前的必跑项。
+
+### 2026-04-07 - final 前已恢复阶段级收敛监控
+- 在 `baseline-reset-9699391` 分支上，已将 `fb2c67a` 风格的收敛监控最小回迁到当前主线：
+  - `local_pretrain`
+  - `local_meta`
+  - `few_shot`（包括 LMT / source update / target refinement）
+- 当前训练结束后会自动导出 `training_convergence_report.json`，字段包括：
+  - `stage_type`
+  - `stage_id`
+  - `best_epoch`
+  - `best_loss`
+  - `convergence_epoch`
+  - `final_loss`
+- 运行期终端也会输出阶段级收敛追踪与收敛/未收敛摘要。
+- 当前 `final` 推荐预算更新为：
+  - `PRETRAIN_EPOCHS=35000`
+  - `PROPOSED_META_EPOCHS=30000`
+  - `META_ONLY_META_EPOCHS=30000`
+  - `FEW_SHOT_EPOCHS=100`
+  - `EXTREME_WEIGHT_BETA_SELF=0.6`
+  - `EXTREME_SOURCE_BORROW_BUDGET_GAMMA=0.75`
+
+### 2026-04-08 - 已支持跳过 local_pretrain/local_meta，仅重跑 extreme 微调
+- 在 `baseline-reset-9699391` 分支上，`DemoModelTraining.py` 已新增：
+  - `SKIP_LOCAL_PRETRAIN`
+  - `SKIP_LOCAL_META`
+- 这两个开关的目的都是复用已存在的本地 checkpoint，避免在只想重试 `EXTREME_TARGET_REFINEMENT_EPOCHS` 或其他 extreme-stage 参数时，重复运行耗时的 `local_pretrain` / `local_meta`。
+- 当前行为约束：
+  - `SKIP_LOCAL_PRETRAIN=1` 时，程序会直接复用 `model_fore_pre_station{station}_local.pth`
+  - `SKIP_LOCAL_META=1` 时，程序会直接复用 `model_fore_train_task_query_local_meta_station{station}.pth`
+  - 若对应 checkpoint 不存在，会直接抛出 `FileNotFoundError`，不允许静默覆盖已有结果
+- 因此，后续若仅想比较：
+  - `EXTREME_TARGET_REFINEMENT_EPOCHS`
+  - `EXTREME_WEIGHT_BETA_SELF`
+  - `EXTREME_SOURCE_BORROW_BUDGET_GAMMA`
+  - 或其他 extreme-stage 参数
+  则推荐直接设置：
+  - `SKIP_LOCAL_PRETRAIN=1`
+  - `SKIP_LOCAL_META=1`
+  只重跑 extreme 微调与最终评估。

@@ -13,15 +13,16 @@ class FewShotLossConfigTest(unittest.TestCase):
         self.assertIn("FEW_SHOT_USE_CDRM = False", text)
 
         match = re.search(
-            r"def run_few_shot_adaptation\(.*?\n(.*?)\n\s*all_personalized_models",
+            r"def adapt_state_dict\(.*?\n(.*?)\n\s*def run_few_shot_adaptation",
             text,
             re.S,
         )
         self.assertIsNotNone(match)
         fn_body = match.group(1)
-        self.assertIn("loss_en = loss2", fn_body)
-        self.assertNotIn("if FEW_SHOT_USE_CDRM:", fn_body)
+        self.assertNotIn("loss_en =", fn_body)
         self.assertNotIn("penalty(", fn_body)
+        self.assertIn("loss_mse = loss_fn_1(outputs, adapt_target_device)", fn_body)
+        self.assertIn("loss_mse.backward()", fn_body)
 
 
 if __name__ == "__main__":

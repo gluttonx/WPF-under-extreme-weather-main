@@ -1,0 +1,89 @@
+======================================================================
+生成多场站测试结果CSV
+======================================================================
+
+从已保存的结果加载...
+（跳过，直接重新生成）
+
+生成预测...
+
+场站 58:
+  ✓ LMT(Class1) 使用默认: model_fore_station58_extreme0.pth
+  ✓ LMT(Class2) 使用默认: model_fore_station58_extreme1.pth
+  ✓ LMT(Class3) 使用默认: model_fore_station58_extreme2.pth
+  ✓ LMT(Class4) 使用默认: model_fore_station58_extreme3.pth
+  ✓ Extreme-FedAvg(Class1) 使用: model_fore_station58_extreme0_extreme_fedavg.pth
+  ✓ Proposed-A(Class1) 使用: model_fore_station58_extreme0_proposed_a.pth
+  ✓ Extreme-FedAvg(Class2) 使用: model_fore_station58_extreme1_extreme_fedavg.pth
+  ✓ Proposed-A(Class2) 使用: model_fore_station58_extreme1_proposed_a.pth
+  ✓ Extreme-FedAvg(Class3) 使用: model_fore_station58_extreme2_extreme_fedavg.pth
+  ✓ Proposed-A(Class3) 使用: model_fore_station58_extreme2_proposed_a.pth
+  ✓ Extreme-FedAvg(Class4) 使用: model_fore_station58_extreme3_extreme_fedavg.pth
+  ✓ Proposed-A(Class4) 使用: model_fore_station58_extreme3_proposed_a.pth
+
+场站 59:
+  ✓ LMT(Class1) 使用默认: model_fore_station59_extreme0.pth
+  ✓ LMT(Class2) 使用默认: model_fore_station59_extreme1.pth
+  ✓ LMT(Class3) 使用默认: model_fore_station59_extreme2.pth
+  ✓ LMT(Class4) 使用默认: model_fore_station59_extreme3.pth
+  ✓ Extreme-FedAvg(Class1) 使用: model_fore_station59_extreme0_extreme_fedavg.pth
+  ✓ Proposed-A(Class1) 使用: model_fore_station59_extreme0_proposed_a.pth
+  ✓ Extreme-FedAvg(Class2) 使用: model_fore_station59_extreme1_extreme_fedavg.pth
+  ✓ Proposed-A(Class2) 使用: model_fore_station59_extreme1_proposed_a.pth
+  ✓ Extreme-FedAvg(Class3) 使用: model_fore_station59_extreme2_extreme_fedavg.pth
+  ✓ Proposed-A(Class3) 使用: model_fore_station59_extreme2_proposed_a.pth
+  ✓ Extreme-FedAvg(Class4) 使用: model_fore_station59_extreme3_extreme_fedavg.pth
+  ✓ Proposed-A(Class4) 使用: model_fore_station59_extreme3_proposed_a.pth
+
+场站 60:
+  ✓ LMT(Class1) 使用默认: model_fore_station60_extreme0.pth
+  ✓ LMT(Class2) 使用默认: model_fore_station60_extreme1.pth
+  ✓ LMT(Class3) 使用默认: model_fore_station60_extreme2.pth
+  ✓ LMT(Class4) 使用默认: model_fore_station60_extreme3.pth
+  ✓ Extreme-FedAvg(Class1) 使用: model_fore_station60_extreme0_extreme_fedavg.pth
+  ✓ Proposed-A(Class1) 使用: model_fore_station60_extreme0_proposed_a.pth
+  ✓ Extreme-FedAvg(Class2) 使用: model_fore_station60_extreme1_extreme_fedavg.pth
+  ✓ Proposed-A(Class2) 使用: model_fore_station60_extreme1_proposed_a.pth
+  ✓ Extreme-FedAvg(Class3) 使用: model_fore_station60_extreme2_extreme_fedavg.pth
+  ✓ Proposed-A(Class3) 使用: model_fore_station60_extreme2_proposed_a.pth
+  ✓ Extreme-FedAvg(Class4) 使用: model_fore_station60_extreme3_extreme_fedavg.pth
+  ✓ Proposed-A(Class4) 使用: model_fore_station60_extreme3_proposed_a.pth
+
+计算Overall Average（按Extreme_Class + Model跨3场站平均）...
+
+======================================================================
+✓✓✓ 多场站结果已生成（Table III/IV 风格）！
+======================================================================
+
+生成文件: multi_station_performance.csv
+总行数: 12
+  - 每场站: 3模型 = 3行
+  - 3场站: 9行
+  - Overall Average: 3行
+  - 总计: 12行
+
+======================================================================
+性能对比表格（横向展开）:
+======================================================================
+        Station          Model  HighWind_nMAE_%  HighWind_nRMSE_%  HighWind_WD_%  HighTemperature_nMAE_%  HighTemperature_nRMSE_%  HighTemperature_WD_%  ColdWave_nMAE_%  ColdWave_nRMSE_%  ColdWave_WD_%  Frost_nMAE_%  Frost_nRMSE_%  Frost_WD_%  Training_duration_s  R_p<0.05_%
+             58            LMT          39.7194           42.8495        38.0721                 19.1182                  21.4017               17.3858          35.8748           39.1613        31.0992       15.0231        17.4628     14.5211               574.17     78.7500
+             58 Extreme-FedAvg          39.5092           42.5421        37.8849                 18.8646                  21.0542               17.2177          39.0265           41.5005        33.8514       14.0536        16.6266     13.6271               634.14     76.2500
+             58     Proposed-A          39.5930           42.5303        38.0254                 18.7164                  21.0240               16.9529          37.6052           40.2870        32.6210       14.0394        16.6154     13.6233               634.18     76.2500
+             59            LMT          27.4633           31.8668        21.3219                 18.0712                  20.5044               16.5869          19.1100           23.7156        17.3117       21.8505        24.4586     20.7391               574.17     62.1212
+             59 Extreme-FedAvg          26.0950           30.4572        19.3232                 17.8342                  20.3350               16.2009          17.3976           20.6438        14.7013       21.8595        24.4416     20.8688               634.14     56.0606
+             59     Proposed-A          25.9805           30.3735        19.1379                 17.8100                  20.3117               16.1852          17.4790           20.6632        14.7034       21.7854        24.3993     20.6900               634.18     56.0606
+             60            LMT          29.7934           35.0051        18.8438                 21.0362                  23.2631               19.8144          34.4811           39.7461        29.1172       19.6372        22.2607     18.9657               574.17     59.4203
+             60 Extreme-FedAvg          29.0758           34.2448        17.6917                 20.9493                  23.1984               19.6882          35.3251           40.1875        31.2700       18.9842        21.7639     18.3563               634.14     62.3188
+             60     Proposed-A          28.9732           34.1274        17.6435                 20.9631                  23.1992               19.7179          34.3295           39.4734        29.4221       19.0055        21.7795     18.3841               634.18     62.3188
+Overall_Average            LMT          32.3254           36.5738        26.0793                 19.4085                  21.7231               17.9290          29.8220           34.2077        25.8427       18.8369        21.3940     18.0753               574.17     66.1474
+Overall_Average Extreme-FedAvg          31.5600           35.7480        24.9666                 19.2160                  21.5292               17.7023          30.5831           34.1106        26.6076       18.2991        20.9440     17.6174               634.14     64.6991
+Overall_Average     Proposed-A          31.5156           35.6771        24.9356                 19.1632                  21.5116               17.6187          29.8046           33.4745        25.5822       18.2768        20.9314     17.5658               634.18     64.6991
+
+======================================================================
+Overall Average（论文口径，横向展开）:
+======================================================================
+        Station          Model  HighWind_nMAE_%  HighWind_nRMSE_%  HighWind_WD_%  HighTemperature_nMAE_%  HighTemperature_nRMSE_%  HighTemperature_WD_%  ColdWave_nMAE_%  ColdWave_nRMSE_%  ColdWave_WD_%  Frost_nMAE_%  Frost_nRMSE_%  Frost_WD_%  Training_duration_s  R_p<0.05_%
+Overall_Average            LMT          32.3254           36.5738        26.0793                 19.4085                  21.7231               17.9290          29.8220           34.2077        25.8427       18.8369        21.3940     18.0753               574.17     66.1474
+Overall_Average Extreme-FedAvg          31.5600           35.7480        24.9666                 19.2160                  21.5292               17.7023          30.5831           34.1106        26.6076       18.2991        20.9440     17.6174               634.14     64.6991
+Overall_Average     Proposed-A          31.5156           35.6771        24.9356                 19.1632                  21.5116               17.6187          29.8046           33.4745        25.5822       18.2768        20.9314     17.5658               634.18     64.6991
+======================================================================
