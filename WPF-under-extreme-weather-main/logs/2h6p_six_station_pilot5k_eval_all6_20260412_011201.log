@@ -1,0 +1,158 @@
+
+======================================================================
+stage=eval
+env  PROTOCOL_NAME=six_station_2h_6point_phase_augmented_protocol PROTOCOL_DATA_DIR=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/2h_6p_six_station PROTOCOL_METADATA_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/2h_6p_six_station/protocol_metadata.json SAMPLE_INTERVAL_HOURS=2 DOWNSAMPLE_OFFSET=1 LEN_REALP=6 POINTS_PER_DAY=12 PHASE_AUGMENT_STATIONS=1 ARTIFACT_DIR=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k MODEL_OUTPUT_DIR=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models LOGS_TRAIN_DIR=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/logs_train CONVERGENCE_REPORT_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/training_convergence_report.json ALL_STATIONS_TEST_RESULTS_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/all_stations_test_results.mat RESULTS_OUTPUT_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/results/multi_station_performance.csv TASK_RESULTS_OUTPUT_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/results/multi_station_performance_task_level.csv YEARLY_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_ENABLED=0 YEARLY_PROTOCOL_METADATA_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/2h_6p_six_station/protocol_metadata.json USE_FEDERATION=1 RUN_FEDERATED_PRETRAIN=0 TRAIN_META_ONLY_BASELINE=0 META_SUPPORT_SHOTS=10 META_QUERY_SHOTS=10 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=5000 PROPOSED_META_EPOCHS=5000 META_ONLY_META_EPOCHS=5000 FEW_SHOT_EPOCHS=200 EXTREME_TARGET_REFINEMENT_EPOCHS=200 PRETRAIN_LOG_INTERVAL=100 META_LOG_INTERVAL=100 FEW_SHOT_LOG_INTERVAL=20
+exec /root/miniconda3/bin/python -u generate_multi_station_results.py
+======================================================================
+
+libgomp: Invalid value for environment variable OMP_NUM_THREADS
+======================================================================
+生成多场站测试结果CSV
+======================================================================
+
+数据协议:
+  Protocol=six_station_2h_6point_phase_augmented_protocol
+  PROTOCOL_DATA_DIR=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/2h_6p_six_station
+  PROTOCOL_METADATA_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/2h_6p_six_station/protocol_metadata.json
+  SAMPLE_INTERVAL_HOURS=2
+  DOWNSAMPLE_OFFSET=1
+  LEN_REALP=6
+  POINTS_PER_DAY=12
+  WINDOW_SPAN_HOURS=12
+
+从已保存的结果加载...
+（跳过，直接重新生成）
+
+生成预测...
+
+场站 58:
+  ✓ LMT(Class1) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station58_extreme0.pth
+  ✓ LMT(Class2) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station58_extreme1.pth
+  ✓ LMT(Class3) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station58_extreme2.pth
+  ✓ LMT(Class4) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station58_extreme3.pth
+  ✓ Extreme-FedAvg(Class1) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station58_extreme0_extreme_fedavg.pth
+  ✓ Proposed-A(Class1) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station58_extreme0_proposed_a.pth
+  ✓ Extreme-FedAvg(Class2) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station58_extreme1_extreme_fedavg.pth
+  ✓ Proposed-A(Class2) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station58_extreme1_proposed_a.pth
+  ✓ Extreme-FedAvg(Class3) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station58_extreme2_extreme_fedavg.pth
+  ✓ Proposed-A(Class3) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station58_extreme2_proposed_a.pth
+  ✓ Extreme-FedAvg(Class4) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station58_extreme3_extreme_fedavg.pth
+  ✓ Proposed-A(Class4) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station58_extreme3_proposed_a.pth
+
+场站 59:
+  ✓ LMT(Class1) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station59_extreme0.pth
+  ✓ LMT(Class2) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station59_extreme1.pth
+  ✓ LMT(Class3) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station59_extreme2.pth
+  ✓ LMT(Class4) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station59_extreme3.pth
+  ✓ Extreme-FedAvg(Class1) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station59_extreme0_extreme_fedavg.pth
+  ✓ Proposed-A(Class1) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station59_extreme0_proposed_a.pth
+  ✓ Extreme-FedAvg(Class2) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station59_extreme1_extreme_fedavg.pth
+  ✓ Proposed-A(Class2) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station59_extreme1_proposed_a.pth
+  ✓ Extreme-FedAvg(Class3) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station59_extreme2_extreme_fedavg.pth
+  ✓ Proposed-A(Class3) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station59_extreme2_proposed_a.pth
+  ✓ Extreme-FedAvg(Class4) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station59_extreme3_extreme_fedavg.pth
+  ✓ Proposed-A(Class4) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station59_extreme3_proposed_a.pth
+
+场站 60:
+  ✓ LMT(Class1) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station60_extreme0.pth
+  ✓ LMT(Class2) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station60_extreme1.pth
+  ✓ LMT(Class3) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station60_extreme2.pth
+  ✓ LMT(Class4) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station60_extreme3.pth
+  ✓ Extreme-FedAvg(Class1) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station60_extreme0_extreme_fedavg.pth
+  ✓ Proposed-A(Class1) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station60_extreme0_proposed_a.pth
+  ✓ Extreme-FedAvg(Class2) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station60_extreme1_extreme_fedavg.pth
+  ✓ Proposed-A(Class2) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station60_extreme1_proposed_a.pth
+  ✓ Extreme-FedAvg(Class3) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station60_extreme2_extreme_fedavg.pth
+  ✓ Proposed-A(Class3) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station60_extreme2_proposed_a.pth
+  ✓ Extreme-FedAvg(Class4) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station60_extreme3_extreme_fedavg.pth
+  ✓ Proposed-A(Class4) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station60_extreme3_proposed_a.pth
+
+场站 61:
+  ✓ LMT(Class1) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station61_extreme0.pth
+  ✓ LMT(Class2) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station61_extreme1.pth
+  ✓ LMT(Class3) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station61_extreme2.pth
+  ✓ LMT(Class4) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station61_extreme3.pth
+  ✓ Extreme-FedAvg(Class1) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station61_extreme0_extreme_fedavg.pth
+  ✓ Proposed-A(Class1) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station61_extreme0_proposed_a.pth
+  ✓ Extreme-FedAvg(Class2) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station61_extreme1_extreme_fedavg.pth
+  ✓ Proposed-A(Class2) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station61_extreme1_proposed_a.pth
+  ✓ Extreme-FedAvg(Class3) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station61_extreme2_extreme_fedavg.pth
+  ✓ Proposed-A(Class3) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station61_extreme2_proposed_a.pth
+  ✓ Extreme-FedAvg(Class4) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station61_extreme3_extreme_fedavg.pth
+  ✓ Proposed-A(Class4) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station61_extreme3_proposed_a.pth
+
+场站 62:
+  ✓ LMT(Class1) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station62_extreme0.pth
+  ✓ LMT(Class2) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station62_extreme1.pth
+  ✓ LMT(Class3) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station62_extreme2.pth
+  ✓ LMT(Class4) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station62_extreme3.pth
+  ✓ Extreme-FedAvg(Class1) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station62_extreme0_extreme_fedavg.pth
+  ✓ Proposed-A(Class1) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station62_extreme0_proposed_a.pth
+  ✓ Extreme-FedAvg(Class2) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station62_extreme1_extreme_fedavg.pth
+  ✓ Proposed-A(Class2) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station62_extreme1_proposed_a.pth
+  ✓ Extreme-FedAvg(Class3) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station62_extreme2_extreme_fedavg.pth
+  ✓ Proposed-A(Class3) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station62_extreme2_proposed_a.pth
+  ✓ Extreme-FedAvg(Class4) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station62_extreme3_extreme_fedavg.pth
+  ✓ Proposed-A(Class4) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station62_extreme3_proposed_a.pth
+
+场站 63:
+  ✓ LMT(Class1) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station63_extreme0.pth
+  ✓ LMT(Class2) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station63_extreme1.pth
+  ✓ LMT(Class3) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station63_extreme2.pth
+  ✓ LMT(Class4) 使用默认: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station63_extreme3.pth
+  ✓ Extreme-FedAvg(Class1) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station63_extreme0_extreme_fedavg.pth
+  ✓ Proposed-A(Class1) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station63_extreme0_proposed_a.pth
+  ✓ Extreme-FedAvg(Class2) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station63_extreme1_extreme_fedavg.pth
+  ✓ Proposed-A(Class2) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station63_extreme1_proposed_a.pth
+  ✓ Extreme-FedAvg(Class3) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station63_extreme2_extreme_fedavg.pth
+  ✓ Proposed-A(Class3) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station63_extreme2_proposed_a.pth
+  ✓ Extreme-FedAvg(Class4) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station63_extreme3_extreme_fedavg.pth
+  ✓ Proposed-A(Class4) 使用: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models/model_fore_station63_extreme3_proposed_a.pth
+
+计算Overall Average（按Extreme_Class + Model跨6场站平均）...
+
+======================================================================
+✓✓✓ 多场站结果已生成（Table III/IV 风格）！
+======================================================================
+
+生成文件: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/results/multi_station_performance.csv
+总行数: 21
+  - 每场站: 3模型 = 3行
+  - 6场站: 18行
+  - Overall Average: 3行
+  - 总计: 21行
+
+======================================================================
+性能对比表格（横向展开）:
+======================================================================
+                                      Protocol  Sample_Interval_Hours  Window_Points  Window_Span_Hours         Station          Model  HighWind_nMAE_%  HighWind_nRMSE_%  HighWind_WD_%  HighTemperature_nMAE_%  HighTemperature_nRMSE_%  HighTemperature_WD_%  ColdWave_nMAE_%  ColdWave_nRMSE_%  ColdWave_WD_%  Frost_nMAE_%  Frost_nRMSE_%  Frost_WD_%  Training_duration_s  R_p<0.05_%
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              58            LMT          49.3092           50.8553        49.0121                 31.5202                  33.9998               31.4167          43.2769           45.8242        36.4468       20.0581        23.9631     19.6552              1130.90     54.8387
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              58 Extreme-FedAvg          49.4079           50.9446        49.1255                 31.0490                  33.6800               30.9738          42.7225           45.2098        36.2653       19.9457        23.7856     18.9741              1793.76     51.6129
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              58     Proposed-A          48.8518           50.3605        48.5655                 30.9627                  33.3223               30.9612          43.0521           45.5864        36.3899       20.1105        23.9662     19.1706              1793.85     54.8387
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              59            LMT          17.5629           21.8921        13.0543                 21.2312                  24.6253               21.0503          19.3896           23.9122        18.6253       20.7914        24.3079     20.2435              1130.90     15.6250
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              59 Extreme-FedAvg          15.9753           19.1535        13.3038                 21.1501                  24.5520               20.9505          19.2896           23.1816        18.7216       20.7418        24.2509     20.1545              1793.76     21.8750
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              59     Proposed-A          16.0072           19.2069        13.4695                 21.5252                  24.9552               21.1767          18.6905           22.6094        18.0868       20.5455        24.0521     19.8151              1793.85     21.8750
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              60            LMT          28.6126           34.3826        18.7339                 26.5884                  29.1259               26.3152          40.4149           44.9995        27.9844       26.2014        31.9826     25.5776              1130.90     16.6667
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              60 Extreme-FedAvg          26.2661           31.3669        20.0691                 26.8092                  29.2703               26.6187          39.2227           44.0968        26.9821       25.9605        31.7447     25.1367              1793.76     26.6667
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              60     Proposed-A          26.1739           31.3813        19.8230                 26.6669                  29.0506               26.4760          38.9751           43.7582        26.9263       25.7272        31.4473     24.8119              1793.85     26.6667
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              61            LMT          51.7686           53.9852        50.4809                 29.6098                  31.8319               29.6098          44.2812           48.1908        33.5913       20.2052        23.5619     19.6028              1130.90     51.6129
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              61 Extreme-FedAvg          52.3928           54.5901        51.2285                 29.5297                  31.7827               29.5297          44.1703           47.8754        33.9652       20.1005        23.3477     18.9488              1793.76     58.0645
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              61     Proposed-A          52.3597           54.5580        51.2468                 29.7497                  31.9749               29.7497          44.4014           48.4018        33.6438       20.2260        23.5246     19.1082              1793.85     58.0645
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              62            LMT          17.4168           20.0695        13.3511                 27.3634                  31.3033               27.1878          19.9804           22.6971        18.1858       18.7419        22.2481     17.4963              1130.90      3.1250
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              62 Extreme-FedAvg          15.2478           17.3977        12.6900                 27.1985                  31.1062               27.1028          19.1908           21.4237        17.5012       18.3425        21.9849     17.0312              1793.76      9.3750
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              62     Proposed-A          15.8196           17.7844        13.5590                 26.8771                  30.5929               26.6361          18.8169           21.0036        17.0154       18.3553        21.9558     16.9745              1793.85     18.7500
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              63            LMT          28.0335           32.3742        19.8633                 26.3034                  29.7629               26.0345          37.2357           40.2753        28.1398       26.4982        31.1134     25.7627              1130.90     26.6667
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              63 Extreme-FedAvg          25.6786           30.1180        20.0209                 26.6246                  30.1341               26.3973          36.7620           39.8335        27.8174       26.6245        31.1622     25.5961              1793.76     30.0000
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12              63     Proposed-A          25.7175           30.0929        20.0738                 26.6080                  30.0931               26.3779          37.0631           40.0526        28.2419       26.1800        30.6454     24.9991              1793.85     26.6667
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12 Overall_Average            LMT          32.1173           35.5932        27.4159                 27.1027                  30.1082               26.9357          34.0964           37.6498        27.1622       22.0827        26.1962     21.3897              1130.90     28.6720
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12 Overall_Average Extreme-FedAvg          30.8281           33.9285        27.7396                 27.0602                  30.0875               26.9288          33.5596           36.9368        26.8755       21.9526        26.0460     20.9736              1793.76     33.3039
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12 Overall_Average     Proposed-A          30.8216           33.8973        27.7896                 27.0649                  29.9982               26.8963          33.4998           36.9020        26.7174       21.8574        25.9319     20.8132              1793.85     34.9744
+
+======================================================================
+Overall Average（论文口径，横向展开）:
+======================================================================
+                                      Protocol  Sample_Interval_Hours  Window_Points  Window_Span_Hours         Station          Model  HighWind_nMAE_%  HighWind_nRMSE_%  HighWind_WD_%  HighTemperature_nMAE_%  HighTemperature_nRMSE_%  HighTemperature_WD_%  ColdWave_nMAE_%  ColdWave_nRMSE_%  ColdWave_WD_%  Frost_nMAE_%  Frost_nRMSE_%  Frost_WD_%  Training_duration_s  R_p<0.05_%
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12 Overall_Average            LMT          32.1173           35.5932        27.4159                 27.1027                  30.1082               26.9357          34.0964           37.6498        27.1622       22.0827        26.1962     21.3897              1130.90     28.6720
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12 Overall_Average Extreme-FedAvg          30.8281           33.9285        27.7396                 27.0602                  30.0875               26.9288          33.5596           36.9368        26.8755       21.9526        26.0460     20.9736              1793.76     33.3039
+six_station_2h_6point_phase_augmented_protocol                      2              6                 12 Overall_Average     Proposed-A          30.8216           33.8973        27.7896                 27.0649                  29.9982               26.8963          33.4998           36.9020        26.7174       21.8574        25.9319     20.8132              1793.85     34.9744
+======================================================================

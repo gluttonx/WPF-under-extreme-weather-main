@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 生成多场站测试结果CSV
-支持3场站 extreme 主表评估
+支持多场站 extreme 主表评估
 """
 import os
 import glob
@@ -64,6 +64,103 @@ print("生成多场站测试结果CSV")
 print("="*70)
 
 PREFER_TUNED_PROPOSED_MODELS = os.getenv("PREFER_TUNED_PROPOSED_MODELS", "0") != "0"
+
+
+def load_protocol_metadata(metadata_path):
+    if not metadata_path or not os.path.exists(metadata_path):
+        return {}
+    import json
+    with open(metadata_path, "r", encoding="utf-8") as metadata_file:
+        return json.load(metadata_file)
+
+
+PROTOCOL_METADATA_PATH = os.getenv("PROTOCOL_METADATA_PATH", os.getenv("YEARLY_PROTOCOL_METADATA_PATH", ""))
+protocol_metadata = load_protocol_metadata(PROTOCOL_METADATA_PATH)
+PROTOCOL_NAME = os.getenv("PROTOCOL_NAME", protocol_metadata.get("protocol_name", "legacy_1h_12point"))
+PROTOCOL_DATA_DIR = os.getenv("PROTOCOL_DATA_DIR", protocol_metadata.get("protocol_data_dir", ""))
+LEN_REALP = int(os.getenv("LEN_REALP", str(protocol_metadata.get("len_realp", 12))))
+POINTS_PER_DAY = int(os.getenv("POINTS_PER_DAY", str(protocol_metadata.get("points_per_day", 24))))
+SAMPLE_INTERVAL_HOURS = int(
+    os.getenv(
+        "SAMPLE_INTERVAL_HOURS",
+        str(protocol_metadata.get("sample_interval_hours", max(1, 24 // max(1, POINTS_PER_DAY)))),
+    )
+)
+DOWNSAMPLE_OFFSET = int(os.getenv("DOWNSAMPLE_OFFSET", str(protocol_metadata.get("downsample_offset", 0))))
+WINDOW_SPAN_HOURS = int(
+    os.getenv(
+        "WINDOW_SPAN_HOURS",
+        str(protocol_metadata.get("window_span_hours", SAMPLE_INTERVAL_HOURS * LEN_REALP)),
+    )
+)
+ARTIFACT_DIR = os.getenv("ARTIFACT_DIR", ".")
+
+
+def resolve_artifact_path(filename):
+    if os.path.isabs(filename):
+        return filename
+    if ARTIFACT_DIR in ("", "."):
+        return filename
+    return os.path.join(ARTIFACT_DIR, filename)
+
+
+MODEL_OUTPUT_DIR = os.getenv("MODEL_OUTPUT_DIR", resolve_artifact_path("models") if ARTIFACT_DIR not in ("", ".") else ".")
+LOGS_TRAIN_DIR = os.getenv("LOGS_TRAIN_DIR", resolve_artifact_path("logs_train"))
+TASK_RESULTS_OUTPUT_PATH = os.getenv("TASK_RESULTS_OUTPUT_PATH", "multi_station_performance_task_level.csv")
+RESULTS_OUTPUT_PATH = os.getenv("RESULTS_OUTPUT_PATH", "multi_station_performance.csv")
+
+
+def resolve_model_path(filename):
+    if os.path.isabs(filename):
+        return filename
+    return os.path.join(MODEL_OUTPUT_DIR, filename)
+
+
+def ensure_parent_dir(path):
+    parent_dir = os.path.dirname(path)
+    if parent_dir:
+        os.makedirs(parent_dir, exist_ok=True)
+
+
+def resolve_station_ids():
+    eval_station_ids = os.getenv("EVAL_STATION_IDS", "")
+    if eval_station_ids:
+        return [station_id.strip() for station_id in eval_station_ids.split(",") if station_id.strip()]
+    metadata_stations = protocol_metadata.get("stations", [])
+    if metadata_stations:
+        return [str(station["station_id"]) for station in metadata_stations]
+    return ['58', '59', '60']
+
+
+def resolve_station_mat_path(station_id):
+    filename = f"{station_id}wf_4_train.mat"
+    if PROTOCOL_DATA_DIR:
+        candidate = os.path.join(PROTOCOL_DATA_DIR, filename)
+        if not os.path.exists(candidate):
+            raise FileNotFoundError(f"Protocol mat missing: {candidate}")
+        return candidate
+    return filename
+
+
+def get_extreme_eval_payload(wf_1, class_index):
+    test_power_key = f"p_test_extre_class{class_index + 1}"
+    test_nwp_key = f"nwp_test_extre_class{class_index + 1}_"
+    support_power_key = f"p_extre_class{class_index + 1}"
+    support_nwp_key = f"nwp_extre_class{class_index + 1}_"
+    power_key = test_power_key if test_power_key in wf_1 else support_power_key
+    nwp_key = test_nwp_key if test_nwp_key in wf_1 else support_nwp_key
+    return wf_1[power_key], wf_1[nwp_key], power_key
+
+
+print("\n数据协议:")
+print(f"  Protocol={PROTOCOL_NAME}")
+print(f"  PROTOCOL_DATA_DIR={PROTOCOL_DATA_DIR or '(legacy root mats)'}")
+print(f"  PROTOCOL_METADATA_PATH={PROTOCOL_METADATA_PATH or '(none)'}")
+print(f"  SAMPLE_INTERVAL_HOURS={SAMPLE_INTERVAL_HOURS}")
+print(f"  DOWNSAMPLE_OFFSET={DOWNSAMPLE_OFFSET}")
+print(f"  LEN_REALP={LEN_REALP}")
+print(f"  POINTS_PER_DAY={POINTS_PER_DAY}")
+print(f"  WINDOW_SPAN_HOURS={WINDOW_SPAN_HOURS}")
 
 def benjamini_hochberg(p_values):
     """
@@ -142,7 +239,7 @@ def calc_paper_metrics(true_events, pred_events, cap_norm=1.0):
 
 
 def get_local_pretrain_model_path(station_id):
-    return f"model_fore_pre_station{station_id}_local.pth"
+    return resolve_model_path(f"model_fore_pre_station{station_id}_local.pth")
 
 
 def resolve_lmt_model_path(station_id, class_idx):
@@ -153,8 +250,8 @@ def resolve_lmt_model_path(station_id, class_idx):
     """
     candidates = []
     if PREFER_TUNED_PROPOSED_MODELS:
-        candidates.append(f"model_fore_station{station_id}_extreme{class_idx}_tuned.pth")
-    candidates.append(f"model_fore_station{station_id}_extreme{class_idx}.pth")
+        candidates.append(resolve_model_path(f"model_fore_station{station_id}_extreme{class_idx}_tuned.pth"))
+    candidates.append(resolve_model_path(f"model_fore_station{station_id}_extreme{class_idx}.pth"))
 
     for path in candidates:
         if os.path.exists(path):
@@ -163,11 +260,11 @@ def resolve_lmt_model_path(station_id, class_idx):
 
 
 def get_extreme_fedavg_model_path(station_id, class_idx):
-    return f"model_fore_station{station_id}_extreme{class_idx}_extreme_fedavg.pth"
+    return resolve_model_path(f"model_fore_station{station_id}_extreme{class_idx}_extreme_fedavg.pth")
 
 
 def get_proposed_a_model_path(station_id, class_idx):
-    return f"model_fore_station{station_id}_extreme{class_idx}_proposed_a.pth"
+    return resolve_model_path(f"model_fore_station{station_id}_extreme{class_idx}_proposed_a.pth")
 
 
 def infer_training_durations_from_tensorboard():
@@ -189,7 +286,7 @@ def infer_training_durations_from_tensorboard():
     except Exception:
         return duration_map
 
-    event_files = glob.glob(os.path.join('logs_train', 'loss2', 'events.out.tfevents.*'))
+    event_files = glob.glob(os.path.join(LOGS_TRAIN_DIR, 'loss2', 'events.out.tfevents.*'))
     if not event_files:
         return duration_map
 
@@ -257,7 +354,7 @@ def infer_training_durations_from_tensorboard():
 cap_norm = 1.0
 dem_realc = 5
 dem_realp = 1
-len_realp = 12
+len_realp = LEN_REALP
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device0 = torch.device("cpu")
 
@@ -269,7 +366,7 @@ if os.path.exists('all_stations_test_results.mat'):
     print("（跳过，直接重新生成）")
 
 # 场站列表
-station_ids = ['58', '59', '60']
+station_ids = resolve_station_ids()
 
 # 输出到表格的模型名称（按论文表风格）
 model_names = [
@@ -291,8 +388,7 @@ for station_id in station_ids:
     print(f"\n场站 {station_id}:")
     
     # 加载该场站的测试数据
-    dataFile = f'{station_id}wf_4_train'
-    wf_1 = scio.loadmat(dataFile)
+    wf_1 = scio.loadmat(resolve_station_mat_path(station_id))
     p = wf_1['p_1h']
     nwp = wf_1['nwp_1h']
     
@@ -339,8 +435,7 @@ for station_id in station_ids:
 
     # 论文口径：在每个极端天气类别子集上评估各方法
     for eval_class in range(4):
-        p_extre = wf_1[f'p_extre_class{eval_class+1}']
-        nwp_extre = wf_1[f'nwp_extre_class{eval_class+1}_']
+        p_extre, nwp_extre, eval_payload_key = get_extreme_eval_payload(wf_1, eval_class)
         num_samples = p_extre.shape[0] // len_realp
         if num_samples == 0:
             continue
@@ -378,8 +473,13 @@ for station_id in station_ids:
                 true_events, pred_events, cap_norm=cap_norm
             )
             all_results.append({
+                'Protocol': PROTOCOL_NAME,
+                'Sample_Interval_Hours': SAMPLE_INTERVAL_HOURS,
+                'Window_Points': LEN_REALP,
+                'Window_Span_Hours': WINDOW_SPAN_HOURS,
                 'Station': station_id,
                 'Extreme_Class': f'Extreme_Weather_Class{eval_class+1}',
+                'Eval_Payload_Key': eval_payload_key,
                 'Model': model_name,
                 'Samples': int(num_samples),
                 'nMAE_%': round(nmae_percent, 4),
@@ -388,7 +488,7 @@ for station_id in station_ids:
                 'R_p<0.05_%': round(rp_less_005_percent, 4)
             })
 
-print("\n计算Overall Average（按Extreme_Class + Model跨3场站平均）...")
+print(f"\n计算Overall Average（按Extreme_Class + Model跨{len(station_ids)}场站平均）...")
 results_long_df = pd.DataFrame(all_results)
 overall_long_df = (
     results_long_df.groupby(['Extreme_Class', 'Model'], as_index=False)[
@@ -398,7 +498,14 @@ overall_long_df = (
     .round(4)
 )
 overall_long_df.insert(0, 'Station', 'Overall_Average')
+overall_long_df.insert(0, 'Window_Span_Hours', WINDOW_SPAN_HOURS)
+overall_long_df.insert(0, 'Window_Points', LEN_REALP)
+overall_long_df.insert(0, 'Sample_Interval_Hours', SAMPLE_INTERVAL_HOURS)
+overall_long_df.insert(0, 'Protocol', PROTOCOL_NAME)
+overall_long_df.insert(6, 'Eval_Payload_Key', 'Overall_Average')
 results_long_df = pd.concat([results_long_df, overall_long_df], ignore_index=True)
+ensure_parent_dir(TASK_RESULTS_OUTPUT_PATH)
+results_long_df.to_csv(TASK_RESULTS_OUTPUT_PATH, index=False, encoding='utf-8-sig')
 
 # 转为论文 Table III/IV 风格：每个模型一行，四类天气横向展开
 weather_name_map = {
@@ -430,6 +537,10 @@ for weather in weather_order:
 wide_df = wide_df[ordered_columns]
 wide_df.columns = [f'{weather}_{metric}' for metric, weather in wide_df.columns]
 wide_df = wide_df.reset_index()
+wide_df.insert(0, 'Protocol', PROTOCOL_NAME)
+wide_df.insert(1, 'Sample_Interval_Hours', SAMPLE_INTERVAL_HOURS)
+wide_df.insert(2, 'Window_Points', LEN_REALP)
+wide_df.insert(3, 'Window_Span_Hours', WINDOW_SPAN_HOURS)
 
 # 追加一个全类别加权的 R_p<0.05（按样本数加权）
 rp_all_class_df = (
@@ -445,13 +556,13 @@ wide_df['Training_duration_s'] = wide_df['Model'].map(duration_map)
 wide_df = wide_df.rename(columns={'AllClasses_R_p<0.05_%': 'R_p<0.05_%'})
 
 # 排序
-station_order = ['58', '59', '60', 'Overall_Average']
+station_order = station_ids + ['Overall_Average']
 wide_df['Station'] = pd.Categorical(wide_df['Station'], categories=station_order, ordered=True)
 wide_df = wide_df.sort_values(['Station', 'Model']).reset_index(drop=True)
 wide_df['Station'] = wide_df['Station'].astype(str)
 
 # 输出列顺序：四类天气指标 + 训练时长 + 总R_p<0.05
-output_cols = ['Station', 'Model']
+output_cols = ['Protocol', 'Sample_Interval_Hours', 'Window_Points', 'Window_Span_Hours', 'Station', 'Model']
 for weather in weather_order:
     for metric in metric_order:
         output_cols.append(f'{weather}_{metric}')
@@ -459,21 +570,25 @@ output_cols.extend(['Training_duration_s', 'R_p<0.05_%'])
 wide_df = wide_df[output_cols]
 
 # 保存为CSV（论文表格风格）
-metric_cols = [c for c in wide_df.columns if c not in ['Station', 'Model', 'Training_duration_s']]
+metric_cols = [
+    c for c in wide_df.columns
+    if c not in ['Protocol', 'Sample_Interval_Hours', 'Window_Points', 'Window_Span_Hours', 'Station', 'Model', 'Training_duration_s']
+]
 wide_df[metric_cols] = wide_df[metric_cols].round(4)
 wide_df['Training_duration_s'] = pd.to_numeric(wide_df['Training_duration_s'], errors='coerce')
 wide_df['Training_duration_s'] = wide_df['Training_duration_s'].round(2)
-wide_df.to_csv('multi_station_performance.csv', index=False, encoding='utf-8-sig')
+ensure_parent_dir(RESULTS_OUTPUT_PATH)
+wide_df.to_csv(RESULTS_OUTPUT_PATH, index=False, encoding='utf-8-sig')
 
 print("\n" + "="*70)
 print("✓✓✓ 多场站结果已生成（Table III/IV 风格）！")
 print("="*70)
-print(f"\n生成文件: multi_station_performance.csv")
+print(f"\n生成文件: {RESULTS_OUTPUT_PATH}")
 print(f"总行数: {len(wide_df)}")
-print(f"  - 每场站: 3模型 = 3行")
-print(f"  - 3场站: 9行")
+print(f"  - 每场站: {len(model_names)}模型 = {len(model_names)}行")
+print(f"  - {len(station_ids)}场站: {len(station_ids) * len(model_names)}行")
 print(f"  - Overall Average: 3行")
-print(f"  - 总计: 12行")
+print(f"  - 总计: {len(wide_df)}行")
 
 print("\n" + "="*70)
 print("性能对比表格（横向展开）:")

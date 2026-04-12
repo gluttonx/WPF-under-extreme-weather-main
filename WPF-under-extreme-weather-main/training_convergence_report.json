@@ -1,36 +1,47 @@
 {
-  "generated_at_unix": 1775618276.7219954,
+  "generated_at_unix": 1775913096.845035,
   "run_config": {
+    "protocol_name": "three_station_2h_6point_protocol",
+    "protocol_data_dir": "/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/2h_6p",
+    "protocol_metadata_path": "/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/2h_6p/protocol_metadata.json",
+    "sample_interval_hours": 2,
+    "downsample_offset": 1,
+    "len_realp": 6,
+    "points_per_day": 12,
+    "window_span_hours": 12,
+    "yearly_protocol_enabled": true,
+    "seasonal_protocol_enabled": false,
     "use_federation": true,
     "use_pseudo_fed": false,
     "train_meta_only_baseline": false,
     "skip_local_pretrain": true,
     "skip_local_meta": true,
-    "pretrain_epochs": 35000,
-    "proposed_meta_epochs": 30000,
-    "meta_only_meta_epochs": 30000,
-    "few_shot_epochs": 500,
+    "pretrain_epochs": 5000,
+    "proposed_meta_epochs": 5000,
+    "meta_only_meta_epochs": 5000,
+    "few_shot_epochs": 200,
     "pretrain_log_interval": 100,
     "meta_log_interval": 100,
-    "few_shot_log_interval": 1,
-    "extreme_weight_beta_self": 0.6,
-    "extreme_source_borrow_budget_gamma": 0.75,
-    "extreme_target_refinement_epochs": 500,
+    "few_shot_log_interval": 20,
+    "extreme_weight_beta_self": 0.5,
+    "extreme_source_borrow_budget_gamma": 1.0,
+    "extreme_target_refinement_epochs": 200,
+    "extreme_target_adapt_max_windows": 2,
     "enable_convergence_monitor": true
   },
   "records": [
     {
       "stage_type": "few_shot",
       "stage_id": "lmt_station58_class0",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 485,
-      "best_epoch": 480,
-      "best_loss": 0.1469859629869461,
-      "final_loss": 0.1712283492088318
+      "convergence_epoch": 180,
+      "best_epoch": 175,
+      "best_loss": 0.0365539975464344,
+      "final_loss": 0.04967942461371422
     },
     {
       "stage_type": "few_shot",
@@ -42,8 +53,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.056260786950588226,
-      "final_loss": 0.056260786950588226
+      "best_loss": 0.35482722520828247,
+      "final_loss": 0.35482722520828247
     },
     {
       "stage_type": "few_shot",
@@ -55,8 +66,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.03991013020277023,
-      "final_loss": 0.03991013020277023
+      "best_loss": 0.35808825492858887,
+      "final_loss": 0.35808825492858887
     },
     {
       "stage_type": "few_shot",
@@ -68,8 +79,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.09291799366474152,
-      "final_loss": 0.09291799366474152
+      "best_loss": 0.2868710160255432,
+      "final_loss": 0.2868710160255432
     },
     {
       "stage_type": "few_shot",
@@ -81,8 +92,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.06841714680194855,
-      "final_loss": 0.06841714680194855
+      "best_loss": 0.12288933992385864,
+      "final_loss": 0.12288933992385864
     },
     {
       "stage_type": "few_shot",
@@ -94,8 +105,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.059007178992033005,
-      "final_loss": 0.059007178992033005
+      "best_loss": 0.004208938218653202,
+      "final_loss": 0.004208938218653202
     },
     {
       "stage_type": "few_shot",
@@ -107,99 +118,21 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.06526593863964081,
-      "final_loss": 0.06526593863964081
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.05495439097285271,
-      "final_loss": 0.05495439097285271
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.05615250766277313,
-      "final_loss": 0.05615250766277313
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.06698117405176163,
-      "final_loss": 0.06698117405176163
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03587079048156738,
-      "final_loss": 0.03587079048156738
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.05168338865041733,
-      "final_loss": 0.05168338865041733
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.022565875202417374,
-      "final_loss": 0.022565875202417374
+      "best_loss": 0.34070953726768494,
+      "final_loss": 0.34070953726768494
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_source_station59_to_58_class0",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 431,
-      "best_epoch": 426,
-      "best_loss": 0.022481823340058327,
-      "final_loss": 0.03600582480430603
+      "convergence_epoch": 52,
+      "best_epoch": 47,
+      "best_loss": 1.79187964022276e-06,
+      "final_loss": 0.00046487347572110593
     },
     {
       "stage_type": "few_shot",
@@ -211,8 +144,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.04476573318243027,
-      "final_loss": 0.04476573318243027
+      "best_loss": 0.33548080921173096,
+      "final_loss": 0.33548080921173096
     },
     {
       "stage_type": "few_shot",
@@ -224,8 +157,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.006591120269149542,
-      "final_loss": 0.006591120269149542
+      "best_loss": 0.11855968087911606,
+      "final_loss": 0.11855968087911606
     },
     {
       "stage_type": "few_shot",
@@ -237,8 +170,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.013783621601760387,
-      "final_loss": 0.013783621601760387
+      "best_loss": 0.25442296266555786,
+      "final_loss": 0.25442296266555786
     },
     {
       "stage_type": "few_shot",
@@ -250,151 +183,47 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.06902305781841278,
-      "final_loss": 0.06902305781841278
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.014903268776834011,
-      "final_loss": 0.014903268776834011
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03470108285546303,
-      "final_loss": 0.03470108285546303
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.07513025403022766,
-      "final_loss": 0.07513025403022766
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.10971587151288986,
-      "final_loss": 0.10971587151288986
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.023467980325222015,
-      "final_loss": 0.023467980325222015
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.050102196633815765,
-      "final_loss": 0.050102196633815765
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.083658866584301,
-      "final_loss": 0.083658866584301
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_source_station60_to_58_class0",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 384,
-      "best_epoch": 379,
-      "best_loss": 0.024598827585577965,
-      "final_loss": 0.0323607511818409
+      "best_loss": 0.21040639281272888,
+      "final_loss": 0.21040639281272888
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_fedavg_station58_class0",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 429,
-      "best_epoch": 424,
-      "best_loss": 0.14681929349899292,
-      "final_loss": 0.17277127504348755
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "proposed_a_station58_class0",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
       "convergence_epoch": 173,
       "best_epoch": 168,
-      "best_loss": 0.14694902300834656,
-      "final_loss": 0.16032016277313232
+      "best_loss": 0.02686571329832077,
+      "final_loss": 0.05839736387133598
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "proposed_a_station58_class0",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 190,
+      "best_epoch": 185,
+      "best_loss": 0.028594765812158585,
+      "final_loss": 0.07086026668548584
     },
     {
       "stage_type": "few_shot",
       "stage_id": "lmt_station58_class1",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 388,
-      "best_epoch": 383,
-      "best_loss": 0.01240493357181549,
-      "final_loss": 0.021798228845000267
+      "convergence_epoch": 79,
+      "best_epoch": 74,
+      "best_loss": 0.0001851644046837464,
+      "final_loss": 0.00040804455056786537
     },
     {
       "stage_type": "few_shot",
@@ -406,8 +235,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.00798946525901556,
-      "final_loss": 0.00798946525901556
+      "best_loss": 0.05675913020968437,
+      "final_loss": 0.05675913020968437
     },
     {
       "stage_type": "few_shot",
@@ -419,8 +248,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0035572685301303864,
-      "final_loss": 0.0035572685301303864
+      "best_loss": 0.030688155442476273,
+      "final_loss": 0.030688155442476273
     },
     {
       "stage_type": "few_shot",
@@ -432,8 +261,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.005691732745617628,
-      "final_loss": 0.005691732745617628
+      "best_loss": 0.09535559266805649,
+      "final_loss": 0.09535559266805649
     },
     {
       "stage_type": "few_shot",
@@ -445,99 +274,21 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.01814192347228527,
-      "final_loss": 0.01814192347228527
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.04695560783147812,
-      "final_loss": 0.04695560783147812
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.015089849941432476,
-      "final_loss": 0.015089849941432476
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.024985045194625854,
-      "final_loss": 0.024985045194625854
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.027246851474046707,
-      "final_loss": 0.027246851474046707
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.013338074088096619,
-      "final_loss": 0.013338074088096619
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0020470849703997374,
-      "final_loss": 0.0020470849703997374
+      "best_loss": 0.032998356968164444,
+      "final_loss": 0.032998356968164444
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_source_station59_to_58_class1",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 484,
-      "best_epoch": 479,
-      "best_loss": 0.001737456303089857,
-      "final_loss": 0.009495938196778297
+      "convergence_epoch": 140,
+      "best_epoch": 135,
+      "best_loss": 1.0411228004159057e-06,
+      "final_loss": 0.0004352068935986608
     },
     {
       "stage_type": "few_shot",
@@ -549,8 +300,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.02559049427509308,
-      "final_loss": 0.02559049427509308
+      "best_loss": 0.028829893097281456,
+      "final_loss": 0.028829893097281456
     },
     {
       "stage_type": "few_shot",
@@ -562,8 +313,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.004007484298199415,
-      "final_loss": 0.004007484298199415
+      "best_loss": 0.04004017263650894,
+      "final_loss": 0.04004017263650894
     },
     {
       "stage_type": "few_shot",
@@ -575,151 +326,60 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.027240555733442307,
-      "final_loss": 0.027240555733442307
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.057501208037137985,
-      "final_loss": 0.057501208037137985
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0023913425393402576,
-      "final_loss": 0.0023913425393402576
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03432612121105194,
-      "final_loss": 0.03432612121105194
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.010650446638464928,
-      "final_loss": 0.010650446638464928
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.015674259513616562,
-      "final_loss": 0.015674259513616562
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.024709520861506462,
-      "final_loss": 0.024709520861506462
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.04393894225358963,
-      "final_loss": 0.04393894225358963
+      "best_loss": 0.020028285682201385,
+      "final_loss": 0.020028285682201385
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_source_station60_to_58_class1",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 420,
-      "best_epoch": 415,
-      "best_loss": 0.0009760161628946662,
-      "final_loss": 0.001413947669789195
+      "convergence_epoch": 59,
+      "best_epoch": 54,
+      "best_loss": 3.999459295300767e-05,
+      "final_loss": 0.0002953778312075883
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_fedavg_station58_class1",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 431,
-      "best_epoch": 426,
-      "best_loss": 0.011886803433299065,
-      "final_loss": 0.01760522834956646
+      "convergence_epoch": 174,
+      "best_epoch": 169,
+      "best_loss": 0.00016015629807952791,
+      "final_loss": 0.007093447260558605
     },
     {
       "stage_type": "few_shot",
       "stage_id": "proposed_a_station58_class1",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 407,
-      "best_epoch": 402,
-      "best_loss": 0.010774798691272736,
-      "final_loss": 0.024885214865207672
+      "convergence_epoch": 195,
+      "best_epoch": 190,
+      "best_loss": 2.999740331688372e-07,
+      "final_loss": 0.002497209468856454
     },
     {
       "stage_type": "few_shot",
       "stage_id": "lmt_station58_class2",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 419,
-      "best_epoch": 414,
-      "best_loss": 0.014424166642129421,
-      "final_loss": 0.017369050532579422
+      "convergence_epoch": 139,
+      "best_epoch": 134,
+      "best_loss": 8.493351197103038e-05,
+      "final_loss": 0.005008956417441368
     },
     {
       "stage_type": "few_shot",
@@ -731,8 +391,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.034905847162008286,
-      "final_loss": 0.034905847162008286
+      "best_loss": 0.2200813740491867,
+      "final_loss": 0.2200813740491867
     },
     {
       "stage_type": "few_shot",
@@ -744,8 +404,21 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.02608354762196541,
-      "final_loss": 0.02608354762196541
+      "best_loss": 0.23938880860805511,
+      "final_loss": 0.23938880860805511
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_source_station59_to_58_class2",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 178,
+      "best_epoch": 173,
+      "best_loss": 0.00013725216558668762,
+      "final_loss": 0.011510887183248997
     },
     {
       "stage_type": "few_shot",
@@ -757,164 +430,60 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.06249740719795227,
-      "final_loss": 0.06249740719795227
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.027265062555670738,
-      "final_loss": 0.027265062555670738
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.06389260292053223,
-      "final_loss": 0.06389260292053223
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.05972513183951378,
-      "final_loss": 0.05972513183951378
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.10253286361694336,
-      "final_loss": 0.10253286361694336
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.031053617596626282,
-      "final_loss": 0.031053617596626282
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.10887876152992249,
-      "final_loss": 0.10887876152992249
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.09013204276561737,
-      "final_loss": 0.09013204276561737
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.20687858760356903,
-      "final_loss": 0.20687858760356903
+      "best_loss": 0.34070032835006714,
+      "final_loss": 0.34070032835006714
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_source_station60_to_58_class2",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 445,
-      "best_epoch": 440,
-      "best_loss": 0.09213881194591522,
-      "final_loss": 0.1052403450012207
+      "convergence_epoch": 162,
+      "best_epoch": 157,
+      "best_loss": 0.000840763736050576,
+      "final_loss": 0.002962646773084998
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_fedavg_station58_class2",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 332,
-      "best_epoch": 327,
-      "best_loss": 0.014926491305232048,
-      "final_loss": 0.02372768148779869
+      "convergence_epoch": 178,
+      "best_epoch": 173,
+      "best_loss": 7.294319220818579e-05,
+      "final_loss": 0.04143790528178215
     },
     {
       "stage_type": "few_shot",
       "stage_id": "proposed_a_station58_class2",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 280,
-      "best_epoch": 275,
-      "best_loss": 0.01337690930813551,
-      "final_loss": 0.02644701674580574
+      "convergence_epoch": 28,
+      "best_epoch": 23,
+      "best_loss": 0.00011240098683629185,
+      "final_loss": 0.007941830903291702
     },
     {
       "stage_type": "few_shot",
       "stage_id": "lmt_station58_class3",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 320,
-      "best_epoch": 315,
-      "best_loss": 0.010816359892487526,
-      "final_loss": 0.012680415995419025
+      "convergence_epoch": 150,
+      "best_epoch": 145,
+      "best_loss": 0.08866821229457855,
+      "final_loss": 0.12847530841827393
     },
     {
       "stage_type": "few_shot",
@@ -926,8 +495,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.00783361867070198,
-      "final_loss": 0.00783361867070198
+      "best_loss": 0.07951780408620834,
+      "final_loss": 0.07951780408620834
     },
     {
       "stage_type": "few_shot",
@@ -939,8 +508,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.004732309374958277,
-      "final_loss": 0.004732309374958277
+      "best_loss": 0.049097031354904175,
+      "final_loss": 0.049097031354904175
     },
     {
       "stage_type": "few_shot",
@@ -952,8 +521,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.000634006573818624,
-      "final_loss": 0.000634006573818624
+      "best_loss": 0.06442953646183014,
+      "final_loss": 0.06442953646183014
     },
     {
       "stage_type": "few_shot",
@@ -965,8 +534,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0018746070563793182,
-      "final_loss": 0.0018746070563793182
+      "best_loss": 0.07749153673648834,
+      "final_loss": 0.07749153673648834
     },
     {
       "stage_type": "few_shot",
@@ -978,8 +547,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.06857846677303314,
-      "final_loss": 0.06857846677303314
+      "best_loss": 0.11341124773025513,
+      "final_loss": 0.11341124773025513
     },
     {
       "stage_type": "few_shot",
@@ -991,8 +560,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.02701028808951378,
-      "final_loss": 0.02701028808951378
+      "best_loss": 0.031040802597999573,
+      "final_loss": 0.031040802597999573
     },
     {
       "stage_type": "few_shot",
@@ -1004,8 +573,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0008276306907646358,
-      "final_loss": 0.0008276306907646358
+      "best_loss": 0.03096636012196541,
+      "final_loss": 0.03096636012196541
     },
     {
       "stage_type": "few_shot",
@@ -1017,8 +586,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.032643139362335205,
-      "final_loss": 0.032643139362335205
+      "best_loss": 0.0705634206533432,
+      "final_loss": 0.0705634206533432
     },
     {
       "stage_type": "few_shot",
@@ -1030,8 +599,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0018651162972673774,
-      "final_loss": 0.0018651162972673774
+      "best_loss": 0.06269501149654388,
+      "final_loss": 0.06269501149654388
     },
     {
       "stage_type": "few_shot",
@@ -1043,8 +612,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.01679166778922081,
-      "final_loss": 0.01679166778922081
+      "best_loss": 0.0633733943104744,
+      "final_loss": 0.0633733943104744
     },
     {
       "stage_type": "few_shot",
@@ -1056,8 +625,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.001734239049255848,
-      "final_loss": 0.001734239049255848
+      "best_loss": 0.019340120255947113,
+      "final_loss": 0.019340120255947113
     },
     {
       "stage_type": "few_shot",
@@ -1069,8 +638,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.044856682419776917,
-      "final_loss": 0.044856682419776917
+      "best_loss": 0.022233862429857254,
+      "final_loss": 0.022233862429857254
     },
     {
       "stage_type": "few_shot",
@@ -1082,8 +651,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0251663438975811,
-      "final_loss": 0.0251663438975811
+      "best_loss": 0.07231828570365906,
+      "final_loss": 0.07231828570365906
     },
     {
       "stage_type": "few_shot",
@@ -1095,8 +664,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.004573301412165165,
-      "final_loss": 0.004573301412165165
+      "best_loss": 0.018173959106206894,
+      "final_loss": 0.018173959106206894
     },
     {
       "stage_type": "few_shot",
@@ -1108,8 +677,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.020339608192443848,
-      "final_loss": 0.020339608192443848
+      "best_loss": 0.01625574193894863,
+      "final_loss": 0.01625574193894863
     },
     {
       "stage_type": "few_shot",
@@ -1121,151 +690,21 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.03293253481388092,
-      "final_loss": 0.03293253481388092
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.04663332551717758,
-      "final_loss": 0.04663332551717758
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.022780224680900574,
-      "final_loss": 0.022780224680900574
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.06576434522867203,
-      "final_loss": 0.06576434522867203
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0064820414409041405,
-      "final_loss": 0.0064820414409041405
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03370680660009384,
-      "final_loss": 0.03370680660009384
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.01312112808227539,
-      "final_loss": 0.01312112808227539
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.04535716027021408,
-      "final_loss": 0.04535716027021408
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.07799310982227325,
-      "final_loss": 0.07799310982227325
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03239092603325844,
-      "final_loss": 0.03239092603325844
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.018067726865410805,
-      "final_loss": 0.018067726865410805
+      "best_loss": 0.03986377269029617,
+      "final_loss": 0.03986377269029617
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_source_station59_to_58_class3",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 147,
-      "best_epoch": 142,
-      "best_loss": 0.0008532647625543177,
-      "final_loss": 0.0011842503445222974
+      "convergence_epoch": 175,
+      "best_epoch": 170,
+      "best_loss": 0.015578359365463257,
+      "final_loss": 0.01650874875485897
     },
     {
       "stage_type": "few_shot",
@@ -1277,8 +716,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.008566748350858688,
-      "final_loss": 0.008566748350858688
+      "best_loss": 0.17881546914577484,
+      "final_loss": 0.17881546914577484
     },
     {
       "stage_type": "few_shot",
@@ -1290,8 +729,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0695909783244133,
-      "final_loss": 0.0695909783244133
+      "best_loss": 0.0629025548696518,
+      "final_loss": 0.0629025548696518
     },
     {
       "stage_type": "few_shot",
@@ -1303,8 +742,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.00990496575832367,
-      "final_loss": 0.00990496575832367
+      "best_loss": 0.08171159029006958,
+      "final_loss": 0.08171159029006958
     },
     {
       "stage_type": "few_shot",
@@ -1316,8 +755,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.004019994754344225,
-      "final_loss": 0.004019994754344225
+      "best_loss": 0.046521466225385666,
+      "final_loss": 0.046521466225385666
     },
     {
       "stage_type": "few_shot",
@@ -1329,8 +768,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.005592850968241692,
-      "final_loss": 0.005592850968241692
+      "best_loss": 0.05225099250674248,
+      "final_loss": 0.05225099250674248
     },
     {
       "stage_type": "few_shot",
@@ -1342,8 +781,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0018622791394591331,
-      "final_loss": 0.0018622791394591331
+      "best_loss": 0.04627671092748642,
+      "final_loss": 0.04627671092748642
     },
     {
       "stage_type": "few_shot",
@@ -1355,8 +794,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0031872473191469908,
-      "final_loss": 0.0031872473191469908
+      "best_loss": 0.07203353941440582,
+      "final_loss": 0.07203353941440582
     },
     {
       "stage_type": "few_shot",
@@ -1368,8 +807,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.011184047907590866,
-      "final_loss": 0.011184047907590866
+      "best_loss": 0.05203479155898094,
+      "final_loss": 0.05203479155898094
     },
     {
       "stage_type": "few_shot",
@@ -1381,8 +820,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.005819128360599279,
-      "final_loss": 0.005819128360599279
+      "best_loss": 0.06355567276477814,
+      "final_loss": 0.06355567276477814
     },
     {
       "stage_type": "few_shot",
@@ -1394,8 +833,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0011333015281707048,
-      "final_loss": 0.0011333015281707048
+      "best_loss": 0.020763877779245377,
+      "final_loss": 0.020763877779245377
     },
     {
       "stage_type": "few_shot",
@@ -1407,8 +846,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0010704882442951202,
-      "final_loss": 0.0010704882442951202
+      "best_loss": 0.050355248153209686,
+      "final_loss": 0.050355248153209686
     },
     {
       "stage_type": "few_shot",
@@ -1420,8 +859,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.013131238520145416,
-      "final_loss": 0.013131238520145416
+      "best_loss": 0.04366925358772278,
+      "final_loss": 0.04366925358772278
     },
     {
       "stage_type": "few_shot",
@@ -1433,8 +872,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.010326921939849854,
-      "final_loss": 0.010326921939849854
+      "best_loss": 0.03183270990848541,
+      "final_loss": 0.03183270990848541
     },
     {
       "stage_type": "few_shot",
@@ -1446,8 +885,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.009656684473156929,
-      "final_loss": 0.009656684473156929
+      "best_loss": 0.0630364939570427,
+      "final_loss": 0.0630364939570427
     },
     {
       "stage_type": "few_shot",
@@ -1459,8 +898,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.016468491405248642,
-      "final_loss": 0.016468491405248642
+      "best_loss": 0.039612047374248505,
+      "final_loss": 0.039612047374248505
     },
     {
       "stage_type": "few_shot",
@@ -1472,8 +911,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.045046210289001465,
-      "final_loss": 0.045046210289001465
+      "best_loss": 0.02192365936934948,
+      "final_loss": 0.02192365936934948
     },
     {
       "stage_type": "few_shot",
@@ -1485,8 +924,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.016353987157344818,
-      "final_loss": 0.016353987157344818
+      "best_loss": 0.07951651513576508,
+      "final_loss": 0.07951651513576508
     },
     {
       "stage_type": "few_shot",
@@ -1498,8 +937,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.062945157289505,
-      "final_loss": 0.062945157289505
+      "best_loss": 0.23158955574035645,
+      "final_loss": 0.23158955574035645
     },
     {
       "stage_type": "few_shot",
@@ -1511,8 +950,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.14421336352825165,
-      "final_loss": 0.14421336352825165
+      "best_loss": 0.05985347926616669,
+      "final_loss": 0.05985347926616669
     },
     {
       "stage_type": "few_shot",
@@ -1524,8 +963,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0005134940147399902,
-      "final_loss": 0.0005134940147399902
+      "best_loss": 0.05452457070350647,
+      "final_loss": 0.05452457070350647
     },
     {
       "stage_type": "few_shot",
@@ -1537,8 +976,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0013274319935590029,
-      "final_loss": 0.0013274319935590029
+      "best_loss": 0.0404079295694828,
+      "final_loss": 0.0404079295694828
     },
     {
       "stage_type": "few_shot",
@@ -1550,8 +989,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.005165198352187872,
-      "final_loss": 0.005165198352187872
+      "best_loss": 0.03340410441160202,
+      "final_loss": 0.03340410441160202
     },
     {
       "stage_type": "few_shot",
@@ -1563,164 +1002,60 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.06231912598013878,
-      "final_loss": 0.06231912598013878
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.019250554963946342,
-      "final_loss": 0.019250554963946342
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.010154640302062035,
-      "final_loss": 0.010154640302062035
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.020129121840000153,
-      "final_loss": 0.020129121840000153
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.030505429953336716,
-      "final_loss": 0.030505429953336716
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.06027805805206299,
-      "final_loss": 0.06027805805206299
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03786930441856384,
-      "final_loss": 0.03786930441856384
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0669364184141159,
-      "final_loss": 0.0669364184141159
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.049231745302677155,
-      "final_loss": 0.049231745302677155
+      "best_loss": 0.009668733924627304,
+      "final_loss": 0.009668733924627304
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_source_station60_to_58_class3",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 449,
-      "best_epoch": 444,
-      "best_loss": 0.0038533518090844154,
-      "final_loss": 0.004303657915443182
+      "convergence_epoch": 139,
+      "best_epoch": 134,
+      "best_loss": 0.014838123694062233,
+      "final_loss": 0.015712851658463478
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_fedavg_station58_class3",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 488,
-      "best_epoch": 483,
-      "best_loss": 0.009679698385298252,
-      "final_loss": 0.011441576294600964
+      "convergence_epoch": 97,
+      "best_epoch": 92,
+      "best_loss": 0.08500247448682785,
+      "final_loss": 0.10160376876592636
     },
     {
       "stage_type": "few_shot",
       "stage_id": "proposed_a_station58_class3",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 478,
-      "best_epoch": 473,
-      "best_loss": 0.009729317389428616,
-      "final_loss": 0.011342660523951054
+      "convergence_epoch": 146,
+      "best_epoch": 141,
+      "best_loss": 0.07641217112541199,
+      "final_loss": 0.10651826113462448
     },
     {
       "stage_type": "few_shot",
       "stage_id": "lmt_station59_class0",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 176,
-      "best_epoch": 171,
-      "best_loss": 0.057527150958776474,
-      "final_loss": 0.07021905481815338
+      "convergence_epoch": 194,
+      "best_epoch": 189,
+      "best_loss": 0.038155294954776764,
+      "final_loss": 0.08958941698074341
     },
     {
       "stage_type": "few_shot",
@@ -1732,8 +1067,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.034947719424963,
-      "final_loss": 0.034947719424963
+      "best_loss": 0.15923821926116943,
+      "final_loss": 0.15923821926116943
     },
     {
       "stage_type": "few_shot",
@@ -1745,8 +1080,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.039699964225292206,
-      "final_loss": 0.039699964225292206
+      "best_loss": 0.22796480357646942,
+      "final_loss": 0.22796480357646942
     },
     {
       "stage_type": "few_shot",
@@ -1758,8 +1093,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.32826560735702515,
-      "final_loss": 0.32826560735702515
+      "best_loss": 0.18556921184062958,
+      "final_loss": 0.18556921184062958
     },
     {
       "stage_type": "few_shot",
@@ -1771,8 +1106,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.6948387026786804,
-      "final_loss": 0.6948387026786804
+      "best_loss": 0.20252780616283417,
+      "final_loss": 0.20252780616283417
     },
     {
       "stage_type": "few_shot",
@@ -1784,8 +1119,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.641921877861023,
-      "final_loss": 0.641921877861023
+      "best_loss": 0.16139325499534607,
+      "final_loss": 0.16139325499534607
     },
     {
       "stage_type": "few_shot",
@@ -1797,8 +1132,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.20122024416923523,
-      "final_loss": 0.20122024416923523
+      "best_loss": 0.09644903242588043,
+      "final_loss": 0.09644903242588043
     },
     {
       "stage_type": "few_shot",
@@ -1810,125 +1145,21 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0010248238686472178,
-      "final_loss": 0.0010248238686472178
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.041623808443546295,
-      "final_loss": 0.041623808443546295
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.08550246059894562,
-      "final_loss": 0.08550246059894562
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0915624126791954,
-      "final_loss": 0.0915624126791954
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.04023447632789612,
-      "final_loss": 0.04023447632789612
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.010702962055802345,
-      "final_loss": 0.010702962055802345
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0017028715228661895,
-      "final_loss": 0.0017028715228661895
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.004712665919214487,
-      "final_loss": 0.004712665919214487
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.46455153822898865,
-      "final_loss": 0.46455153822898865
+      "best_loss": 0.10251548886299133,
+      "final_loss": 0.10251548886299133
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_source_station58_to_59_class0",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 450,
-      "best_epoch": 445,
-      "best_loss": 0.11265821754932404,
-      "final_loss": 0.1278991997241974
+      "convergence_epoch": 198,
+      "best_epoch": 193,
+      "best_loss": 0.019530754536390305,
+      "final_loss": 0.03243253380060196
     },
     {
       "stage_type": "few_shot",
@@ -1940,8 +1171,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.02373351901769638,
-      "final_loss": 0.02373351901769638
+      "best_loss": 0.24837979674339294,
+      "final_loss": 0.24837979674339294
     },
     {
       "stage_type": "few_shot",
@@ -1953,8 +1184,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.06230476498603821,
-      "final_loss": 0.06230476498603821
+      "best_loss": 0.062442418187856674,
+      "final_loss": 0.062442418187856674
     },
     {
       "stage_type": "few_shot",
@@ -1966,8 +1197,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.005261870101094246,
-      "final_loss": 0.005261870101094246
+      "best_loss": 0.2046714723110199,
+      "final_loss": 0.2046714723110199
     },
     {
       "stage_type": "few_shot",
@@ -1979,151 +1210,60 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.07418597489595413,
-      "final_loss": 0.07418597489595413
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.05021160840988159,
-      "final_loss": 0.05021160840988159
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.056630175560712814,
-      "final_loss": 0.056630175560712814
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.04129604995250702,
-      "final_loss": 0.04129604995250702
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.1260702908039093,
-      "final_loss": 0.1260702908039093
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.020650427788496017,
-      "final_loss": 0.020650427788496017
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.004437905736267567,
-      "final_loss": 0.004437905736267567
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.06687251478433609,
-      "final_loss": 0.06687251478433609
+      "best_loss": 0.12615236639976501,
+      "final_loss": 0.12615236639976501
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_source_station60_to_59_class0",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 395,
-      "best_epoch": 390,
-      "best_loss": 0.03182513266801834,
-      "final_loss": 0.037506766617298126
+      "convergence_epoch": 148,
+      "best_epoch": 143,
+      "best_loss": 0.03352292999625206,
+      "final_loss": 0.06817866861820221
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_fedavg_station59_class0",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 383,
-      "best_epoch": 378,
-      "best_loss": 0.053234077990055084,
-      "final_loss": 0.06442814320325851
+      "convergence_epoch": 74,
+      "best_epoch": 69,
+      "best_loss": 0.02358505129814148,
+      "final_loss": 0.05202734097838402
     },
     {
       "stage_type": "few_shot",
       "stage_id": "proposed_a_station59_class0",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 278,
-      "best_epoch": 273,
-      "best_loss": 0.050294242799282074,
-      "final_loss": 0.06545623391866684
+      "convergence_epoch": 150,
+      "best_epoch": 145,
+      "best_loss": 0.018010936677455902,
+      "final_loss": 0.03122549131512642
     },
     {
       "stage_type": "few_shot",
       "stage_id": "lmt_station59_class1",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 323,
-      "best_epoch": 318,
-      "best_loss": 0.012175802141427994,
-      "final_loss": 0.02312510646879673
+      "convergence_epoch": 200,
+      "best_epoch": 195,
+      "best_loss": 0.0038689232897013426,
+      "final_loss": 0.007531626150012016
     },
     {
       "stage_type": "few_shot",
@@ -2135,73 +1275,21 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.014331167563796043,
-      "final_loss": 0.014331167563796043
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.02503501996397972,
-      "final_loss": 0.02503501996397972
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.004027077928185463,
-      "final_loss": 0.004027077928185463
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.005322602577507496,
-      "final_loss": 0.005322602577507496
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0474969856441021,
-      "final_loss": 0.0474969856441021
+      "best_loss": 0.030491119250655174,
+      "final_loss": 0.030491119250655174
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_source_station58_to_59_class1",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 452,
-      "best_epoch": 447,
-      "best_loss": 0.005394138861447573,
-      "final_loss": 0.009197411127388477
+      "convergence_epoch": 89,
+      "best_epoch": 84,
+      "best_loss": 0.0007330083171837032,
+      "final_loss": 0.020473703742027283
     },
     {
       "stage_type": "few_shot",
@@ -2213,8 +1301,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.012314006686210632,
-      "final_loss": 0.012314006686210632
+      "best_loss": 0.019997354596853256,
+      "final_loss": 0.019997354596853256
     },
     {
       "stage_type": "few_shot",
@@ -2226,8 +1314,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.011331066489219666,
-      "final_loss": 0.011331066489219666
+      "best_loss": 0.08612307906150818,
+      "final_loss": 0.08612307906150818
     },
     {
       "stage_type": "few_shot",
@@ -2239,2218 +1327,60 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.01979020982980728,
-      "final_loss": 0.01979020982980728
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.014662257395684719,
-      "final_loss": 0.014662257395684719
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0058534471318125725,
-      "final_loss": 0.0058534471318125725
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.011518292129039764,
-      "final_loss": 0.011518292129039764
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0062795220874249935,
-      "final_loss": 0.0062795220874249935
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.011511115357279778,
-      "final_loss": 0.011511115357279778
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.017952533438801765,
-      "final_loss": 0.017952533438801765
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.05289718508720398,
-      "final_loss": 0.05289718508720398
+      "best_loss": 0.026689711958169937,
+      "final_loss": 0.026689711958169937
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_source_station60_to_59_class1",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 323,
-      "best_epoch": 318,
-      "best_loss": 0.004574035294353962,
-      "final_loss": 0.00727868964895606
+      "convergence_epoch": 123,
+      "best_epoch": 118,
+      "best_loss": 0.015504170209169388,
+      "final_loss": 0.02341514080762863
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_fedavg_station59_class1",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 349,
-      "best_epoch": 344,
-      "best_loss": 0.011362267658114433,
-      "final_loss": 0.01928163506090641
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "proposed_a_station59_class1",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 361,
-      "best_epoch": 356,
-      "best_loss": 0.010870338417589664,
-      "final_loss": 0.01278114877641201
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "lmt_station59_class2",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 447,
-      "best_epoch": 442,
-      "best_loss": 0.010804769583046436,
-      "final_loss": 0.015107356011867523
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.05712439864873886,
-      "final_loss": 0.05712439864873886
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.011445834301412106,
-      "final_loss": 0.011445834301412106
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0028146617114543915,
-      "final_loss": 0.0028146617114543915
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.024453002959489822,
-      "final_loss": 0.024453002959489822
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.35088181495666504,
-      "final_loss": 0.35088181495666504
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_source_station58_to_59_class2",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 407,
-      "best_epoch": 402,
-      "best_loss": 0.0015251971781253815,
-      "final_loss": 0.002111277775838971
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.019301149994134903,
-      "final_loss": 0.019301149994134903
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.011699619702994823,
-      "final_loss": 0.011699619702994823
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03431417793035507,
-      "final_loss": 0.03431417793035507
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.024479586631059647,
-      "final_loss": 0.024479586631059647
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.21978506445884705,
-      "final_loss": 0.21978506445884705
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_source_station60_to_59_class2",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 205,
-      "best_epoch": 200,
-      "best_loss": 0.0040219505317509174,
-      "final_loss": 0.012946384958922863
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_fedavg_station59_class2",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 463,
-      "best_epoch": 458,
-      "best_loss": 0.01017136499285698,
-      "final_loss": 0.01766381412744522
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "proposed_a_station59_class2",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 105,
-      "best_epoch": 100,
-      "best_loss": 0.0101854233071208,
-      "final_loss": 0.01412113569676876
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "lmt_station59_class3",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 452,
-      "best_epoch": 447,
-      "best_loss": 0.023397723212838173,
-      "final_loss": 0.02598056197166443
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.012887964956462383,
-      "final_loss": 0.012887964956462383
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0015841246349737048,
-      "final_loss": 0.0015841246349737048
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.00409543514251709,
-      "final_loss": 0.00409543514251709
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.004021856468170881,
-      "final_loss": 0.004021856468170881
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.005255243740975857,
-      "final_loss": 0.005255243740975857
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.024002661928534508,
-      "final_loss": 0.024002661928534508
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0016251028282567859,
-      "final_loss": 0.0016251028282567859
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.005599392112344503,
-      "final_loss": 0.005599392112344503
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0028370951768010855,
-      "final_loss": 0.0028370951768010855
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.008879924193024635,
-      "final_loss": 0.008879924193024635
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.015269766561686993,
-      "final_loss": 0.015269766561686993
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.007492548786103725,
-      "final_loss": 0.007492548786103725
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0013065737439319491,
-      "final_loss": 0.0013065737439319491
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.00423365319147706,
-      "final_loss": 0.00423365319147706
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.00048391491873189807,
-      "final_loss": 0.00048391491873189807
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0037080924957990646,
-      "final_loss": 0.0037080924957990646
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.015461146831512451,
-      "final_loss": 0.015461146831512451
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.015953784808516502,
-      "final_loss": 0.015953784808516502
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.012367311865091324,
-      "final_loss": 0.012367311865091324
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.006021122448146343,
-      "final_loss": 0.006021122448146343
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.04410053789615631,
-      "final_loss": 0.04410053789615631
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.003897633869200945,
-      "final_loss": 0.003897633869200945
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.010687418282032013,
-      "final_loss": 0.010687418282032013
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.001959217479452491,
-      "final_loss": 0.001959217479452491
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0026182939764112234,
-      "final_loss": 0.0026182939764112234
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.02756332978606224,
-      "final_loss": 0.02756332978606224
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.11821988224983215,
-      "final_loss": 0.11821988224983215
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0029015489853918552,
-      "final_loss": 0.0029015489853918552
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0079399598762393,
-      "final_loss": 0.0079399598762393
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.035185590386390686,
-      "final_loss": 0.035185590386390686
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.007437694817781448,
-      "final_loss": 0.007437694817781448
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.008484557271003723,
-      "final_loss": 0.008484557271003723
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.01366866659373045,
-      "final_loss": 0.01366866659373045
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.008761613629758358,
-      "final_loss": 0.008761613629758358
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.007371558807790279,
-      "final_loss": 0.007371558807790279
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.09007012844085693,
-      "final_loss": 0.09007012844085693
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.033162672072649,
-      "final_loss": 0.033162672072649
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.023419801145792007,
-      "final_loss": 0.023419801145792007
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03231237083673477,
-      "final_loss": 0.03231237083673477
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.013008557260036469,
-      "final_loss": 0.013008557260036469
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_source_station58_to_59_class3",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 459,
-      "best_epoch": 454,
-      "best_loss": 0.0014907786389812827,
-      "final_loss": 0.004025404341518879
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.006084849592298269,
-      "final_loss": 0.006084849592298269
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0474172942340374,
-      "final_loss": 0.0474172942340374
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03875701129436493,
-      "final_loss": 0.03875701129436493
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.005733882542699575,
-      "final_loss": 0.005733882542699575
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.01793419010937214,
-      "final_loss": 0.01793419010937214
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0025547361001372337,
-      "final_loss": 0.0025547361001372337
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.00934744905680418,
-      "final_loss": 0.00934744905680418
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0014759909827262163,
-      "final_loss": 0.0014759909827262163
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.005997966043651104,
-      "final_loss": 0.005997966043651104
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.003031065221875906,
-      "final_loss": 0.003031065221875906
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0005397562636062503,
-      "final_loss": 0.0005397562636062503
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.011262564919888973,
-      "final_loss": 0.011262564919888973
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.012934213504195213,
-      "final_loss": 0.012934213504195213
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.004338014870882034,
-      "final_loss": 0.004338014870882034
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.014763036742806435,
-      "final_loss": 0.014763036742806435
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.04819464311003685,
-      "final_loss": 0.04819464311003685
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.01884874328970909,
-      "final_loss": 0.01884874328970909
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03189008682966232,
-      "final_loss": 0.03189008682966232
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.031217850744724274,
-      "final_loss": 0.031217850744724274
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0006315113278105855,
-      "final_loss": 0.0006315113278105855
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0024061701260507107,
-      "final_loss": 0.0024061701260507107
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.010959960520267487,
-      "final_loss": 0.010959960520267487
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.06986874341964722,
-      "final_loss": 0.06986874341964722
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.01602425053715706,
-      "final_loss": 0.01602425053715706
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.020543023943901062,
-      "final_loss": 0.020543023943901062
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0028578508645296097,
-      "final_loss": 0.0028578508645296097
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.017199169844388962,
-      "final_loss": 0.017199169844388962
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.07249473035335541,
-      "final_loss": 0.07249473035335541
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.010524889454245567,
-      "final_loss": 0.010524889454245567
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.09262235462665558,
-      "final_loss": 0.09262235462665558
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.019187554717063904,
-      "final_loss": 0.019187554717063904
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_source_station60_to_59_class3",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 397,
-      "best_epoch": 392,
-      "best_loss": 0.00914574135094881,
-      "final_loss": 0.012649763375520706
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_fedavg_station59_class3",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 300,
-      "best_epoch": 295,
-      "best_loss": 0.023627305403351784,
-      "final_loss": 0.028281642124056816
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "proposed_a_station59_class3",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 489,
-      "best_epoch": 484,
-      "best_loss": 0.02246496081352234,
-      "final_loss": 0.02616620995104313
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "lmt_station60_class0",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 177,
-      "best_epoch": 172,
-      "best_loss": 0.03088247962296009,
-      "final_loss": 0.03660399094223976
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.013697322458028793,
-      "final_loss": 0.013697322458028793
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.017449069768190384,
-      "final_loss": 0.017449069768190384
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.3010251522064209,
-      "final_loss": 0.3010251522064209
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.6240216493606567,
-      "final_loss": 0.6240216493606567
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.5620724558830261,
-      "final_loss": 0.5620724558830261
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.1670771688222885,
-      "final_loss": 0.1670771688222885
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.00471696350723505,
-      "final_loss": 0.00471696350723505
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.058663465082645416,
-      "final_loss": 0.058663465082645416
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.07886628806591034,
-      "final_loss": 0.07886628806591034
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.04420040175318718,
-      "final_loss": 0.04420040175318718
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.028055159375071526,
-      "final_loss": 0.028055159375071526
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.004855629056692123,
-      "final_loss": 0.004855629056692123
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.024037925526499748,
-      "final_loss": 0.024037925526499748
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.01661030948162079,
-      "final_loss": 0.01661030948162079
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.5122731924057007,
-      "final_loss": 0.5122731924057007
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_source_station58_to_60_class0",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 377,
-      "best_epoch": 372,
-      "best_loss": 0.11246620118618011,
-      "final_loss": 0.13957060873508453
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.007481846958398819,
-      "final_loss": 0.007481846958398819
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.003807361237704754,
-      "final_loss": 0.003807361237704754
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.006518789567053318,
-      "final_loss": 0.006518789567053318
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.05949586629867554,
-      "final_loss": 0.05949586629867554
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.04748348519206047,
-      "final_loss": 0.04748348519206047
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.06471584737300873,
-      "final_loss": 0.06471584737300873
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.04101927578449249,
-      "final_loss": 0.04101927578449249
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.08102571964263916,
-      "final_loss": 0.08102571964263916
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03235745429992676,
-      "final_loss": 0.03235745429992676
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.010709008201956749,
-      "final_loss": 0.010709008201956749
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.026148220524191856,
-      "final_loss": 0.026148220524191856
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.040398359298706055,
-      "final_loss": 0.040398359298706055
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_source_station59_to_60_class0",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 72,
-      "best_epoch": 67,
-      "best_loss": 0.028672929853200912,
-      "final_loss": 0.0438963882625103
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_fedavg_station60_class0",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 497,
-      "best_loss": 0.03282664343714714,
-      "final_loss": 0.038756173104047775
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "proposed_a_station60_class0",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 459,
-      "best_epoch": 454,
-      "best_loss": 0.03207078576087952,
-      "final_loss": 0.043915700167417526
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "lmt_station60_class1",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 445,
-      "best_epoch": 440,
-      "best_loss": 0.012333875522017479,
-      "final_loss": 0.016702590510249138
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0226773452013731,
-      "final_loss": 0.0226773452013731
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.023988451808691025,
-      "final_loss": 0.023988451808691025
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.021033188328146935,
-      "final_loss": 0.021033188328146935
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.013277094811201096,
-      "final_loss": 0.013277094811201096
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.05357024073600769,
-      "final_loss": 0.05357024073600769
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_source_station58_to_60_class1",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 374,
-      "best_epoch": 369,
-      "best_loss": 0.00727770384401083,
-      "final_loss": 0.013996746391057968
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03425675630569458,
-      "final_loss": 0.03425675630569458
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.011430955491960049,
-      "final_loss": 0.011430955491960049
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.005871820263564587,
-      "final_loss": 0.005871820263564587
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.011664947494864464,
-      "final_loss": 0.011664947494864464
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03068464994430542,
-      "final_loss": 0.03068464994430542
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.027867935597896576,
-      "final_loss": 0.027867935597896576
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.025281693786382675,
-      "final_loss": 0.025281693786382675
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.021638324484229088,
-      "final_loss": 0.021638324484229088
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.013453393243253231,
-      "final_loss": 0.013453393243253231
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.004199826158583164,
-      "final_loss": 0.004199826158583164
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_source_station59_to_60_class1",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 385,
-      "best_epoch": 380,
-      "best_loss": 0.010082577355206013,
-      "final_loss": 0.011682036332786083
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_fedavg_station60_class1",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 480,
-      "best_epoch": 475,
-      "best_loss": 0.012393408454954624,
-      "final_loss": 0.018868902698159218
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "proposed_a_station60_class1",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 344,
-      "best_epoch": 339,
-      "best_loss": 0.011422106996178627,
-      "final_loss": 0.01355203427374363
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "lmt_station60_class2",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 301,
-      "best_epoch": 296,
-      "best_loss": 0.003253370523452759,
-      "final_loss": 0.008867286145687103
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.08535796403884888,
-      "final_loss": 0.08535796403884888
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.04613786190748215,
-      "final_loss": 0.04613786190748215
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.008502951823174953,
-      "final_loss": 0.008502951823174953
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03155713528394699,
-      "final_loss": 0.03155713528394699
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.36669695377349854,
-      "final_loss": 0.36669695377349854
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_source_station58_to_60_class2",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 472,
-      "best_epoch": 467,
-      "best_loss": 0.021453654393553734,
-      "final_loss": 0.03334847465157509
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.017895473167300224,
-      "final_loss": 0.017895473167300224
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.012076362036168575,
-      "final_loss": 0.012076362036168575
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.026723936200141907,
-      "final_loss": 0.026723936200141907
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.031297869980335236,
-      "final_loss": 0.031297869980335236
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.015555910766124725,
-      "final_loss": 0.015555910766124725
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.009816214442253113,
-      "final_loss": 0.009816214442253113
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_source_station59_to_60_class2",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 348,
-      "best_epoch": 343,
-      "best_loss": 0.010828344151377678,
-      "final_loss": 0.11482641845941544
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "extreme_fedavg_station60_class2",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 203,
-      "best_epoch": 198,
-      "best_loss": 0.0031418714206665754,
-      "final_loss": 0.010621189139783382
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "proposed_a_station60_class2",
-      "total_epochs": 500,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": true,
-      "convergence_epoch": 311,
-      "best_epoch": 306,
-      "best_loss": 0.003400517627596855,
-      "final_loss": 0.008370716124773026
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "lmt_station60_class3",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
       "convergence_epoch": 192,
       "best_epoch": 187,
-      "best_loss": 0.014956015162169933,
-      "final_loss": 0.018230967223644257
+      "best_loss": 0.0037541151978075504,
+      "final_loss": 0.00571060087531805
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "proposed_a_station59_class1",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 195,
+      "best_epoch": 190,
+      "best_loss": 0.003932093735784292,
+      "final_loss": 0.005389796104282141
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "lmt_station59_class2",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 124,
+      "best_epoch": 119,
+      "best_loss": 0.019418977200984955,
+      "final_loss": 0.049099162220954895
     },
     {
       "stage_type": "few_shot",
@@ -4462,8 +1392,21 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.006872212514281273,
-      "final_loss": 0.006872212514281273
+      "best_loss": 0.13935700058937073,
+      "final_loss": 0.13935700058937073
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_source_station58_to_59_class2",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 25,
+      "best_epoch": 20,
+      "best_loss": 5.063311255071312e-05,
+      "final_loss": 0.005411827005445957
     },
     {
       "stage_type": "few_shot",
@@ -4475,8 +1418,60 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.00425614882260561,
-      "final_loss": 0.00425614882260561
+      "best_loss": 0.2621365189552307,
+      "final_loss": 0.2621365189552307
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_source_station60_to_59_class2",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 89,
+      "best_epoch": 84,
+      "best_loss": 0.00015242956578731537,
+      "final_loss": 0.014725294895470142
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_fedavg_station59_class2",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 150,
+      "best_epoch": 145,
+      "best_loss": 0.025448551401495934,
+      "final_loss": 0.05923452228307724
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "proposed_a_station59_class2",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 187,
+      "best_epoch": 182,
+      "best_loss": 0.01680198684334755,
+      "final_loss": 0.0901571735739708
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "lmt_station59_class3",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 134,
+      "best_epoch": 129,
+      "best_loss": 0.0237269289791584,
+      "final_loss": 0.038133926689624786
     },
     {
       "stage_type": "few_shot",
@@ -4488,8 +1483,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0014443303225561976,
-      "final_loss": 0.0014443303225561976
+      "best_loss": 0.14253056049346924,
+      "final_loss": 0.14253056049346924
     },
     {
       "stage_type": "few_shot",
@@ -4501,8 +1496,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.002210215199738741,
-      "final_loss": 0.002210215199738741
+      "best_loss": 0.1193772554397583,
+      "final_loss": 0.1193772554397583
     },
     {
       "stage_type": "few_shot",
@@ -4514,8 +1509,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.00878874957561493,
-      "final_loss": 0.00878874957561493
+      "best_loss": 0.07895394414663315,
+      "final_loss": 0.07895394414663315
     },
     {
       "stage_type": "few_shot",
@@ -4527,8 +1522,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.01411503367125988,
-      "final_loss": 0.01411503367125988
+      "best_loss": 0.12912803888320923,
+      "final_loss": 0.12912803888320923
     },
     {
       "stage_type": "few_shot",
@@ -4540,8 +1535,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0056099011562764645,
-      "final_loss": 0.0056099011562764645
+      "best_loss": 0.14663530886173248,
+      "final_loss": 0.14663530886173248
     },
     {
       "stage_type": "few_shot",
@@ -4553,8 +1548,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.004825535695999861,
-      "final_loss": 0.004825535695999861
+      "best_loss": 0.09600391983985901,
+      "final_loss": 0.09600391983985901
     },
     {
       "stage_type": "few_shot",
@@ -4566,8 +1561,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.01142796128988266,
-      "final_loss": 0.01142796128988266
+      "best_loss": 0.12733329832553864,
+      "final_loss": 0.12733329832553864
     },
     {
       "stage_type": "few_shot",
@@ -4579,8 +1574,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.001591893145814538,
-      "final_loss": 0.001591893145814538
+      "best_loss": 0.1244659274816513,
+      "final_loss": 0.1244659274816513
     },
     {
       "stage_type": "few_shot",
@@ -4592,8 +1587,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.001973441569134593,
-      "final_loss": 0.001973441569134593
+      "best_loss": 0.07049696892499924,
+      "final_loss": 0.07049696892499924
     },
     {
       "stage_type": "few_shot",
@@ -4605,8 +1600,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0040894607082009315,
-      "final_loss": 0.0040894607082009315
+      "best_loss": 0.09061509370803833,
+      "final_loss": 0.09061509370803833
     },
     {
       "stage_type": "few_shot",
@@ -4618,8 +1613,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.00316981365904212,
-      "final_loss": 0.00316981365904212
+      "best_loss": 0.10077821463346481,
+      "final_loss": 0.10077821463346481
     },
     {
       "stage_type": "few_shot",
@@ -4631,8 +1626,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.009869731031358242,
-      "final_loss": 0.009869731031358242
+      "best_loss": 0.07078760117292404,
+      "final_loss": 0.07078760117292404
     },
     {
       "stage_type": "few_shot",
@@ -4644,8 +1639,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.012796452268958092,
-      "final_loss": 0.012796452268958092
+      "best_loss": 0.03114256076514721,
+      "final_loss": 0.03114256076514721
     },
     {
       "stage_type": "few_shot",
@@ -4657,8 +1652,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0059437938034534454,
-      "final_loss": 0.0059437938034534454
+      "best_loss": 0.0738760307431221,
+      "final_loss": 0.0738760307431221
     },
     {
       "stage_type": "few_shot",
@@ -4670,8 +1665,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.009845506399869919,
-      "final_loss": 0.009845506399869919
+      "best_loss": 0.01332541462033987,
+      "final_loss": 0.01332541462033987
     },
     {
       "stage_type": "few_shot",
@@ -4683,8 +1678,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.02153077721595764,
-      "final_loss": 0.02153077721595764
+      "best_loss": 0.01425367221236229,
+      "final_loss": 0.01425367221236229
     },
     {
       "stage_type": "few_shot",
@@ -4696,8 +1691,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0071863047778606415,
-      "final_loss": 0.0071863047778606415
+      "best_loss": 0.053171634674072266,
+      "final_loss": 0.053171634674072266
     },
     {
       "stage_type": "few_shot",
@@ -4709,8 +1704,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.006189202424138784,
-      "final_loss": 0.006189202424138784
+      "best_loss": 0.12181868404150009,
+      "final_loss": 0.12181868404150009
     },
     {
       "stage_type": "few_shot",
@@ -4722,8 +1717,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.027896564453840256,
-      "final_loss": 0.027896564453840256
+      "best_loss": 0.10201745480298996,
+      "final_loss": 0.10201745480298996
     },
     {
       "stage_type": "few_shot",
@@ -4735,8 +1730,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.005187315866351128,
-      "final_loss": 0.005187315866351128
+      "best_loss": 0.07411834597587585,
+      "final_loss": 0.07411834597587585
     },
     {
       "stage_type": "few_shot",
@@ -4748,8 +1743,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.001070478348992765,
-      "final_loss": 0.001070478348992765
+      "best_loss": 0.056903254240751266,
+      "final_loss": 0.056903254240751266
     },
     {
       "stage_type": "few_shot",
@@ -4761,8 +1756,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0037329979240894318,
-      "final_loss": 0.0037329979240894318
+      "best_loss": 0.05152013525366783,
+      "final_loss": 0.05152013525366783
     },
     {
       "stage_type": "few_shot",
@@ -4774,8 +1769,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0015699876239523292,
-      "final_loss": 0.0015699876239523292
+      "best_loss": 0.06766568124294281,
+      "final_loss": 0.06766568124294281
     },
     {
       "stage_type": "few_shot",
@@ -4787,8 +1782,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.020037559792399406,
-      "final_loss": 0.020037559792399406
+      "best_loss": 0.0916798859834671,
+      "final_loss": 0.0916798859834671
     },
     {
       "stage_type": "few_shot",
@@ -4800,8 +1795,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.09264765679836273,
-      "final_loss": 0.09264765679836273
+      "best_loss": 0.060808904469013214,
+      "final_loss": 0.060808904469013214
     },
     {
       "stage_type": "few_shot",
@@ -4813,8 +1808,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.006626039277762175,
-      "final_loss": 0.006626039277762175
+      "best_loss": 0.0837688148021698,
+      "final_loss": 0.0837688148021698
     },
     {
       "stage_type": "few_shot",
@@ -4826,8 +1821,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.011036235839128494,
-      "final_loss": 0.011036235839128494
+      "best_loss": 0.07499402016401291,
+      "final_loss": 0.07499402016401291
     },
     {
       "stage_type": "few_shot",
@@ -4839,8 +1834,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0318790040910244,
-      "final_loss": 0.0318790040910244
+      "best_loss": 0.10350428521633148,
+      "final_loss": 0.10350428521633148
     },
     {
       "stage_type": "few_shot",
@@ -4852,8 +1847,21 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.01341839786618948,
-      "final_loss": 0.01341839786618948
+      "best_loss": 0.055087387561798096,
+      "final_loss": 0.055087387561798096
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_source_station58_to_59_class3",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 156,
+      "best_epoch": 151,
+      "best_loss": 0.009223603643476963,
+      "final_loss": 0.009718270972371101
     },
     {
       "stage_type": "few_shot",
@@ -4865,8 +1873,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.001965004950761795,
-      "final_loss": 0.001965004950761795
+      "best_loss": 0.12535640597343445,
+      "final_loss": 0.12535640597343445
     },
     {
       "stage_type": "few_shot",
@@ -4878,8 +1886,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.009292501024901867,
-      "final_loss": 0.009292501024901867
+      "best_loss": 0.09967625141143799,
+      "final_loss": 0.09967625141143799
     },
     {
       "stage_type": "few_shot",
@@ -4891,8 +1899,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.006809827871620655,
-      "final_loss": 0.006809827871620655
+      "best_loss": 0.04566653072834015,
+      "final_loss": 0.04566653072834015
     },
     {
       "stage_type": "few_shot",
@@ -4904,8 +1912,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.006828388199210167,
-      "final_loss": 0.006828388199210167
+      "best_loss": 0.068229541182518,
+      "final_loss": 0.068229541182518
     },
     {
       "stage_type": "few_shot",
@@ -4917,8 +1925,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.051374610513448715,
-      "final_loss": 0.051374610513448715
+      "best_loss": 0.09973876178264618,
+      "final_loss": 0.09973876178264618
     },
     {
       "stage_type": "few_shot",
@@ -4930,8 +1938,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.028252586722373962,
-      "final_loss": 0.028252586722373962
+      "best_loss": 0.09713208675384521,
+      "final_loss": 0.09713208675384521
     },
     {
       "stage_type": "few_shot",
@@ -4943,8 +1951,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.023229848593473434,
-      "final_loss": 0.023229848593473434
+      "best_loss": 0.11250272393226624,
+      "final_loss": 0.11250272393226624
     },
     {
       "stage_type": "few_shot",
@@ -4956,8 +1964,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.02715953253209591,
-      "final_loss": 0.02715953253209591
+      "best_loss": 0.08863292634487152,
+      "final_loss": 0.08863292634487152
     },
     {
       "stage_type": "few_shot",
@@ -4969,21 +1977,1100 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.01818108558654785,
-      "final_loss": 0.01818108558654785
+      "best_loss": 0.10723382234573364,
+      "final_loss": 0.10723382234573364
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.04313008114695549,
+      "final_loss": 0.04313008114695549
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.108835369348526,
+      "final_loss": 0.108835369348526
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.06960500776767731,
+      "final_loss": 0.06960500776767731
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.06282689422369003,
+      "final_loss": 0.06282689422369003
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.0762639045715332,
+      "final_loss": 0.0762639045715332
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.06358420848846436,
+      "final_loss": 0.06358420848846436
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.018701959401369095,
+      "final_loss": 0.018701959401369095
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.04958523437380791,
+      "final_loss": 0.04958523437380791
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.1393369436264038,
+      "final_loss": 0.1393369436264038
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.10675893723964691,
+      "final_loss": 0.10675893723964691
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.04591754078865051,
+      "final_loss": 0.04591754078865051
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.03323949873447418,
+      "final_loss": 0.03323949873447418
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.07782097160816193,
+      "final_loss": 0.07782097160816193
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.034102726727724075,
+      "final_loss": 0.034102726727724075
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_source_station60_to_59_class3",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 198,
+      "best_epoch": 193,
+      "best_loss": 0.014328157529234886,
+      "final_loss": 0.015170849859714508
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_fedavg_station59_class3",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 181,
+      "best_epoch": 176,
+      "best_loss": 0.01738828420639038,
+      "final_loss": 0.023807009682059288
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "proposed_a_station59_class3",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 175,
+      "best_epoch": 170,
+      "best_loss": 0.018182607367634773,
+      "final_loss": 0.03362707421183586
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "lmt_station60_class0",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 114,
+      "best_epoch": 109,
+      "best_loss": 0.029375843703746796,
+      "final_loss": 0.06275865435600281
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.09638349711894989,
+      "final_loss": 0.09638349711894989
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.16215813159942627,
+      "final_loss": 0.16215813159942627
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.2628801465034485,
+      "final_loss": 0.2628801465034485
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.2322426289319992,
+      "final_loss": 0.2322426289319992
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.22221963107585907,
+      "final_loss": 0.22221963107585907
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.17970627546310425,
+      "final_loss": 0.17970627546310425
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.18506568670272827,
+      "final_loss": 0.18506568670272827
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_source_station58_to_60_class0",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 184,
+      "best_epoch": 179,
+      "best_loss": 0.013317770324647427,
+      "final_loss": 0.05034511536359787
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.1769828498363495,
+      "final_loss": 0.1769828498363495
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.16789567470550537,
+      "final_loss": 0.16789567470550537
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.1399718075990677,
+      "final_loss": 0.1399718075990677
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.14258843660354614,
+      "final_loss": 0.14258843660354614
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.04046378657221794,
+      "final_loss": 0.04046378657221794
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.18400618433952332,
+      "final_loss": 0.18400618433952332
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_source_station59_to_60_class0",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 200,
+      "best_epoch": 195,
+      "best_loss": 0.02291719801723957,
+      "final_loss": 0.042075950652360916
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_fedavg_station60_class0",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 192,
+      "best_epoch": 187,
+      "best_loss": 0.023180291056632996,
+      "final_loss": 0.029893826693296432
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "proposed_a_station60_class0",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 186,
+      "best_epoch": 181,
+      "best_loss": 0.019926007837057114,
+      "final_loss": 0.03415273129940033
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "lmt_station60_class1",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 79,
+      "best_epoch": 74,
+      "best_loss": 0.01834852807223797,
+      "final_loss": 0.024250661954283714
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.07593497633934021,
+      "final_loss": 0.07593497633934021
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_source_station58_to_60_class1",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 101,
+      "best_epoch": 96,
+      "best_loss": 4.838934546569362e-05,
+      "final_loss": 0.0039413911290466785
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.14186929166316986,
+      "final_loss": 0.14186929166316986
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.13429847359657288,
+      "final_loss": 0.13429847359657288
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.12633973360061646,
+      "final_loss": 0.12633973360061646
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.10503546893596649,
+      "final_loss": 0.10503546893596649
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_source_station59_to_60_class1",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 195,
+      "best_epoch": 190,
+      "best_loss": 0.004517222288995981,
+      "final_loss": 0.007009024731814861
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_fedavg_station60_class1",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 77,
+      "best_epoch": 72,
+      "best_loss": 0.01702973246574402,
+      "final_loss": 0.022753972560167313
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "proposed_a_station60_class1",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 185,
+      "best_epoch": 180,
+      "best_loss": 0.018190482631325722,
+      "final_loss": 0.021675316616892815
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "lmt_station60_class2",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 160,
+      "best_epoch": 155,
+      "best_loss": 8.010436431504786e-05,
+      "final_loss": 0.002348862821236253
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.13962942361831665,
+      "final_loss": 0.13962942361831665
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_source_station58_to_60_class2",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 38,
+      "best_epoch": 33,
+      "best_loss": 0.00011998067930107936,
+      "final_loss": 0.0034118490293622017
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.1479613482952118,
+      "final_loss": 0.1479613482952118
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.13415983319282532,
+      "final_loss": 0.13415983319282532
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_source_station59_to_60_class2",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 151,
+      "best_epoch": 146,
+      "best_loss": 0.004679589066654444,
+      "final_loss": 0.009729349054396152
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "extreme_fedavg_station60_class2",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 76,
+      "best_epoch": 71,
+      "best_loss": 1.0387383554189e-05,
+      "final_loss": 0.002459401497617364
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "proposed_a_station60_class2",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 61,
+      "best_epoch": 56,
+      "best_loss": 3.166703027090989e-05,
+      "final_loss": 0.00968404021114111
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "lmt_station60_class3",
+      "total_epochs": 200,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": true,
+      "convergence_epoch": 157,
+      "best_epoch": 152,
+      "best_loss": 0.08869202435016632,
+      "final_loss": 0.10257472842931747
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.2022266387939453,
+      "final_loss": 0.2022266387939453
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.20912429690361023,
+      "final_loss": 0.20912429690361023
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.1546088457107544,
+      "final_loss": 0.1546088457107544
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.19297903776168823,
+      "final_loss": 0.19297903776168823
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.22151951491832733,
+      "final_loss": 0.22151951491832733
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.14788898825645447,
+      "final_loss": 0.14788898825645447
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.19105570018291473,
+      "final_loss": 0.19105570018291473
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.19287025928497314,
+      "final_loss": 0.19287025928497314
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.1249544620513916,
+      "final_loss": 0.1249544620513916
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.17993658781051636,
+      "final_loss": 0.17993658781051636
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.1878524124622345,
+      "final_loss": 0.1878524124622345
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.14019963145256042,
+      "final_loss": 0.14019963145256042
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.04702015966176987,
+      "final_loss": 0.04702015966176987
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.15137410163879395,
+      "final_loss": 0.15137410163879395
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.07549645006656647,
+      "final_loss": 0.07549645006656647
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.017525218427181244,
+      "final_loss": 0.017525218427181244
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.018536150455474854,
+      "final_loss": 0.018536150455474854
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.19414004683494568,
+      "final_loss": 0.19414004683494568
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.17932778596878052,
+      "final_loss": 0.17932778596878052
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.11813177913427353,
+      "final_loss": 0.11813177913427353
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.12325575947761536,
+      "final_loss": 0.12325575947761536
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.045952003449201584,
+      "final_loss": 0.045952003449201584
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.135361909866333,
+      "final_loss": 0.135361909866333
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.145472452044487,
+      "final_loss": 0.145472452044487
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.10778290033340454,
+      "final_loss": 0.10778290033340454
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.1451122760772705,
+      "final_loss": 0.1451122760772705
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.09371310472488403,
+      "final_loss": 0.09371310472488403
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.19566898047924042,
+      "final_loss": 0.19566898047924042
+    },
+    {
+      "stage_type": "few_shot",
+      "stage_id": "few_shot",
+      "total_epochs": 1,
+      "patience": 5,
+      "min_delta": 0.0001,
+      "min_epochs": 5,
+      "converged": false,
+      "convergence_epoch": null,
+      "best_epoch": 1,
+      "best_loss": 0.12815330922603607,
+      "final_loss": 0.12815330922603607
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_source_station58_to_60_class3",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 358,
-      "best_epoch": 353,
-      "best_loss": 0.004823668859899044,
-      "final_loss": 0.0059903934597969055
+      "convergence_epoch": 154,
+      "best_epoch": 149,
+      "best_loss": 0.02080952748656273,
+      "final_loss": 0.02254907228052616
     },
     {
       "stage_type": "few_shot",
@@ -4995,8 +3082,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.007983959279954433,
-      "final_loss": 0.007983959279954433
+      "best_loss": 0.2049446702003479,
+      "final_loss": 0.2049446702003479
     },
     {
       "stage_type": "few_shot",
@@ -5008,8 +3095,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.0017929894383996725,
-      "final_loss": 0.0017929894383996725
+      "best_loss": 0.15677595138549805,
+      "final_loss": 0.15677595138549805
     },
     {
       "stage_type": "few_shot",
@@ -5021,8 +3108,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.01978231966495514,
-      "final_loss": 0.01978231966495514
+      "best_loss": 0.2102339267730713,
+      "final_loss": 0.2102339267730713
     },
     {
       "stage_type": "few_shot",
@@ -5034,8 +3121,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.007252378389239311,
-      "final_loss": 0.007252378389239311
+      "best_loss": 0.17409835755825043,
+      "final_loss": 0.17409835755825043
     },
     {
       "stage_type": "few_shot",
@@ -5047,8 +3134,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.046284787356853485,
-      "final_loss": 0.046284787356853485
+      "best_loss": 0.05519236624240875,
+      "final_loss": 0.05519236624240875
     },
     {
       "stage_type": "few_shot",
@@ -5060,8 +3147,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.023799961432814598,
-      "final_loss": 0.023799961432814598
+      "best_loss": 0.0733480304479599,
+      "final_loss": 0.0733480304479599
     },
     {
       "stage_type": "few_shot",
@@ -5073,8 +3160,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.006555318366736174,
-      "final_loss": 0.006555318366736174
+      "best_loss": 0.14148065447807312,
+      "final_loss": 0.14148065447807312
     },
     {
       "stage_type": "few_shot",
@@ -5086,8 +3173,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.015925191342830658,
-      "final_loss": 0.015925191342830658
+      "best_loss": 0.2232869565486908,
+      "final_loss": 0.2232869565486908
     },
     {
       "stage_type": "few_shot",
@@ -5099,8 +3186,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.010501326993107796,
-      "final_loss": 0.010501326993107796
+      "best_loss": 0.15306076407432556,
+      "final_loss": 0.15306076407432556
     },
     {
       "stage_type": "few_shot",
@@ -5112,8 +3199,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.017589617520570755,
-      "final_loss": 0.017589617520570755
+      "best_loss": 0.17804795503616333,
+      "final_loss": 0.17804795503616333
     },
     {
       "stage_type": "few_shot",
@@ -5125,8 +3212,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.021587302908301353,
-      "final_loss": 0.021587302908301353
+      "best_loss": 0.09341087192296982,
+      "final_loss": 0.09341087192296982
     },
     {
       "stage_type": "few_shot",
@@ -5138,8 +3225,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.03730010986328125,
-      "final_loss": 0.03730010986328125
+      "best_loss": 0.06702622771263123,
+      "final_loss": 0.06702622771263123
     },
     {
       "stage_type": "few_shot",
@@ -5151,8 +3238,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.010167064145207405,
-      "final_loss": 0.010167064145207405
+      "best_loss": 0.02859560027718544,
+      "final_loss": 0.02859560027718544
     },
     {
       "stage_type": "few_shot",
@@ -5164,8 +3251,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.013451799750328064,
-      "final_loss": 0.013451799750328064
+      "best_loss": 0.05746331065893173,
+      "final_loss": 0.05746331065893173
     },
     {
       "stage_type": "few_shot",
@@ -5177,8 +3264,8 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.013295633718371391,
-      "final_loss": 0.013295633718371391
+      "best_loss": 0.11338099092245102,
+      "final_loss": 0.11338099092245102
     },
     {
       "stage_type": "few_shot",
@@ -5190,177 +3277,47 @@
       "converged": false,
       "convergence_epoch": null,
       "best_epoch": 1,
-      "best_loss": 0.07229558378458023,
-      "final_loss": 0.07229558378458023
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03234325349330902,
-      "final_loss": 0.03234325349330902
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.028553679585456848,
-      "final_loss": 0.028553679585456848
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.03972962498664856,
-      "final_loss": 0.03972962498664856
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.021891407668590546,
-      "final_loss": 0.021891407668590546
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.0139908567070961,
-      "final_loss": 0.0139908567070961
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.04028737545013428,
-      "final_loss": 0.04028737545013428
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.013361930847167969,
-      "final_loss": 0.013361930847167969
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.039425283670425415,
-      "final_loss": 0.039425283670425415
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.016752585768699646,
-      "final_loss": 0.016752585768699646
-    },
-    {
-      "stage_type": "few_shot",
-      "stage_id": "few_shot",
-      "total_epochs": 1,
-      "patience": 5,
-      "min_delta": 0.0001,
-      "min_epochs": 5,
-      "converged": false,
-      "convergence_epoch": null,
-      "best_epoch": 1,
-      "best_loss": 0.007806077599525452,
-      "final_loss": 0.007806077599525452
+      "best_loss": 0.032145991921424866,
+      "final_loss": 0.032145991921424866
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_source_station59_to_60_class3",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 391,
-      "best_epoch": 386,
-      "best_loss": 0.010452724993228912,
-      "final_loss": 0.011903350241482258
+      "convergence_epoch": 115,
+      "best_epoch": 110,
+      "best_loss": 0.01602611504495144,
+      "final_loss": 0.017790548503398895
     },
     {
       "stage_type": "few_shot",
       "stage_id": "extreme_fedavg_station60_class3",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 395,
-      "best_epoch": 390,
-      "best_loss": 0.014741219580173492,
-      "final_loss": 0.017946939915418625
+      "convergence_epoch": 50,
+      "best_epoch": 45,
+      "best_loss": 0.09569153189659119,
+      "final_loss": 0.12659968435764313
     },
     {
       "stage_type": "few_shot",
       "stage_id": "proposed_a_station60_class3",
-      "total_epochs": 500,
+      "total_epochs": 200,
       "patience": 5,
       "min_delta": 0.0001,
       "min_epochs": 5,
       "converged": true,
-      "convergence_epoch": 321,
-      "best_epoch": 316,
-      "best_loss": 0.014435605145990849,
-      "final_loss": 0.016734974458813667
+      "convergence_epoch": 46,
+      "best_epoch": 41,
+      "best_loss": 0.0955173522233963,
+      "final_loss": 0.10134148597717285
     }
   ]
 }

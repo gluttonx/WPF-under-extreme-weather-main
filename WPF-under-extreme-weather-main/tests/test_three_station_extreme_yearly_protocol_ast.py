@@ -15,8 +15,10 @@ class ThreeStationExtremeYearlyProtocolAstTest(unittest.TestCase):
 
         text = BUILDER_FILE.read_text(encoding="utf-8")
 
-        self.assertIn('OUTPUT_DIR = ROOT / "three_station_yearly_protocol_data"', text)
-        self.assertIn('METADATA_PATH = OUTPUT_DIR / "three_station_yearly_protocol_metadata.json"', text)
+        self.assertIn("PROTOCOL_DATA_DIR", text)
+        self.assertIn("PROTOCOL_METADATA_PATH", text)
+        self.assertIn("protocol_data", text)
+        self.assertIn("2h_6p", text)
         self.assertIn("2223jilin_058_processed_4classes.xlsx", text)
         self.assertIn("2223jilin_059_processed_4classes.xlsx", text)
         self.assertIn("2223jilin_060_processed_4classes.xlsx", text)

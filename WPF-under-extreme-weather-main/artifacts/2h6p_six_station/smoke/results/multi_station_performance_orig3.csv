@@ -1,0 +1,13 @@
+﻿Protocol,Sample_Interval_Hours,Window_Points,Window_Span_Hours,Station,Model,HighWind_nMAE_%,HighWind_nRMSE_%,HighWind_WD_%,HighTemperature_nMAE_%,HighTemperature_nRMSE_%,HighTemperature_WD_%,ColdWave_nMAE_%,ColdWave_nRMSE_%,ColdWave_WD_%,Frost_nMAE_%,Frost_nRMSE_%,Frost_WD_%,Training_duration_s,R_p<0.05_%
+six_station_2h_6point_phase_augmented_protocol,2,6,12,58,LMT,79.2588,82.3,79.2588,17.9092,19.4211,17.6502,53.9397,59.5151,53.4901,24.948,29.7698,24.4794,,54.8387
+six_station_2h_6point_phase_augmented_protocol,2,6,12,58,Extreme-FedAvg,79.1731,82.2229,79.1731,17.902,19.4163,17.6349,53.8669,59.448,53.412,24.885,29.7113,24.3871,,54.8387
+six_station_2h_6point_phase_augmented_protocol,2,6,12,58,Proposed-A,79.1757,82.2286,79.1757,17.8897,19.4022,17.619,53.8731,59.45,53.4118,24.8807,29.7021,24.3856,,54.8387
+six_station_2h_6point_phase_augmented_protocol,2,6,12,59,LMT,80.9151,82.6539,80.9151,27.8357,31.5773,27.4494,85.8893,87.5597,85.8893,36.2382,41.7026,35.7866,,81.25
+six_station_2h_6point_phase_augmented_protocol,2,6,12,59,Extreme-FedAvg,80.8241,82.5672,80.8241,27.7714,31.5278,27.371,85.801,87.4677,85.801,36.1792,41.6399,35.7081,,81.25
+six_station_2h_6point_phase_augmented_protocol,2,6,12,59,Proposed-A,80.8343,82.5756,80.8343,27.7664,31.5206,27.3649,85.7885,87.4537,85.7885,36.1846,41.6478,35.7081,,81.25
+six_station_2h_6point_phase_augmented_protocol,2,6,12,60,LMT,75.501,79.5568,75.3805,39.854,43.6593,39.854,65.5824,73.3882,65.4837,36.1107,43.073,35.6185,,83.3333
+six_station_2h_6point_phase_augmented_protocol,2,6,12,60,Extreme-FedAvg,75.4154,79.4821,75.2915,39.7737,43.5777,39.7737,65.5317,73.3206,65.4239,36.0682,43.0185,35.5388,,83.3333
+six_station_2h_6point_phase_augmented_protocol,2,6,12,60,Proposed-A,75.4226,79.4766,75.2904,39.765,43.5799,39.765,65.538,73.3266,65.4339,36.0452,42.9884,35.5386,,83.3333
+six_station_2h_6point_phase_augmented_protocol,2,6,12,Overall_Average,LMT,78.5583,81.5036,78.5181,28.533,31.5526,28.3179,68.4705,73.4877,68.2877,32.4323,38.1818,31.9615,,72.5227
+six_station_2h_6point_phase_augmented_protocol,2,6,12,Overall_Average,Extreme-FedAvg,78.4709,81.4241,78.4296,28.4824,31.5073,28.2599,68.3999,73.4121,68.2123,32.3775,38.1232,31.878,,72.5227
+six_station_2h_6point_phase_augmented_protocol,2,6,12,Overall_Average,Proposed-A,78.4775,81.4269,78.4335,28.4737,31.5009,28.2496,68.3999,73.4101,68.2114,32.3702,38.1128,31.8774,,72.5227

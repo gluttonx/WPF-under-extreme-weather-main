@@ -23,10 +23,27 @@ USE_PSEUDO_FED = False  # False=去掉 shared pretrain/shared meta，恢复 loca
 TRAIN_META_ONLY_BASELINE = os.getenv("TRAIN_META_ONLY_BASELINE", "0") != "0"
 SKIP_LOCAL_PRETRAIN = os.getenv("SKIP_LOCAL_PRETRAIN", "0") != "0"
 SKIP_LOCAL_META = os.getenv("SKIP_LOCAL_META", "0") != "0"
+ARTIFACT_DIR = os.getenv("ARTIFACT_DIR", ".")
+
+
+def resolve_artifact_path(filename):
+    if os.path.isabs(filename):
+        return filename
+    if ARTIFACT_DIR in ("", "."):
+        return filename
+    return os.path.join(ARTIFACT_DIR, filename)
+
+
+MODEL_OUTPUT_DIR = os.getenv("MODEL_OUTPUT_DIR", resolve_artifact_path("models") if ARTIFACT_DIR not in ("", ".") else ".")
+LOGS_TRAIN_DIR = os.getenv("LOGS_TRAIN_DIR", resolve_artifact_path("logs_train"))
+ALL_STATIONS_TEST_RESULTS_PATH = os.getenv(
+    "ALL_STATIONS_TEST_RESULTS_PATH",
+    resolve_artifact_path("all_stations_test_results.mat"),
+)
 FEW_SHOT_EPOCHS = int(os.getenv("FEW_SHOT_EPOCHS", "50"))             # 论文口径：每个极端天气 fine-tune 50 epochs
 FEW_SHOT_USE_CDRM = False
 FEW_SHOT_CDRM_WEIGHT = 5.0
-# 联邦场景下保持3场站，但按论文口径保持每轮总任务数 k*=5
+# 联邦场景下按论文口径保持每轮总任务数 k*=5
 META_TASKS_PER_EPOCH = 5
 PRETRAIN_EPOCHS = int(os.getenv("PRETRAIN_EPOCHS", "35000"))
 PROPOSED_META_EPOCHS = int(os.getenv("PROPOSED_META_EPOCHS", "30000"))
@@ -35,7 +52,10 @@ PRETRAIN_LOG_INTERVAL = int(os.getenv("PRETRAIN_LOG_INTERVAL", "100"))
 META_LOG_INTERVAL = int(os.getenv("META_LOG_INTERVAL", "100"))
 FEW_SHOT_LOG_INTERVAL = int(os.getenv("FEW_SHOT_LOG_INTERVAL", "1"))
 ENABLE_CONVERGENCE_MONITOR = os.getenv("ENABLE_CONVERGENCE_MONITOR", "1") != "0"
-CONVERGENCE_REPORT_PATH = os.getenv("CONVERGENCE_REPORT_PATH", "training_convergence_report.json")
+CONVERGENCE_REPORT_PATH = os.getenv(
+    "CONVERGENCE_REPORT_PATH",
+    resolve_artifact_path("training_convergence_report.json"),
+)
 CONVERGENCE_MIN_DELTA = float(os.getenv("CONVERGENCE_MIN_DELTA", "1e-4"))
 CONVERGENCE_MIN_EPOCHS = int(os.getenv("CONVERGENCE_MIN_EPOCHS", "5"))
 CONVERGENCE_PATIENCE_PRETRAIN = int(os.getenv("CONVERGENCE_PATIENCE_PRETRAIN", "200"))
@@ -60,7 +80,95 @@ EXTREME_WEIGHT_TAU_T = float(os.getenv("EXTREME_WEIGHT_TAU_T", "1.0"))
 EXTREME_TARGET_REFINEMENT_EPOCHS = int(
     os.getenv("EXTREME_TARGET_REFINEMENT_EPOCHS", str(max(1, FEW_SHOT_EPOCHS // 2)))
 )
+EXTREME_TARGET_ADAPT_MAX_WINDOWS = int(os.getenv("EXTREME_TARGET_ADAPT_MAX_WINDOWS", "0"))
+
+# ========== [数据协议] 支持 1h/12点 legacy 与 2h/6点 yearly protocol ==========
+YEARLY_PROTOCOL_ENABLED = os.getenv("YEARLY_PROTOCOL_ENABLED", "0") != "0"
+SEASONAL_PROTOCOL_ENABLED = os.getenv("SEASONAL_PROTOCOL_ENABLED", "0") != "0"
+DEFAULT_YEARLY_PROTOCOL_METADATA_PATH = "three_station_yearly_protocol_data/three_station_yearly_protocol_metadata.json"
+YEARLY_PROTOCOL_METADATA_PATH = os.getenv("YEARLY_PROTOCOL_METADATA_PATH", DEFAULT_YEARLY_PROTOCOL_METADATA_PATH)
+
+
+def load_yearly_protocol_metadata(metadata_path):
+    if not metadata_path or not os.path.exists(metadata_path):
+        return {}
+    with open(metadata_path, "r", encoding="utf-8") as metadata_file:
+        return json.load(metadata_file)
+
+
+PROTOCOL_METADATA_PATH = os.getenv(
+    "PROTOCOL_METADATA_PATH",
+    YEARLY_PROTOCOL_METADATA_PATH if YEARLY_PROTOCOL_ENABLED else "",
+)
+yearly_protocol_metadata = load_yearly_protocol_metadata(PROTOCOL_METADATA_PATH)
+PROTOCOL_NAME = os.getenv(
+    "PROTOCOL_NAME",
+    yearly_protocol_metadata.get("protocol_name", "legacy_1h_12point"),
+)
+PROTOCOL_DATA_DIR = os.getenv(
+    "PROTOCOL_DATA_DIR",
+    yearly_protocol_metadata.get("protocol_data_dir", ""),
+)
+LEN_REALP = int(os.getenv("LEN_REALP", str(yearly_protocol_metadata.get("len_realp", 12))))
+POINTS_PER_DAY = int(os.getenv("POINTS_PER_DAY", str(yearly_protocol_metadata.get("points_per_day", 24))))
+SAMPLE_INTERVAL_HOURS = int(
+    os.getenv(
+        "SAMPLE_INTERVAL_HOURS",
+        str(yearly_protocol_metadata.get("sample_interval_hours", max(1, 24 // max(1, POINTS_PER_DAY)))),
+    )
+)
+DOWNSAMPLE_OFFSET = int(os.getenv("DOWNSAMPLE_OFFSET", str(yearly_protocol_metadata.get("downsample_offset", 0))))
+WINDOW_SPAN_HOURS = int(
+    os.getenv(
+        "WINDOW_SPAN_HOURS",
+        str(yearly_protocol_metadata.get("window_span_hours", SAMPLE_INTERVAL_HOURS * LEN_REALP)),
+    )
+)
 convergence_records = []
+
+
+def resolve_station_mat_path(station_id):
+    filename = f"{station_id}wf_4_train.mat"
+    if PROTOCOL_DATA_DIR:
+        candidate = os.path.join(PROTOCOL_DATA_DIR, filename)
+        if not os.path.exists(candidate):
+            raise FileNotFoundError(f"Protocol mat missing: {candidate}")
+        return candidate
+    return filename
+
+
+def resolve_station_ids():
+    metadata_stations = yearly_protocol_metadata.get("stations", [])
+    if USE_FEDERATION and metadata_stations:
+        return [str(station["station_id"]) for station in metadata_stations]
+    if USE_FEDERATION:
+        return ['58', '59', '60']
+    return ['58']
+
+
+def resolve_model_path(filename):
+    if os.path.isabs(filename):
+        return filename
+    return os.path.join(MODEL_OUTPUT_DIR, filename)
+
+
+def print_protocol_banner():
+    progress_log("=" * 70)
+    progress_log("数据协议配置")
+    progress_log("=" * 70)
+    progress_log(f"  protocol_name: {PROTOCOL_NAME}")
+    progress_log(f"  protocol_data_dir: {PROTOCOL_DATA_DIR or '(legacy root mats)'}")
+    progress_log(f"  protocol_metadata_path: {PROTOCOL_METADATA_PATH or '(none)'}")
+    progress_log(f"  yearly_protocol_enabled: {YEARLY_PROTOCOL_ENABLED}")
+    progress_log(f"  seasonal_protocol_enabled: {SEASONAL_PROTOCOL_ENABLED}")
+    progress_log(f"  sample_interval_hours: {SAMPLE_INTERVAL_HOURS}")
+    progress_log(f"  downsample_offset: {DOWNSAMPLE_OFFSET}")
+    progress_log(f"  len_realp: {LEN_REALP}")
+    progress_log(f"  points_per_day: {POINTS_PER_DAY}")
+    progress_log(f"  window_span_hours: {WINDOW_SPAN_HOURS}")
+    progress_log(f"  artifact_dir: {ARTIFACT_DIR}")
+    progress_log(f"  model_output_dir: {MODEL_OUTPUT_DIR}")
+    progress_log(f"  logs_train_dir: {LOGS_TRAIN_DIR}")
 
 
 def progress_log(message=""):
@@ -167,6 +275,9 @@ def register_convergence_record(record):
 def export_convergence_report(report_path, records, run_config):
     if not ENABLE_CONVERGENCE_MONITOR:
         return
+    report_dir = os.path.dirname(report_path)
+    if report_dir:
+        os.makedirs(report_dir, exist_ok=True)
     report_payload = {
         "generated_at_unix": float(time.time()),
         "run_config": run_config,
@@ -202,25 +313,27 @@ def seed_torch(seed=1029):
 
 ## data processing
 seed_torch(seed=1029)
+os.makedirs(ARTIFACT_DIR, exist_ok=True) if ARTIFACT_DIR not in ("", ".") else None
+os.makedirs(MODEL_OUTPUT_DIR, exist_ok=True)
+os.makedirs(LOGS_TRAIN_DIR, exist_ok=True)
+print_protocol_banner()
 
 # ========== [联邦修改] 多场站数据加载 ==========
+station_ids = resolve_station_ids()
 if USE_FEDERATION:
     print("="*70)
-    print("联邦模式：加载3个场站数据（58/59/60）")
+    print(f"联邦模式：加载{len(station_ids)}个场站数据（{', '.join(station_ids)}）")
     print("="*70)
-    station_ids = ['58', '59', '60']  # [联邦新增] 3个场站作为客户端
 else:
     print("="*70)
-    print("单场站模式：加载场站58数据（原方法）")
+    print(f"单场站模式：加载场站{station_ids[0]}数据（原方法）")
     print("="*70)
-    station_ids = ['58']  # [原代码] 单场站
 
 # [联邦修改] 循环加载所有场站数据
 station_data = {}
 for station_id in station_ids:
-    dataFile = f'{station_id}wf_4_train'
-    print(f"  加载 {dataFile}.mat...")
-    wf_1 = scio.loadmat(dataFile)
+    print(f"  加载 {resolve_station_mat_path(station_id)}...")
+    wf_1 = scio.loadmat(resolve_station_mat_path(station_id))
     
     # [原代码保留] 数据提取逻辑完全不变
     station_data[station_id] = {
@@ -231,16 +344,26 @@ for station_id in station_ids:
         'p_extre_class2_00': wf_1['p_extre_class2'],
         'p_extre_class3_00': wf_1['p_extre_class3'],
         'p_extre_class4_00': wf_1['p_extre_class4'],
+        'p_test_00': wf_1.get('p_test'),
         'nwp': wf_1['nwp_1h'],
+        'nwp_test_00': wf_1.get('nwp_test'),
         'nwp_conven_00': wf_1['nwp_conven_'],
         'nwp_conven_class_00': wf_1['nwp_conven_class_'],
         'nwp_extre_class1_00': wf_1['nwp_extre_class1_'],
         'nwp_extre_class2_00': wf_1['nwp_extre_class2_'],
         'nwp_extre_class3_00': wf_1['nwp_extre_class3_'],
-        'nwp_extre_class4_00': wf_1['nwp_extre_class4_']
+        'nwp_extre_class4_00': wf_1['nwp_extre_class4_'],
+        'p_test_extre_class1_00': wf_1.get('p_test_extre_class1', wf_1['p_extre_class1']),
+        'p_test_extre_class2_00': wf_1.get('p_test_extre_class2', wf_1['p_extre_class2']),
+        'p_test_extre_class3_00': wf_1.get('p_test_extre_class3', wf_1['p_extre_class3']),
+        'p_test_extre_class4_00': wf_1.get('p_test_extre_class4', wf_1['p_extre_class4']),
+        'nwp_test_extre_class1_00': wf_1.get('nwp_test_extre_class1_', wf_1['nwp_extre_class1_']),
+        'nwp_test_extre_class2_00': wf_1.get('nwp_test_extre_class2_', wf_1['nwp_extre_class2_']),
+        'nwp_test_extre_class3_00': wf_1.get('nwp_test_extre_class3_', wf_1['nwp_extre_class3_']),
+        'nwp_test_extre_class4_00': wf_1.get('nwp_test_extre_class4_', wf_1['nwp_extre_class4_'])
     }
 
-# ========== [联邦修改] 删除"主场站"概念，3场站一视同仁 ==========
+# ========== [联邦修改] 删除"主场站"概念，所有场站一视同仁 ==========
 # 为第一个场站准备变量（用于参数初始化，后续会处理所有场站）
 primary_station = station_ids[0]
 p = station_data[primary_station]['p']
@@ -265,47 +388,55 @@ device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device0=torch.device("cpu")
 
 # 模型文件路径（兼容保留）
-PRETRAIN_MODEL_PATH = "model_fore_pre_federated.pth" if USE_FEDERATION else "model_fore_pre.pth"
-PROPOSED_SUPPORT_MODEL_PATH = "model_fore_train_task_support_proposed.pth"
-PROPOSED_META_MODEL_PATH = "model_fore_train_task_query_proposed.pth"
-META_ONLY_SUPPORT_MODEL_PATH = "model_fore_train_task_support_meta_only.pth"
-META_ONLY_MODEL_PATH = "model_fore_train_task_query_meta_only.pth"
+PRETRAIN_MODEL_PATH = resolve_model_path("model_fore_pre_federated.pth" if USE_FEDERATION else "model_fore_pre.pth")
+PROPOSED_SUPPORT_MODEL_PATH = resolve_model_path("model_fore_train_task_support_proposed.pth")
+PROPOSED_META_MODEL_PATH = resolve_model_path("model_fore_train_task_query_proposed.pth")
+META_ONLY_SUPPORT_MODEL_PATH = resolve_model_path("model_fore_train_task_support_meta_only.pth")
+META_ONLY_MODEL_PATH = resolve_model_path("model_fore_train_task_query_meta_only.pth")
 
 
 def get_local_pretrain_model_path(station_id):
-    return f"model_fore_pre_station{station_id}_local.pth"
+    return resolve_model_path(f"model_fore_pre_station{station_id}_local.pth")
 
 
 def get_local_meta_support_model_path(station_id):
-    return f"model_fore_train_task_support_local_meta_station{station_id}.pth"
+    return resolve_model_path(f"model_fore_train_task_support_local_meta_station{station_id}.pth")
 
 
 def get_local_meta_model_path(station_id):
-    return f"model_fore_train_task_query_local_meta_station{station_id}.pth"
+    return resolve_model_path(f"model_fore_train_task_query_local_meta_station{station_id}.pth")
 
 
 def get_local_meta_only_support_model_path(station_id):
-    return f"model_fore_train_task_support_meta_only_station{station_id}.pth"
+    return resolve_model_path(f"model_fore_train_task_support_meta_only_station{station_id}.pth")
 
 
 def get_local_meta_only_model_path(station_id):
-    return f"model_fore_train_task_query_meta_only_station{station_id}.pth"
+    return resolve_model_path(f"model_fore_train_task_query_meta_only_station{station_id}.pth")
+
+
+def get_lmt_model_path(station_id, class_idx):
+    return resolve_model_path(f"model_fore_station{station_id}_extreme{class_idx}.pth")
+
+
+def get_meta_only_extreme_model_path(station_id, class_idx):
+    return resolve_model_path(f"model_fore_station{station_id}_extreme{class_idx}_meta_only.pth")
 
 
 def get_extreme_fedavg_model_path(station_id, class_idx):
-    return f"model_fore_station{station_id}_extreme{class_idx}_extreme_fedavg.pth"
+    return resolve_model_path(f"model_fore_station{station_id}_extreme{class_idx}_extreme_fedavg.pth")
 
 
 def get_proposed_a_model_path(station_id, class_idx):
-    return f"model_fore_station{station_id}_extreme{class_idx}_proposed_a.pth"
+    return resolve_model_path(f"model_fore_station{station_id}_extreme{class_idx}_proposed_a.pth")
 
 
 # Define Parameters
 dem_realp=1
-len_realp=12
+len_realp = LEN_REALP
 Cap=50  # 总装机容量 (MW)
 m=365
-d=24
+d = POINTS_PER_DAY
 ooo=365
 # 数据已经是标幺值，不需要再归一化
 Series_day = P_load.reshape(-1,dem_realp)
@@ -383,7 +514,7 @@ if USE_FEDERATION:
 # ========== [联邦新增] 结束 ==========
 
 # ========== [联邦修改] 准备所有场站的元训练、极端天气和测试数据 ==========
-print("\n准备所有场站的元训练和测试数据（3场站一视同仁）...")
+print(f"\n准备所有场站的元训练和测试数据（{len(station_ids)}场站一视同仁）...")
 all_stations_full_data = {}
 
 for station_id in station_ids:
@@ -406,11 +537,21 @@ for station_id in station_ids:
     Series_day_st = P_load_st.reshape(-1,dem_realp)
     nwp_day_st = (P_nwp_st/np.max(abs(P_nwp_st),axis=0)).reshape(-1,dem_realp*np.size(P_nwp_st,axis=1))
     
-    # 测试集（2023年）
-    test_target_p_st = Series_day_st[m*d//dem_realp:(m*d+ooo*d)//dem_realp,:]
-    test_target_p_st = test_target_p_st.reshape(-1,len_realp,dem_realp)
-    test_input_c_st = nwp_day_st[m*d//dem_realp:(m*d+ooo*d)//dem_realp,:]
-    test_input_c_st = test_input_c_st.reshape(-1,len_realp,dem_realc)
+    # 测试集（2023年）：yearly protocol 直接使用 builder 输出的 p_test/nwp_test。
+    if (
+        (SEASONAL_PROTOCOL_ENABLED or YEARLY_PROTOCOL_ENABLED)
+        and station_data[station_id]['p_test_00'] is not None
+        and station_data[station_id]['nwp_test_00'] is not None
+    ):
+        test_target_p_st = station_data[station_id]['p_test_00']
+        test_target_p_st = test_target_p_st.reshape(-1,len_realp,dem_realp)
+        test_nwp_st = station_data[station_id]['nwp_test_00']
+        test_input_c_st = (test_nwp_st/np.max(abs(P_nwp_st),axis=0)).reshape(-1,len_realp,dem_realc)
+    else:
+        test_target_p_st = Series_day_st[m*d//dem_realp:(m*d+ooo*d)//dem_realp,:]
+        test_target_p_st = test_target_p_st.reshape(-1,len_realp,dem_realp)
+        test_input_c_st = nwp_day_st[m*d//dem_realp:(m*d+ooo*d)//dem_realp,:]
+        test_input_c_st = test_input_c_st.reshape(-1,len_realp,dem_realc)
     
     # 聚类类别（用于元训练）
     p_conven_class_st = station_data[station_id]['p_conven_class_00']
@@ -421,17 +562,30 @@ for station_id in station_ids:
     # 极端天气类别（用于Few-shot）
     p_extre_st = np.empty([1,4],dtype=object)
     nwp_extre_st = np.empty([1,5],dtype=object)
+    p_test_extre_st = np.empty([1,4],dtype=object)
+    nwp_test_extre_st = np.empty([1,5],dtype=object)
     
     for i_class in range(4):
         p_extre_st[0,i_class] = station_data[station_id][f'p_extre_class{i_class+1}_00']
+        p_test_extre_st[0,i_class] = station_data[station_id][f'p_test_extre_class{i_class+1}_00']
     
     for i_nwp in range(5):
         nwp_extre_st[0,i_nwp] = np.empty([1,4],dtype=object)
+        nwp_test_extre_st[0,i_nwp] = np.empty([1,4],dtype=object)
         for i_class in range(4):
             nwp_extre_st[0, i_nwp][0, i_class] = station_data[station_id][f'nwp_extre_class{i_class+1}_00'][0, i_nwp]
+            nwp_test_extre_st[0, i_nwp][0, i_class] = station_data[station_id][f'nwp_test_extre_class{i_class+1}_00'][0, i_nwp]
     
     for i in range(np.size(nwp_extre_st,axis=1)):
         nwp_extre_st[0,i] = nwp_extre_st[0,i]/np.max(abs(P_nwp_st[:,i]),axis=0)
+        nwp_test_extre_st[0,i] = nwp_test_extre_st[0,i]/np.max(abs(P_nwp_st[:,i]),axis=0)
+
+    if (SEASONAL_PROTOCOL_ENABLED or YEARLY_PROTOCOL_ENABLED):
+        p_test_extre_source = p_test_extre_st
+        nwp_test_extre_source = nwp_test_extre_st
+    else:
+        p_test_extre_source = p_extre_st
+        nwp_test_extre_source = nwp_extre_st
     
     # 存储该场站的完整数据
     all_stations_full_data[station_id] = {
@@ -441,7 +595,9 @@ for station_id in station_ids:
         'p_conven_class': p_conven_class_st,
         'nwp_conven_class': nwp_conven_class_st,
         'p_extre': p_extre_st,
-        'nwp_extre': nwp_extre_st
+        'nwp_extre': nwp_extre_st,
+        'p_test_extre': p_test_extre_st,
+        'nwp_test_extre': nwp_test_extre_st
     }
     print(f"    测试集2023: {test_target_p_st.shape}")
     print(f"    聚类类别: 10类")
@@ -559,8 +715,8 @@ else:
 total_train_step = 0
 total_test_step = 0
 epoch1_pre = PRETRAIN_EPOCHS
-writer1 = SummaryWriter("./logs_train/loss1")
-writer2 = SummaryWriter("./logs_train/loss2")
+writer1 = SummaryWriter(os.path.join(LOGS_TRAIN_DIR, "loss1"))
+writer2 = SummaryWriter(os.path.join(LOGS_TRAIN_DIR, "loss2"))
 
 
 def get_pretrain_penalty_weight(epoch_idx):
@@ -1101,6 +1257,28 @@ def split_extreme_adapt_val(nwp_windows, power_windows, adapt_ratio=EXTREME_ADAP
     }
 
 
+def apply_target_adapt_kshot_limit(split_payload):
+    """Limit only target-station adapt windows; source windows keep the normal split."""
+    max_windows = int(EXTREME_TARGET_ADAPT_MAX_WINDOWS)
+    if max_windows <= 0:
+        return split_payload
+
+    adapt_nwp = split_payload["adapt_nwp"]
+    adapt_power = split_payload["adapt_power"]
+    if adapt_nwp.shape[0] <= max_windows:
+        return split_payload
+
+    limited_payload = copy.deepcopy(split_payload)
+    heldout_nwp = adapt_nwp[max_windows:]
+    heldout_power = adapt_power[max_windows:]
+    limited_payload["adapt_nwp"] = adapt_nwp[:max_windows]
+    limited_payload["adapt_power"] = adapt_power[:max_windows]
+    limited_payload["val_nwp"] = np.concatenate((heldout_nwp, split_payload["val_nwp"]), axis=0)
+    limited_payload["val_power"] = np.concatenate((heldout_power, split_payload["val_power"]), axis=0)
+    limited_payload["target_adapt_max_windows"] = max_windows
+    return limited_payload
+
+
 def to_tensor_payload(split_payload):
     return {
         "adapt_input": torch.tensor(split_payload["adapt_nwp"], dtype=torch.float32),
@@ -1371,6 +1549,9 @@ def aggregate_extreme_updates_weighted(target_station_id, self_update_payload, s
 
 
 def save_state_dict(state_dict, save_path):
+    save_dir = os.path.dirname(save_path)
+    if save_dir:
+        os.makedirs(save_dir, exist_ok=True)
     torch.save(state_dict, save_path)
     return save_path
 
@@ -1396,9 +1577,12 @@ for station_id in station_ids:
         nwp_extre_class, p_extre_class = extract_extreme_windows_for_station_class(station_id, i_class)
         num_samples = nwp_extre_class.shape[0]
         target_split_payload = split_extreme_adapt_val(nwp_extre_class, p_extre_class)
+        target_split_payload = apply_target_adapt_kshot_limit(target_split_payload)
         target_payload = to_tensor_payload(target_split_payload)
 
         print(f"    样本数: {num_samples}")
+        if EXTREME_TARGET_ADAPT_MAX_WINDOWS > 0:
+            print(f"    target K-shot adapt窗口上限: {EXTREME_TARGET_ADAPT_MAX_WINDOWS}")
         print(
             f"    训练轮数: {FEW_SHOT_EPOCHS}, "
             f"few-shot loss={'CDRM+MSE' if FEW_SHOT_USE_CDRM else 'MSE'}"
@@ -1421,7 +1605,7 @@ for station_id in station_ids:
             log_tag=f"lmt_station{station_id}_class{i_class}",
             model_label="LMT",
         )
-        lmt_model_name = f"./model_fore_station{station_id}_extreme{i_class}.pth"
+        lmt_model_name = get_lmt_model_path(station_id, i_class)
         save_state_dict(lmt_state_dict, lmt_model_name)
         print(f"    ✓ 保存(LMT): {lmt_model_name}")
         all_personalized_models[f'lmt_{station_id}_class{i_class}'] = lmt_model_name
@@ -1520,7 +1704,7 @@ for station_id in station_ids:
 
         # Meta-only：同口径执行 step-11 few-shot，确保与论文消融对齐
         if TRAIN_META_ONLY_BASELINE:
-            meta_only_model_name = f"./model_fore_station{station_id}_extreme{i_class}_meta_only.pth"
+            meta_only_model_name = get_meta_only_extreme_model_path(station_id, i_class)
             run_few_shot_adaptation(
                 base_model_path=get_local_meta_only_model_path(station_id) if USE_FEDERATION and not USE_PSEUDO_FED else META_ONLY_MODEL_PATH,
                 save_path=meta_only_model_name,
@@ -1557,7 +1741,7 @@ for station_id in station_ids:
     # 预测：该场站的4个极端天气模型
     for i_class in range(4):
         model_paths = {
-            "lmt": f"model_fore_station{station_id}_extreme{i_class}.pth",
+            "lmt": get_lmt_model_path(station_id, i_class),
             "extreme_fedavg": get_extreme_fedavg_model_path(station_id, i_class),
             "proposed_a": get_proposed_a_model_path(station_id, i_class),
         }
@@ -1575,12 +1759,29 @@ for station_id in station_ids:
 
 # 保存所有结果
 print("\n保存所有场站测试结果...")
-scio.savemat('all_stations_test_results.mat', {'all_test_results': all_test_results, 'Cap': Cap})
-print("✓ 已保存: all_stations_test_results.mat")
+all_results_dir = os.path.dirname(ALL_STATIONS_TEST_RESULTS_PATH)
+if all_results_dir:
+    os.makedirs(all_results_dir, exist_ok=True)
+scio.savemat(ALL_STATIONS_TEST_RESULTS_PATH, {'all_test_results': all_test_results, 'Cap': Cap})
+print(f"✓ 已保存: {ALL_STATIONS_TEST_RESULTS_PATH}")
 export_convergence_report(
     CONVERGENCE_REPORT_PATH,
     convergence_records,
     {
+        "protocol_name": PROTOCOL_NAME,
+        "protocol_data_dir": PROTOCOL_DATA_DIR,
+        "protocol_metadata_path": PROTOCOL_METADATA_PATH,
+        "artifact_dir": ARTIFACT_DIR,
+        "model_output_dir": MODEL_OUTPUT_DIR,
+        "logs_train_dir": LOGS_TRAIN_DIR,
+        "all_stations_test_results_path": ALL_STATIONS_TEST_RESULTS_PATH,
+        "sample_interval_hours": SAMPLE_INTERVAL_HOURS,
+        "downsample_offset": DOWNSAMPLE_OFFSET,
+        "len_realp": LEN_REALP,
+        "points_per_day": POINTS_PER_DAY,
+        "window_span_hours": WINDOW_SPAN_HOURS,
+        "yearly_protocol_enabled": YEARLY_PROTOCOL_ENABLED,
+        "seasonal_protocol_enabled": SEASONAL_PROTOCOL_ENABLED,
         "use_federation": USE_FEDERATION,
         "use_pseudo_fed": USE_PSEUDO_FED,
         "train_meta_only_baseline": TRAIN_META_ONLY_BASELINE,
@@ -1596,6 +1797,7 @@ export_convergence_report(
         "extreme_weight_beta_self": EXTREME_WEIGHT_BETA_SELF,
         "extreme_source_borrow_budget_gamma": EXTREME_SOURCE_BORROW_BUDGET_GAMMA,
         "extreme_target_refinement_epochs": EXTREME_TARGET_REFINEMENT_EPOCHS,
+        "extreme_target_adapt_max_windows": EXTREME_TARGET_ADAPT_MAX_WINDOWS,
         "enable_convergence_monitor": ENABLE_CONVERGENCE_MONITOR,
     },
 )

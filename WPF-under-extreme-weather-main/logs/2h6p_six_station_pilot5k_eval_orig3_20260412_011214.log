@@ -1,0 +1,24 @@
+
+======================================================================
+stage=eval
+env  PROTOCOL_NAME=six_station_2h_6point_phase_augmented_protocol PROTOCOL_DATA_DIR=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/2h_6p_six_station PROTOCOL_METADATA_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/2h_6p_six_station/protocol_metadata.json SAMPLE_INTERVAL_HOURS=2 DOWNSAMPLE_OFFSET=1 LEN_REALP=6 POINTS_PER_DAY=12 PHASE_AUGMENT_STATIONS=1 ARTIFACT_DIR=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k MODEL_OUTPUT_DIR=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/models LOGS_TRAIN_DIR=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/logs_train CONVERGENCE_REPORT_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/training_convergence_report.json ALL_STATIONS_TEST_RESULTS_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/artifacts/2h6p_six_station/pilot-5k/all_stations_test_results.mat RESULTS_OUTPUT_PATH=artifacts/2h6p_six_station/pilot-5k/results/multi_station_performance_orig3.csv TASK_RESULTS_OUTPUT_PATH=artifacts/2h6p_six_station/pilot-5k/results/multi_station_performance_task_level_orig3.csv YEARLY_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_ENABLED=0 YEARLY_PROTOCOL_METADATA_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/2h_6p_six_station/protocol_metadata.json USE_FEDERATION=1 RUN_FEDERATED_PRETRAIN=0 TRAIN_META_ONLY_BASELINE=0 META_SUPPORT_SHOTS=10 META_QUERY_SHOTS=10 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=5000 PROPOSED_META_EPOCHS=5000 META_ONLY_META_EPOCHS=5000 FEW_SHOT_EPOCHS=200 EXTREME_TARGET_REFINEMENT_EPOCHS=200 PRETRAIN_LOG_INTERVAL=100 META_LOG_INTERVAL=100 FEW_SHOT_LOG_INTERVAL=20
+exec /root/miniconda3/bin/python -u generate_multi_station_results.py
+======================================================================
+
+libgomp: Invalid value for environment variable OMP_NUM_THREADS
+======================================================================
+生成多场站测试结果CSV
+======================================================================
+
+数据协议:
+  Protocol=six_station_2h_6point_phase_augmented_protocol
+  PROTOCOL_DATA_DIR=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/2h_6p_six_station
+  PROTOCOL_METADATA_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/2h_6p_six_station/protocol_metadata.json
+  SAMPLE_INTERVAL_HOURS=2
+  DOWNSAMPLE_OFFSET=1
+  LEN_REALP=6
+  POINTS_PER_DAY=12
+  WINDOW_SPAN_HOURS=12
+
+从已保存的结果加载...
+（跳过，直接重新生成）

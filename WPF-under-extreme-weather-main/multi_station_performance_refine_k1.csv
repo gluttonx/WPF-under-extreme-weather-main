@@ -1,0 +1,13 @@
+﻿Protocol,Sample_Interval_Hours,Window_Points,Window_Span_Hours,Station,Model,HighWind_nMAE_%,HighWind_nRMSE_%,HighWind_WD_%,HighTemperature_nMAE_%,HighTemperature_nRMSE_%,HighTemperature_WD_%,ColdWave_nMAE_%,ColdWave_nRMSE_%,ColdWave_WD_%,Frost_nMAE_%,Frost_nRMSE_%,Frost_WD_%,Training_duration_s,R_p<0.05_%
+three_station_2h_6point_protocol,2,6,12,58,LMT,27.6759,31.3414,24.2186,31.9879,33.9158,31.7409,42.9692,45.1641,36.1077,40.0196,44.0408,37.201,,54.8387
+three_station_2h_6point_protocol,2,6,12,58,Extreme-FedAvg,26.4904,29.5298,23.8911,31.3361,33.2996,31.1366,42.8525,45.0517,36.2371,39.6367,44.1066,36.4655,,58.0645
+three_station_2h_6point_protocol,2,6,12,58,Proposed-A,27.2046,30.147,24.6794,32.0153,33.875,31.7772,43.2705,45.4623,36.3656,40.0736,44.7168,36.7847,,51.6129
+three_station_2h_6point_protocol,2,6,12,59,LMT,20.7112,23.7848,16.0714,22.0237,25.4153,21.8898,20.5246,24.1348,20.3966,30.1438,34.1183,27.393,,31.25
+three_station_2h_6point_protocol,2,6,12,59,Extreme-FedAvg,18.0569,20.9062,14.5465,22.2211,25.6021,22.0679,19.5674,23.0414,19.4765,28.8374,32.9346,25.9108,,31.25
+three_station_2h_6point_protocol,2,6,12,59,Proposed-A,18.5329,21.5903,15.1668,21.9488,25.3372,21.8436,20.8347,23.9096,20.8325,29.8124,34.1377,26.9488,,31.25
+three_station_2h_6point_protocol,2,6,12,60,LMT,26.4305,32.0717,17.4588,23.3761,25.5959,23.1143,40.4976,44.834,28.2536,33.6477,38.8294,32.8787,,36.6667
+three_station_2h_6point_protocol,2,6,12,60,Extreme-FedAvg,23.709,29.7947,17.223,23.6621,25.8308,23.4248,40.1231,44.3937,27.9162,32.9938,38.1187,32.0412,,36.6667
+three_station_2h_6point_protocol,2,6,12,60,Proposed-A,23.838,29.8902,17.3142,23.5621,25.7338,23.31,39.9345,44.1959,27.9818,32.6058,37.6632,31.6476,,33.3333
+three_station_2h_6point_protocol,2,6,12,Overall_Average,LMT,24.9392,29.066,19.2496,25.7959,28.309,25.5817,34.6638,38.0443,28.2526,34.6037,38.9962,32.4909,,41.264
+three_station_2h_6point_protocol,2,6,12,Overall_Average,Extreme-FedAvg,22.7521,26.7436,18.5535,25.7398,28.2442,25.5431,34.181,37.4956,27.8766,33.8226,38.3866,31.4725,,42.6609
+three_station_2h_6point_protocol,2,6,12,Overall_Average,Proposed-A,23.1918,27.2092,19.0535,25.8421,28.3153,25.6436,34.6799,37.8559,28.3933,34.1639,38.8392,31.7937,,38.766

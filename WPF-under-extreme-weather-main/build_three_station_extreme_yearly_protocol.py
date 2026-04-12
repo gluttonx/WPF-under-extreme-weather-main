@@ -11,6 +11,7 @@ extreme few-shot path explicit:
 It does not reuse old mixed-year p_extre_class* mats as source-of-truth.
 """
 import json
+import os
 from collections import OrderedDict
 from dataclasses import dataclass
 from datetime import datetime
@@ -29,12 +30,23 @@ except Exception:
 
 
 ROOT = Path(__file__).resolve().parent
-OUTPUT_DIR = ROOT / "three_station_yearly_protocol_data"
-METADATA_PATH = OUTPUT_DIR / "three_station_yearly_protocol_metadata.json"
+PROTOCOL_NAME = os.getenv("PROTOCOL_NAME", "three_station_2h_6point_protocol")
+SAMPLE_INTERVAL_HOURS = int(os.getenv("SAMPLE_INTERVAL_HOURS", "2"))
+DOWNSAMPLE_OFFSET = int(os.getenv("DOWNSAMPLE_OFFSET", "1"))
+LEN_REALP = int(os.getenv("LEN_REALP", "6"))
+POINTS_PER_DAY = int(os.getenv("POINTS_PER_DAY", str(24 // SAMPLE_INTERVAL_HOURS)))
+WINDOW_SPAN_HOURS = SAMPLE_INTERVAL_HOURS * LEN_REALP
+OUTPUT_DIR = Path(os.getenv("PROTOCOL_DATA_DIR", str(ROOT / "protocol_data" / "2h_6p")))
+METADATA_PATH = Path(os.getenv("PROTOCOL_METADATA_PATH", str(OUTPUT_DIR / "protocol_metadata.json")))
+PHASE_AUGMENT_STATIONS = os.getenv("PHASE_AUGMENT_STATIONS", "0") != "0"
+PHASE_AUGMENT_STATION_MAP = {
+    "58": "61",
+    "59": "62",
+    "60": "63",
+}
 
 SUPPORT_YEAR = 2022
 TEST_YEAR = 2023
-LEN_REALP = 12
 NUM_CONVENTIONAL_CLASSES = 10
 
 SELECTED_FEATURES = [
@@ -78,7 +90,7 @@ EXTREME_TEST_NWP_KEYS = [
     "nwp_test_extre_class3_",
     "nwp_test_extre_class4_",
 ]
-YEARLY_PROTOCOL_STATIONS = [
+BASE_YEARLY_PROTOCOL_STATIONS = [
     {
         "station_id": "58",
         "source_station_id": "058",
@@ -101,6 +113,44 @@ YEARLY_PROTOCOL_STATIONS = [
         "capacity": 100.0,
     },
 ]
+
+
+def build_protocol_station_configs():
+    station_configs = []
+    for station_config in BASE_YEARLY_PROTOCOL_STATIONS:
+        base_config = dict(station_config)
+        base_config["downsample_offset"] = DOWNSAMPLE_OFFSET
+        base_config["phase_role"] = "base"
+        base_config["phase_source_station_id"] = station_config["station_id"]
+        station_configs.append(base_config)
+
+    if not PHASE_AUGMENT_STATIONS:
+        return station_configs
+
+    if SAMPLE_INTERVAL_HOURS != 2:
+        raise ValueError("PHASE_AUGMENT_STATIONS currently supports SAMPLE_INTERVAL_HOURS=2 only")
+
+    complementary_offset = int(
+        os.getenv(
+            "PHASE_AUGMENT_COMPLEMENTARY_OFFSET",
+            str((DOWNSAMPLE_OFFSET + 1) % SAMPLE_INTERVAL_HOURS),
+        )
+    )
+    if complementary_offset == DOWNSAMPLE_OFFSET:
+        raise ValueError("phase augmentation requires a complementary offset different from DOWNSAMPLE_OFFSET")
+
+    for station_config in BASE_YEARLY_PROTOCOL_STATIONS:
+        augmented_config = dict(station_config)
+        augmented_config["station_id"] = PHASE_AUGMENT_STATION_MAP[station_config["station_id"]]
+        augmented_config["downsample_offset"] = complementary_offset
+        augmented_config["phase_role"] = "complementary"
+        augmented_config["phase_source_station_id"] = station_config["station_id"]
+        station_configs.append(augmented_config)
+
+    return station_configs
+
+
+YEARLY_PROTOCOL_STATIONS = build_protocol_station_configs()
 
 
 @dataclass
@@ -219,6 +269,23 @@ def split_records_by_year(records: List[SheetRecord], year: int) -> List[SheetRe
     return [clone_sheet_record(record) for record in records if record.date.year == year]
 
 
+def validate_protocol_config():
+    if SAMPLE_INTERVAL_HOURS < 1:
+        raise ValueError("SAMPLE_INTERVAL_HOURS must be >= 1")
+    if DOWNSAMPLE_OFFSET < 0 or DOWNSAMPLE_OFFSET >= SAMPLE_INTERVAL_HOURS:
+        raise ValueError("DOWNSAMPLE_OFFSET must be in [0, SAMPLE_INTERVAL_HOURS)")
+    if WINDOW_SPAN_HOURS != 12:
+        raise ValueError("2h/6 protocol must preserve 12h windows")
+    if POINTS_PER_DAY * SAMPLE_INTERVAL_HOURS != 24:
+        raise ValueError("POINTS_PER_DAY must match SAMPLE_INTERVAL_HOURS")
+
+
+def downsample_records(records, interval_hours=SAMPLE_INTERVAL_HOURS, offset=DOWNSAMPLE_OFFSET):
+    if interval_hours == 1:
+        return list(records)
+    return [record for index, record in enumerate(records) if index % interval_hours == offset]
+
+
 def records_to_arrays(records: List[SheetRecord]) -> Tuple[np.ndarray, np.ndarray]:
     if not records:
         return (
@@ -296,6 +363,7 @@ def build_cluster_objects(records: List[SheetRecord], labels: np.ndarray, k: int
 def build_yearly_station_asset(station_config: Dict[str, object], workbook_cache: Dict[str, Dict[str, List[SheetRecord]]]) -> Dict[str, object]:
     workbook_name = station_config["workbook"]
     capacity = station_config["capacity"]
+    station_downsample_offset = int(station_config.get("downsample_offset", DOWNSAMPLE_OFFSET))
     workbook = workbook_cache[workbook_name]
 
     workbook_copy = {
@@ -308,9 +376,18 @@ def build_yearly_station_asset(station_config: Dict[str, object], workbook_cache
     main_sheet_records = workbook_copy[station_config["main_sheet"]]
     normal_records = workbook_copy["normal_weather"]
 
-    yearly_main_support = split_records_by_year(main_sheet_records, SUPPORT_YEAR)
-    yearly_main_test = split_records_by_year(main_sheet_records, TEST_YEAR)
-    yearly_normal_support = split_records_by_year(normal_records, SUPPORT_YEAR)
+    yearly_main_support = downsample_records(
+        split_records_by_year(main_sheet_records, SUPPORT_YEAR),
+        offset=station_downsample_offset,
+    )
+    yearly_main_test = downsample_records(
+        split_records_by_year(main_sheet_records, TEST_YEAR),
+        offset=station_downsample_offset,
+    )
+    yearly_normal_support = downsample_records(
+        split_records_by_year(normal_records, SUPPORT_YEAR),
+        offset=station_downsample_offset,
+    )
 
     normal_power, normal_nwp = records_to_arrays(yearly_normal_support)
     standardized_normal = standardize_features(normal_nwp)
@@ -327,6 +404,8 @@ def build_yearly_station_asset(station_config: Dict[str, object], workbook_cache
     mat_dict = {
         "p_1h": train_power.reshape(-1, 1),
         "nwp_1h": train_nwp,
+        f"p_{SAMPLE_INTERVAL_HOURS}h": train_power.reshape(-1, 1),
+        f"nwp_{SAMPLE_INTERVAL_HOURS}h": train_nwp,
         "p_conven": normal_power.reshape(-1, 1),
         "nwp_conven_": normal_nwp,
         "p_conven_class": p_conven_class,
@@ -338,8 +417,14 @@ def build_yearly_station_asset(station_config: Dict[str, object], workbook_cache
     extreme_support_window_counts = {}
     extreme_test_window_counts = {}
     for sheet_name, class_index in EXTREME_SHEETS.items():
-        support_records = split_records_by_year(workbook_copy[sheet_name], SUPPORT_YEAR)
-        test_records = split_records_by_year(workbook_copy[sheet_name], TEST_YEAR)
+        support_records = downsample_records(
+            split_records_by_year(workbook_copy[sheet_name], SUPPORT_YEAR),
+            offset=station_downsample_offset,
+        )
+        test_records = downsample_records(
+            split_records_by_year(workbook_copy[sheet_name], TEST_YEAR),
+            offset=station_downsample_offset,
+        )
         support_power, support_nwp = build_extreme_objects(support_records)
         test_power_class, test_nwp_class = build_extreme_objects(test_records)
         mat_dict[EXTREME_SUPPORT_POWER_KEYS[class_index]] = support_power
@@ -349,7 +434,7 @@ def build_yearly_station_asset(station_config: Dict[str, object], workbook_cache
         extreme_support_window_counts[EXTREME_CLASS_NAMES[class_index]] = int(support_power.shape[0] // LEN_REALP)
         extreme_test_window_counts[EXTREME_CLASS_NAMES[class_index]] = int(test_power_class.shape[0] // LEN_REALP)
 
-    asset_path = OUTPUT_DIR / f"{station_config['station_id']}wf_yearly_protocol.mat"
+    asset_path = OUTPUT_DIR / f"{station_config['station_id']}wf_4_train.mat"
     savemat(asset_path, mat_dict)
 
     return {
@@ -366,22 +451,39 @@ def build_yearly_station_asset(station_config: Dict[str, object], workbook_cache
         "extreme_support_window_counts": extreme_support_window_counts,
         "extreme_test_window_counts": extreme_test_window_counts,
         "num_conventional_classes": NUM_CONVENTIONAL_CLASSES,
+        "protocol_name": PROTOCOL_NAME,
+        "sample_interval_hours": SAMPLE_INTERVAL_HOURS,
+        "downsample_offset": station_downsample_offset,
         "len_realp": LEN_REALP,
+        "points_per_day": POINTS_PER_DAY,
+        "window_span_hours": WINDOW_SPAN_HOURS,
+        "phase_augmentation_enabled": PHASE_AUGMENT_STATIONS,
+        "phase_role": station_config.get("phase_role", "base"),
+        "phase_source_station_id": station_config.get("phase_source_station_id", station_config["station_id"]),
     }
 
 
 def main():
-    OUTPUT_DIR.mkdir(exist_ok=True)
+    validate_protocol_config()
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     workbook_cache = {}
     for station_config in YEARLY_PROTOCOL_STATIONS:
         workbook_name = station_config["workbook"]
         workbook_cache[workbook_name] = load_xlsx_workbook(ROOT / workbook_name)
 
     metadata = {
-        "protocol_name": "three_station_yearly_extreme_protocol",
+        "protocol_name": PROTOCOL_NAME,
         "support_year": SUPPORT_YEAR,
         "test_year": TEST_YEAR,
+        "sample_interval_hours": SAMPLE_INTERVAL_HOURS,
+        "downsample_offset": DOWNSAMPLE_OFFSET,
         "len_realp": LEN_REALP,
+        "points_per_day": POINTS_PER_DAY,
+        "window_span_hours": WINDOW_SPAN_HOURS,
+        "protocol_data_dir": str(OUTPUT_DIR),
+        "protocol_metadata_path": str(METADATA_PATH),
+        "phase_augmentation_enabled": PHASE_AUGMENT_STATIONS,
+        "phase_augment_station_map": PHASE_AUGMENT_STATION_MAP if PHASE_AUGMENT_STATIONS else {},
         "num_conventional_classes": NUM_CONVENTIONAL_CLASSES,
         "extreme_class_names": EXTREME_CLASS_NAMES,
         "stations": [],
@@ -392,6 +494,7 @@ def main():
         metadata["stations"].append(station_metadata)
         print(
             f"station {station_metadata['station_id']}: "
+            f"offset={station_metadata['downsample_offset']}, "
             f"support_windows={station_metadata['extreme_support_window_counts']}, "
             f"test_windows={station_metadata['extreme_test_window_counts']}"
         )

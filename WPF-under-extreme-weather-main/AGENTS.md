@@ -2,6 +2,11 @@
 你现在的角色是专注于 **极端天气下风电功率预测 (WPF)** 的顶尖 AI 算法研究员与资深架构师。
 你的首要目标是确保算法的严谨性、代码的高效性以及科研产出的高质量。
 
+# 🎯 当前核心实验目标
+- 当前阶段的硬目标不是让 `Proposed-A` “略优”或“多数情况下赢”，而是让 `Proposed-A` 相对 `LMT` 在主要误差指标上拉开**至少 5% 的相对差距**，理想区间为 `5%-10%`。
+- 后续所有改进建议、实验设计和结果分析都必须优先回答：这个方案是否有合理机制让 `Proposed-A vs LMT` 的差距达到或接近 `>=5%`。若只是小幅参数微调，且缺乏把差距扩大到 5% 级别的机制，应明确降级为低优先级。
+- 分析结果时必须单独报告 `Proposed-A vs LMT`，不能只报告 `Proposed-A vs Extreme-FedAvg` 或总体 win count。若 `Extreme-FedAvg` 受益更多但 `Proposed-A` 没有拉开 `LMT`，则该方向不满足当前主目标。
+
 # 🧠 Long-term memory & Knowledge Graph
 - **会话初始化：** 开始任务前，不仅必须读取本文件中的 `Decision Log`，还必须静默调用 `memory-keeper` MCP 检索历史上下文（如：特定的气象特征清洗习惯、过去失败的实验参数）。
 - **知识固化：** 若出现新约束、新模型架构决策或解决了一个顽固 Bug，任务结束前必须双线记录：
@@ -52,6 +57,27 @@
 ---
 
 ## Decision Log
+### 2026-04-11 - 当前主目标更新为 Proposed-A 相对 LMT 至少 5% 差距
+- 用户明确当前论文实验目标：让 `Proposed-A` 相对传统强基线 `LMT` 拉开好几个百分点，硬门槛至少 `5%` 相对提升，理想为 `5%-10%`。
+- 后续建议必须围绕该目标过滤：
+  - 不再默认推荐“小参数调优”作为主方案，除非有证据表明它可能产生 5% 级别差距；
+  - 优先考虑能改变 `Proposed-A vs LMT` 信息优势或方法结构的方案；
+  - 每次结果分析必须显式列出 `Proposed-A vs LMT` 的相对差距。
+- 2026-04-11 的 `2h/6p + refine-k1` 结果不满足目标：
+  - `Proposed-A vs LMT` 约为 `+1.77% nMAE`、`+1.63% nRMSE`，未达到 `>=5%`；
+  - `Extreme-FedAvg` 在 K=1 下整体强于 `Proposed-A`，说明 target-only K-shot 限制本身不足以完成目标；
+  - 后续应避免只沿 target K-shot 或轻微权重参数微调继续消耗算力，除非先给出能接近 5% 差距的机制论证。
+
+### 2026-04-11 - 2h/6p 相位增强实验按 61/62/63 新场站口径执行
+- 用户明确要求：在 `2h / 6点 / 12h窗口` 协议下，把原始 1h 数据中未使用的互补小时相位分别作为 `61 / 62 / 63` 三个新增场站处理。
+- 执行口径固定为：
+  - `58 / 59 / 60` 使用当前 2h/6p 相位；
+  - `61 / 62 / 63` 使用互补 2h/6p 相位；
+  - 训练和 source 选择按 `6` 个场站处理；
+  - 不排除同物理场站的互补相位 source，例如 target `58` 可以使用 source `61`。
+- 用户已明确知晓“伪重复 / 数据泄漏 / 审稿质疑”这类论文表述风险，并要求后续设计不要默认以该风险阻断此实验。
+- 后续除非用户另行要求 strict variant，否则默认实现 `58/59/60/61/62/63` 六场站、所有非 self source 均可参与。
+
 ### 2026-03-06 - 论文口径与联邦实现对齐（极端天气多场站）
 - 论文对照基准：
   - `Meta-learning only` 在 Table IV 的语义是 “without pre-training”，不是同时去掉 LWP/CDRM。
@@ -181,3 +207,47 @@
   - `SKIP_LOCAL_PRETRAIN=1`
   - `SKIP_LOCAL_META=1`
   只重跑 extreme 微调与最终评估。
+
+### 2026-04-12 - six-station 2h/6p pilot-5k 已完成，下一步转向 federated normal meta
+- 当前主工作目录固定为：
+  - `/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main`
+- 当前论文汇报口径已由用户明确改为 `6` 个目标站：
+  - `58 / 59 / 60 / 61 / 62 / 63`
+  - `61 / 62 / 63` 是原始三个物理场站的互补 2h 相位，但在本文实验中按新增真实目标站处理。
+  - 后续结果分析默认使用 all-6 的 `Overall_Average`，不是只看原始 `58 / 59 / 60`。
+- `2h / 6点 / 12h窗口` six-station `pilot-5k` 已在 4090 上完成：
+  - train log: `logs/2h6p_six_station_pilot5k_train_20260412_001228.log`
+  - all-6 eval log: `logs/2h6p_six_station_pilot5k_eval_all6_20260412_011201.log`
+  - all-6 result CSV: `artifacts/2h6p_six_station/pilot-5k/results/multi_station_performance.csv`
+  - model artifacts: `artifacts/2h6p_six_station/pilot-5k/models/`
+  - produced `.pth` count: `90`
+- all-6 Mean nMAE result:
+  - `LMT = 28.8498`
+  - `Extreme-FedAvg = 28.3501`
+  - `Proposed-A = 28.3110`
+  - `Proposed-A vs LMT = +1.87%` relative improvement, still below the hard target `>=5%`.
+- Important interpretation:
+  - Compared with the earlier strong `1h / 12点` baseline in `git 4.8.11: Proposed-A win all`, the current `2h / 6点 / 12h窗口` protocol has clearly degraded the `LMT` baseline and therefore successfully reduced effective information.
+  - The remaining problem is no longer mainly “LMT too strong”; it is that `Proposed-A` has not recovered enough performance from the extra cross-station information.
+  - The current `Proposed-A` only gets cross-station information mainly in the final extreme-weather adaptation/aggregation stage. That stage has limited leverage because it is still a small fine-tune step.
+- Current code evidence:
+  - `DemoModelTraining.py` still runs local normal-weather meta per station:
+    - `run_meta_training(..., sample_station_ids=[station_id])`
+  - Therefore `local_meta_station{s}` does not yet benefit from other stations' normal-weather tasks.
+- Recommended next branch/task:
+  - Implement a minimal `Fed-Normal-Meta Proposed-A` experiment.
+  - Keep `LMT` unchanged: `local_pretrain_s -> local_meta_s -> target extreme fine-tune`.
+  - Keep `Extreme-FedAvg` unchanged initially: use `local_meta_s` as the extreme aggregation base.
+  - Change only `Proposed-A` initialization:
+    - train `fed_normal_meta_station{s}.pth` for each target station `s`;
+    - initialize it from `model_fore_pre_station{s}_local.pth`;
+    - use normal-weather meta tasks from all `58/59/60/61/62/63` stations;
+    - allow all non-self source stations, including same-physical complementary phase sources;
+    - use this `fed_normal_meta_station{s}.pth` as the base for Proposed-A's extreme aggregation and target refinement.
+  - Mechanism expectation: `LMT` remains target-only under reduced 2h/6p effective information, while `Proposed-A` gains a stronger cross-station normal-weather task prior before entering extreme few-shot adaptation. This has a more plausible path to `>=5%` than continuing to tune only final fine-tune epochs or K-shot settings.
+- If `Fed-Normal-Meta Proposed-A` still only improves `Proposed-A vs LMT` by about `2%-3%`, then the next high-priority route should be stronger effective-information reduction, e.g. `3h / 4点 / 12h窗口`, rather than minor final-stage parameter tuning.
+- Note on `orig3`:
+  - `logs/2h6p_six_station_pilot5k_eval_orig3_20260412_011214.log` initially stopped before completion.
+  - It was later regenerated eval-only with `OMP_NUM_THREADS=1`, producing:
+    - `artifacts/2h6p_six_station/pilot-5k/results/multi_station_performance_orig3.csv`
+  - Since the paper口径 is now all-6, `orig3` is secondary and should not override all-6 conclusions.
