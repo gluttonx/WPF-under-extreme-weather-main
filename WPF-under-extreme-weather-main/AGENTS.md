@@ -281,3 +281,40 @@
 - Next formal experiment should run on 4090, not CPU. Recommended first formal run:
   - `ARTIFACT_DIR=artifacts/2h6p_six_station/fed-normal-meta-5k ENABLE_FED_NORMAL_META_PROPOSED=1 FED_NORMAL_META_SELF_FLOOR=0.3 python -u run_three_station_yearly_protocol.py train --preset pilot-5k --six-station`
   - then same env with `eval --preset pilot-5k --six-station`.
+
+### 2026-04-12 - Fed-Normal-Meta self_floor=0.8 pilot-5k result
+- Formal 4090 six-station 2h/6p pilot-5k run completed with:
+  - `ENABLE_FED_NORMAL_META_PROPOSED=1`
+  - `FED_NORMAL_META_SELF_FLOOR=0.8`
+  - `ARTIFACT_DIR=artifacts/2h6p_six_station/fed-normal-meta-5k`
+  - train log: `logs/2h6p_six_station_fed_normal_meta_self08_5k_train_20260412_155932.log`
+  - eval log: `logs/2h6p_six_station_fed_normal_meta_self08_5k_eval_all6_20260412_193528.log`
+  - result CSV: `artifacts/2h6p_six_station/fed-normal-meta-5k/results/multi_station_performance.csv`
+- This run reused local pretrain/local meta checkpoints and reran Fed-Normal-Meta plus extreme adaptation.
+- All-6 Overall_Average Mean nMAE:
+  - `LMT = 28.7320`
+  - `Extreme-FedAvg = 28.3359`
+  - `Proposed-A = 27.8476`
+  - `Proposed-A vs LMT = +3.08%`
+  - `Proposed-A vs Extreme-FedAvg = +1.72%`
+- Compared with the previous all-6 pilot-5k:
+  - old `Proposed-A = 28.3109`
+  - self08 `Proposed-A = 27.8476`
+  - absolute gain: `-0.4633` Mean nMAE
+  - relative gain vs old Proposed-A: about `1.64%`.
+- Hard target still not met:
+  - current-run 5% threshold from LMT is `27.2954`;
+  - self08 Proposed-A is `27.8476`, still `+0.5523` above threshold.
+- Improvement is uneven:
+  - HighWind improves strongly vs LMT: `7.27%`;
+  - HighTemperature only `0.60%`;
+  - ColdWave `2.49%`;
+  - Frost `0.90%`.
+- Per-station Mean nMAE Proposed-A vs LMT:
+  - station 58: `-0.03%` (slightly worse)
+  - station 59: `+8.14%`
+  - station 60: `+3.16%`
+  - station 61: `+1.32%`
+  - station 62: `+6.43%`
+  - station 63: `+3.00%`
+- Interpretation: self_floor=0.8 is a real improvement over self_floor=0.3/old Proposed-A direction, but still not enough for the 5% claim. The next most plausible low-risk lever is adding Fed-Normal-Meta best-checkpoint restore / smoothing, because all six fed-normal-meta stages had final loss worse than best loss.
