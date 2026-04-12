@@ -68,6 +68,16 @@ class TwoHourSixPointLauncherAstTest(unittest.TestCase):
         self.assertIn("LOGS_TRAIN_DIR", text)
         self.assertIn("artifacts", text)
 
+    def test_launcher_previews_fed_normal_meta_env(self):
+        text = LAUNCHER_FILE.read_text(encoding="utf-8")
+
+        for token in [
+            '"ENABLE_FED_NORMAL_META_PROPOSED"',
+            '"FED_NORMAL_META_SELF_FLOOR"',
+            '"SKIP_FED_NORMAL_META"',
+        ]:
+            self.assertIn(token, text)
+
 
 if __name__ == "__main__":
     unittest.main()

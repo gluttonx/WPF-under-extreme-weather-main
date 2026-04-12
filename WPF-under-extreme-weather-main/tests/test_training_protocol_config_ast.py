@@ -73,7 +73,7 @@ class TrainingProtocolConfigAstTest(unittest.TestCase):
         text = TRAIN_FILE.read_text(encoding="utf-8")
 
         self.assertIn("for source_station_id in station_ids:", text)
-        self.assertIn("if source_station_id == station_id:", text)
+        self.assertIn("if source_station_id == target_station_id:", text)
         self.assertNotIn("physical_station", text)
         self.assertNotIn("same_physical", text)
 
@@ -95,6 +95,35 @@ class TrainingProtocolConfigAstTest(unittest.TestCase):
 
         self.assertNotIn("SummaryWriter(\"./logs_train/loss1\")", text)
         self.assertNotIn("scio.savemat('all_stations_test_results.mat'", text)
+
+    def test_training_declares_fed_normal_meta_proposed_config(self):
+        text = TRAIN_FILE.read_text(encoding="utf-8")
+
+        for token in [
+            'ENABLE_FED_NORMAL_META_PROPOSED = os.getenv("ENABLE_FED_NORMAL_META_PROPOSED", "0") != "0"',
+            'FED_NORMAL_META_SELF_FLOOR = float(os.getenv("FED_NORMAL_META_SELF_FLOOR", "0.3"))',
+            'SKIP_FED_NORMAL_META = os.getenv("SKIP_FED_NORMAL_META", "0") != "0"',
+            "def get_fed_normal_meta_support_model_path(station_id):",
+            "def get_fed_normal_meta_model_path(station_id):",
+            "model_fore_train_task_support_fed_normal_meta_station",
+            "model_fore_train_task_query_fed_normal_meta_station",
+        ]:
+            self.assertIn(token, text)
+
+    def test_fed_normal_meta_samples_all_stations_with_target_weight_floor(self):
+        text = TRAIN_FILE.read_text(encoding="utf-8")
+
+        for token in [
+            "def compute_fed_normal_meta_station_weights(target_station_id, candidate_station_ids):",
+            "FED_NORMAL_META_SELF_FLOOR",
+            "def run_fed_normal_meta_training():",
+            "fed_normal_meta_client_states",
+            "aggregate_fed_normal_meta_states",
+            "client_station_order = [station_id] +",
+            "sample_station_ids=[client_station_id]",
+            "fed_normal_meta_tag = f\"fed_normal_meta_station{station_id}\"",
+        ]:
+            self.assertIn(token, text)
 
 
 if __name__ == "__main__":

@@ -23,6 +23,22 @@ class ExtremeFLContractAstTest(unittest.TestCase):
         self.assertIn("def aggregate_extreme_updates_weighted(", text)
         self.assertIn("EXTREME_WEIGHT_BETA_SELF", text)
 
+    def test_proposed_a_can_use_fed_normal_meta_base_without_changing_other_models(self):
+        text = TRAIN_FILE.read_text(encoding="utf-8")
+
+        for token in [
+            "def get_local_extreme_base_model_path(station_id):",
+            "def get_proposed_a_base_model_path(station_id):",
+            "if ENABLE_FED_NORMAL_META_PROPOSED:",
+            "return get_fed_normal_meta_model_path(station_id)",
+            "local_shared_init_state = torch.load(",
+            "proposed_shared_init_state = torch.load(",
+            "base_state_dict=proposed_shared_init_state",
+            "shared_init_state_dict=proposed_shared_init_state",
+            "base_state_dict=local_shared_init_state",
+        ]:
+            self.assertIn(token, text)
+
 
 if __name__ == "__main__":
     unittest.main()

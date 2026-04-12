@@ -251,3 +251,33 @@
   - It was later regenerated eval-only with `OMP_NUM_THREADS=1`, producing:
     - `artifacts/2h6p_six_station/pilot-5k/results/multi_station_performance_orig3.csv`
   - Since the paper口径 is now all-6, `orig3` is secondary and should not override all-6 conclusions.
+
+### 2026-04-12 - Fed-Normal-Meta Proposed-A implemented for six-station 2h/6p
+- Implemented the minimal `Fed-Normal-Meta Proposed-A` path in `DemoModelTraining.py`.
+- The design is target-conditioned FedAvg-style normal-weather meta learning, not a single pooled meta model:
+  - for each target station `s`, initialize from `model_fore_pre_station{s}_local.pth`;
+  - broadcast the target state to all six stations;
+  - each client performs one normal-weather support/query meta update on its own tasks;
+  - aggregate client state dicts with a target self floor (`FED_NORMAL_META_SELF_FLOOR`, default `0.3`) and source weights proportional to normal-meta window counts;
+  - save `model_fore_train_task_query_fed_normal_meta_station{s}.pth`.
+- Model-role separation:
+  - `LMT` still uses the local-meta base;
+  - `Extreme-FedAvg` still uses the local-meta base;
+  - `Proposed-A` uses the fed-normal-meta base only when `ENABLE_FED_NORMAL_META_PROPOSED=1`.
+- New control flags:
+  - `ENABLE_FED_NORMAL_META_PROPOSED=1`
+  - `FED_NORMAL_META_SELF_FLOOR=0.3`
+  - `SKIP_FED_NORMAL_META=1` for reusing existing fed-normal-meta checkpoints.
+- Smoke verification completed on CPU with:
+  - artifact dir: `artifacts/2h6p_six_station/fed-normal-meta-smoke/`
+  - command: `ARTIFACT_DIR=artifacts/2h6p_six_station/fed-normal-meta-smoke ENABLE_FED_NORMAL_META_PROPOSED=1 FED_NORMAL_META_SELF_FLOOR=0.3 python -u run_three_station_yearly_protocol.py train --smoke --six-station`
+  - eval command: `ARTIFACT_DIR=artifacts/2h6p_six_station/fed-normal-meta-smoke ENABLE_FED_NORMAL_META_PROPOSED=1 FED_NORMAL_META_SELF_FLOOR=0.3 python -u run_three_station_yearly_protocol.py eval --smoke --six-station`
+  - produced `102` `.pth` files, including `12` fed-normal-meta support/query checkpoints and the expected `72` LMT/Extreme-FedAvg/Proposed-A extreme checkpoints.
+  - generated: `artifacts/2h6p_six_station/fed-normal-meta-smoke/results/multi_station_performance.csv`.
+- Regression verification passed:
+  - `python -m unittest tests.test_extreme_fl_contract_ast tests.test_training_protocol_config_ast tests.test_skip_stage_reuse_ast tests.test_2h_6point_launcher_ast -v`
+  - `python -m py_compile DemoModelTraining.py generate_multi_station_results.py run_three_station_yearly_protocol.py`
+  - `git diff --check`
+- Next formal experiment should run on 4090, not CPU. Recommended first formal run:
+  - `ARTIFACT_DIR=artifacts/2h6p_six_station/fed-normal-meta-5k ENABLE_FED_NORMAL_META_PROPOSED=1 FED_NORMAL_META_SELF_FLOOR=0.3 python -u run_three_station_yearly_protocol.py train --preset pilot-5k --six-station`
+  - then same env with `eval --preset pilot-5k --six-station`.

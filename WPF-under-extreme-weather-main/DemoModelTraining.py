@@ -23,6 +23,9 @@ USE_PSEUDO_FED = False  # False=去掉 shared pretrain/shared meta，恢复 loca
 TRAIN_META_ONLY_BASELINE = os.getenv("TRAIN_META_ONLY_BASELINE", "0") != "0"
 SKIP_LOCAL_PRETRAIN = os.getenv("SKIP_LOCAL_PRETRAIN", "0") != "0"
 SKIP_LOCAL_META = os.getenv("SKIP_LOCAL_META", "0") != "0"
+ENABLE_FED_NORMAL_META_PROPOSED = os.getenv("ENABLE_FED_NORMAL_META_PROPOSED", "0") != "0"
+FED_NORMAL_META_SELF_FLOOR = float(os.getenv("FED_NORMAL_META_SELF_FLOOR", "0.3"))
+SKIP_FED_NORMAL_META = os.getenv("SKIP_FED_NORMAL_META", "0") != "0"
 ARTIFACT_DIR = os.getenv("ARTIFACT_DIR", ".")
 
 
@@ -169,6 +172,9 @@ def print_protocol_banner():
     progress_log(f"  artifact_dir: {ARTIFACT_DIR}")
     progress_log(f"  model_output_dir: {MODEL_OUTPUT_DIR}")
     progress_log(f"  logs_train_dir: {LOGS_TRAIN_DIR}")
+    progress_log(f"  enable_fed_normal_meta_proposed: {ENABLE_FED_NORMAL_META_PROPOSED}")
+    progress_log(f"  fed_normal_meta_self_floor: {FED_NORMAL_META_SELF_FLOOR}")
+    progress_log(f"  skip_fed_normal_meta: {SKIP_FED_NORMAL_META}")
 
 
 def progress_log(message=""):
@@ -407,6 +413,14 @@ def get_local_meta_model_path(station_id):
     return resolve_model_path(f"model_fore_train_task_query_local_meta_station{station_id}.pth")
 
 
+def get_fed_normal_meta_support_model_path(station_id):
+    return resolve_model_path(f"model_fore_train_task_support_fed_normal_meta_station{station_id}.pth")
+
+
+def get_fed_normal_meta_model_path(station_id):
+    return resolve_model_path(f"model_fore_train_task_query_fed_normal_meta_station{station_id}.pth")
+
+
 def get_local_meta_only_support_model_path(station_id):
     return resolve_model_path(f"model_fore_train_task_support_meta_only_station{station_id}.pth")
 
@@ -429,6 +443,16 @@ def get_extreme_fedavg_model_path(station_id, class_idx):
 
 def get_proposed_a_model_path(station_id, class_idx):
     return resolve_model_path(f"model_fore_station{station_id}_extreme{class_idx}_proposed_a.pth")
+
+
+def get_local_extreme_base_model_path(station_id):
+    return get_local_meta_model_path(station_id) if USE_FEDERATION and not USE_PSEUDO_FED else PROPOSED_META_MODEL_PATH
+
+
+def get_proposed_a_base_model_path(station_id):
+    if ENABLE_FED_NORMAL_META_PROPOSED:
+        return get_fed_normal_meta_model_path(station_id)
+    return get_local_extreme_base_model_path(station_id)
 
 
 # Define Parameters
@@ -972,6 +996,129 @@ def get_meta_trainable_params(model_instance, train_all_params=False, disable_lw
     return list(model_instance.get_trainable_params())
 
 
+def aggregate_fed_normal_meta_states(weighted_states):
+    aggregate_state = copy.deepcopy(weighted_states[0][0])
+    for name in aggregate_state.keys():
+        reference_tensor = aggregate_state[name]
+        if not torch.is_floating_point(reference_tensor):
+            aggregate_state[name] = reference_tensor.clone()
+            continue
+        weighted_sum = None
+        for state_dict, alpha in weighted_states:
+            contrib = state_dict[name].detach().to(dtype=torch.float32, device="cpu") * float(alpha)
+            weighted_sum = contrib if weighted_sum is None else weighted_sum + contrib
+        aggregate_state[name] = weighted_sum.to(dtype=reference_tensor.dtype, device=reference_tensor.device)
+    return aggregate_state
+
+
+def count_station_normal_meta_windows(station_id):
+    p_conven_class_st = all_stations_full_data[station_id]['p_conven_class']
+    total_station_classes = np.size(p_conven_class_st, axis=1)
+    total_windows = 0
+    for i_class in range(total_station_classes):
+        p_data = p_conven_class_st[0, i_class]
+        total_windows += max(0, int(p_data.shape[0] // len_realp))
+    return total_windows
+
+
+def compute_fed_normal_meta_station_weights(target_station_id, candidate_station_ids):
+    candidate_station_ids = [str(station_id) for station_id in candidate_station_ids]
+    if target_station_id not in candidate_station_ids:
+        raise ValueError(f"target station {target_station_id} is not in candidate stations")
+    if len(candidate_station_ids) == 1:
+        return {target_station_id: 1.0}
+
+    self_floor = min(max(float(FED_NORMAL_META_SELF_FLOOR), 0.0), 1.0)
+    source_station_ids = [station_id for station_id in candidate_station_ids if station_id != target_station_id]
+    source_counts = {
+        station_id: count_station_normal_meta_windows(station_id)
+        for station_id in source_station_ids
+    }
+    total_source_count = float(sum(source_counts.values()))
+    if total_source_count <= 0.0:
+        return {
+            station_id: 1.0 if station_id == target_station_id else 0.0
+            for station_id in candidate_station_ids
+        }
+
+    station_weights = {target_station_id: self_floor}
+    remaining_weight = 1.0 - self_floor
+    for station_id in source_station_ids:
+        station_weights[station_id] = remaining_weight * float(source_counts[station_id]) / total_source_count
+    return station_weights
+
+
+def run_meta_support_query_update(
+    base_state_dict,
+    sample_station_ids,
+    meta_tag,
+    epoch_idx,
+    use_cdrm=True,
+    train_all_params=False,
+    disable_lwp=False,
+):
+    support_params = get_meta_trainable_params(
+        model_fore_train_task_support,
+        train_all_params=train_all_params,
+        disable_lwp=disable_lwp
+    )
+    query_params = get_meta_trainable_params(
+        model_fore_train_task_query,
+        train_all_params=train_all_params,
+        disable_lwp=disable_lwp
+    )
+    optimizer_support = torch.optim.Adam(support_params, lr=0.0002, betas=(0.5, 0.999))
+    optimizer_query = torch.optim.Adam(query_params, lr=0.0002, betas=(0.5, 0.999))
+
+    Train_target_support, Train_input_support, Train_target_query, Train_input_query = sample_meta_batch(
+        sample_station_ids=sample_station_ids
+    )
+
+    model_fore_train_task_support.load_state_dict(copy.deepcopy(base_state_dict))
+    if disable_lwp:
+        freeze_lwp_as_identity(model_fore_train_task_support)
+    model_fore_train_task_support.train()
+    Train_target_support = Train_target_support.to(device)
+    Train_input_support = Train_input_support.to(device)
+    Train_outputs_support = model_fore_train_task_support(Train_input_support)
+    if use_cdrm:
+        loss1 = penalty(Train_outputs_support, Train_target_support)
+    else:
+        loss1 = torch.zeros((), dtype=torch.float32, device=device)
+    loss2 = loss_fn_1(Train_outputs_support, Train_target_support)
+    loss_en = 10 * loss1 + loss2 if use_cdrm else loss2
+    optimizer_support.zero_grad()
+    loss_en.backward()
+    optimizer_support.step()
+    model_fore_train_task_support.eval()
+    support_state = copy.deepcopy(model_fore_train_task_support.state_dict())
+
+    model_fore_train_task_query.load_state_dict(copy.deepcopy(support_state))
+    if disable_lwp:
+        freeze_lwp_as_identity(model_fore_train_task_query)
+    model_fore_train_task_query.train()
+    Train_target_query = Train_target_query.to(device)
+    Train_input_query = Train_input_query.to(device)
+    Train_outputs_query_ = model_fore_train_task_query(Train_input_query)
+    if use_cdrm:
+        loss1_q = penalty(Train_outputs_query_, Train_target_query)
+    else:
+        loss1_q = torch.zeros((), dtype=torch.float32, device=device)
+    loss2_q = loss_fn_1(Train_outputs_query_, Train_target_query)
+    loss_en_q = 10 * loss1_q + loss2_q if use_cdrm else loss2_q
+    optimizer_query.zero_grad()
+    loss_en_q.backward()
+    optimizer_query.step()
+    model_fore_train_task_query.eval()
+    query_state = copy.deepcopy(model_fore_train_task_query.state_dict())
+
+    writer1.add_scalar(f"loss_penalty_train_task_support_{meta_tag}", loss1.item(), epoch_idx)
+    writer2.add_scalar(f"loss_mse_train_task_support_{meta_tag}", loss2.item(), epoch_idx)
+    writer1.add_scalar(f"loss_penalty_train_task_query_{meta_tag}", loss1_q.item(), epoch_idx)
+    writer2.add_scalar(f"loss_mse_train_task_query_{meta_tag}", loss2_q.item(), epoch_idx)
+    return query_state, loss2_q.item()
+
+
 def run_meta_training(
     meta_tag,
     init_state_dict,
@@ -1180,8 +1327,82 @@ def run_local_meta_training():
             )
 
 
+def run_fed_normal_meta_training():
+    if not ENABLE_FED_NORMAL_META_PROPOSED:
+        return
+    if not (USE_FEDERATION and not USE_PSEUDO_FED):
+        return
+
+    for station_id in station_ids:
+        print("\n" + "=" * 70)
+        print(f"开始Fed-Normal-Meta元训练: target station {station_id}")
+        print("=" * 70)
+
+        local_pretrain_path = get_local_pretrain_model_path(station_id)
+        fed_normal_meta_support_path = get_fed_normal_meta_support_model_path(station_id)
+        fed_normal_meta_path = get_fed_normal_meta_model_path(station_id)
+        if SKIP_FED_NORMAL_META:
+            if not os.path.exists(fed_normal_meta_path):
+                raise FileNotFoundError(
+                    f"SKIP_FED_NORMAL_META=1 但未找到已有 checkpoint: {fed_normal_meta_path}"
+                )
+            progress_log(f"✓ 跳过Fed-Normal-Meta，复用已有 checkpoint: {fed_normal_meta_path}")
+            continue
+
+        fed_normal_meta_weights = compute_fed_normal_meta_station_weights(station_id, station_ids)
+        progress_log(f"  aggregation_weights={fed_normal_meta_weights}")
+        current_state = torch.load(local_pretrain_path, map_location=device)
+        fed_normal_meta_tag = f"fed_normal_meta_station{station_id}"
+        convergence_record = initialize_convergence_record(
+            stage_type="fed_normal_meta",
+            stage_id=fed_normal_meta_tag,
+            total_epochs=PROPOSED_META_EPOCHS,
+            patience=CONVERGENCE_PATIENCE_META,
+        )
+
+        for i_t in range(PROPOSED_META_EPOCHS):
+            fed_normal_meta_client_states = []
+            weighted_query_loss = 0.0
+
+            client_station_order = [station_id] + [
+                source_station_id for source_station_id in station_ids
+                if source_station_id != station_id
+            ]
+            for client_station_id in client_station_order:
+                client_weight = float(fed_normal_meta_weights.get(client_station_id, 0.0))
+                if client_weight <= 0.0:
+                    continue
+                client_state, client_query_loss = run_meta_support_query_update(
+                    base_state_dict=current_state,
+                    sample_station_ids=[client_station_id],
+                    meta_tag=f"{fed_normal_meta_tag}_client{client_station_id}",
+                    epoch_idx=i_t,
+                    use_cdrm=True,
+                    train_all_params=False,
+                    disable_lwp=False,
+                )
+                fed_normal_meta_client_states.append((client_state, client_weight))
+                weighted_query_loss += client_weight * float(client_query_loss)
+
+            current_state = aggregate_fed_normal_meta_states(fed_normal_meta_client_states)
+            torch.save(current_state, fed_normal_meta_support_path)
+            torch.save(current_state, fed_normal_meta_path)
+            update_convergence_record(convergence_record, i_t, weighted_query_loss)
+
+            if should_log_epoch(i_t, PROPOSED_META_EPOCHS, interval=META_LOG_INTERVAL):
+                progress_log(
+                    f"  收敛追踪[fed_normal_meta:fed_normal_meta_station{station_id}] "
+                    f"epoch={i_t + 1}/{PROPOSED_META_EPOCHS} "
+                    f"weighted_query_mse={weighted_query_loss:.6f}"
+                )
+
+        register_convergence_record(convergence_record)
+        progress_log(f"✓ Fed-Normal-Meta元训练完成: {fed_normal_meta_path}")
+
+
 if USE_FEDERATION and not USE_PSEUDO_FED:
     run_local_meta_training()
+    run_fed_normal_meta_training()
 else:
     run_shared_meta_training()
 
@@ -1566,6 +1787,58 @@ def run_target_refinement(base_state_dict, target_payload, log_tag, model_label)
         model_label=model_label,
     )
 
+
+def build_source_update_payloads(shared_init_state_dict, target_station_id, class_idx, target_payload, log_prefix):
+    source_update_payloads = []
+    for source_station_id in station_ids:
+        if source_station_id == target_station_id:
+            continue
+        source_screening_payload = select_effective_source_windows(
+            shared_init_state_dict=shared_init_state_dict,
+            source_station_id=source_station_id,
+            class_idx=class_idx,
+            target_payload=target_payload,
+        )
+        print(
+            f"    [screen:{log_prefix}] source_station={source_station_id} -> target_station={target_station_id}, "
+            f"candidate={source_screening_payload['candidate_window_count']}, "
+            f"gated={source_screening_payload['gated_window_count']}, "
+            f"effective={source_screening_payload['effective_window_count']}"
+        )
+        if source_screening_payload["effective_window_count"] == 0:
+            continue
+
+        source_split_payload = split_extreme_adapt_val(
+            source_screening_payload["nwp_windows"],
+            source_screening_payload["power_windows"],
+        )
+        source_payload = to_tensor_payload(source_split_payload)
+        source_state_dict, source_final_loss = adapt_state_dict(
+            base_state_dict=shared_init_state_dict,
+            adapt_input_tensor=source_payload["adapt_input"],
+            adapt_target_tensor=source_payload["adapt_target"],
+            epochs=FEW_SHOT_EPOCHS,
+            log_tag=f"{log_prefix}_station{source_station_id}_to_{target_station_id}_class{class_idx}",
+            model_label=f"{log_prefix}:{source_station_id}->target{target_station_id}",
+        )
+        source_update_payloads.append({
+            "station_id": source_station_id,
+            "state_dict": source_state_dict,
+            "effective_window_count": source_screening_payload["effective_window_count"],
+            "source_val_loss": evaluate_state_dict_loss(
+                source_state_dict,
+                source_payload["val_input"],
+                source_payload["val_target"],
+            ) if source_payload["val_input"].shape[0] > 0 else source_final_loss,
+            "target_val_loss": evaluate_state_dict_loss(
+                source_state_dict,
+                target_payload["val_input"],
+                target_payload["val_target"],
+            ),
+        })
+    return source_update_payloads
+
+
 for station_id in station_ids:
     print(f"\n{'='*70}")
     print(f"场站 {station_id} 的Few-shot适应")
@@ -1592,13 +1865,16 @@ for station_id in station_ids:
             f"{target_payload['val_input'].shape[0]}"
         )
 
-        shared_init_state = torch.load(
-            get_local_meta_model_path(station_id) if USE_FEDERATION and not USE_PSEUDO_FED else PROPOSED_META_MODEL_PATH,
-            map_location=device,
-        )
+        local_base_model_path = get_local_extreme_base_model_path(station_id)
+        proposed_base_model_path = get_proposed_a_base_model_path(station_id)
+        local_shared_init_state = torch.load(local_base_model_path, map_location=device)
+        if proposed_base_model_path == local_base_model_path:
+            proposed_shared_init_state = local_shared_init_state
+        else:
+            proposed_shared_init_state = torch.load(proposed_base_model_path, map_location=device)
 
         lmt_state_dict, lmt_final_loss = adapt_state_dict(
-            base_state_dict=shared_init_state,
+            base_state_dict=local_shared_init_state,
             adapt_input_tensor=target_payload["adapt_input"],
             adapt_target_tensor=target_payload["adapt_target"],
             epochs=FEW_SHOT_EPOCHS,
@@ -1623,53 +1899,13 @@ for station_id in station_ids:
             "target_val_loss": target_val_loss,
         }
 
-        source_update_payloads = []
-        for source_station_id in station_ids:
-            if source_station_id == station_id:
-                continue
-            source_screening_payload = select_effective_source_windows(
-                shared_init_state_dict=shared_init_state,
-                source_station_id=source_station_id,
-                class_idx=i_class,
-                target_payload=target_payload,
-            )
-            print(
-                f"    [screen] source_station={source_station_id} -> target_station={station_id}, "
-                f"candidate={source_screening_payload['candidate_window_count']}, "
-                f"gated={source_screening_payload['gated_window_count']}, "
-                f"effective={source_screening_payload['effective_window_count']}"
-            )
-            if source_screening_payload["effective_window_count"] == 0:
-                continue
-
-            source_split_payload = split_extreme_adapt_val(
-                source_screening_payload["nwp_windows"],
-                source_screening_payload["power_windows"],
-            )
-            source_payload = to_tensor_payload(source_split_payload)
-            source_state_dict, source_final_loss = adapt_state_dict(
-                base_state_dict=shared_init_state,
-                adapt_input_tensor=source_payload["adapt_input"],
-                adapt_target_tensor=source_payload["adapt_target"],
-                epochs=FEW_SHOT_EPOCHS,
-                log_tag=f"extreme_source_station{source_station_id}_to_{station_id}_class{i_class}",
-                model_label=f"source{source_station_id}->target{station_id}",
-            )
-            source_update_payloads.append({
-                "station_id": source_station_id,
-                "state_dict": source_state_dict,
-                "effective_window_count": source_screening_payload["effective_window_count"],
-                "source_val_loss": evaluate_state_dict_loss(
-                    source_state_dict,
-                    source_payload["val_input"],
-                    source_payload["val_target"],
-                ) if source_payload["val_input"].shape[0] > 0 else source_final_loss,
-                "target_val_loss": evaluate_state_dict_loss(
-                    source_state_dict,
-                    target_payload["val_input"],
-                    target_payload["val_target"],
-                ),
-            })
+        source_update_payloads = build_source_update_payloads(
+            shared_init_state_dict=local_shared_init_state,
+            target_station_id=station_id,
+            class_idx=i_class,
+            target_payload=target_payload,
+            log_prefix="extreme_source",
+        )
 
         fedavg_aggregate_state, fedavg_weight_map = aggregate_extreme_updates_uniform(
             self_update_payload,
@@ -1686,10 +1922,46 @@ for station_id in station_ids:
         print(f"    ✓ 保存(Extreme-FedAvg): {fedavg_model_name} weights={fedavg_weight_map}")
         all_personalized_models[f'extreme_fedavg_{station_id}_class{i_class}'] = fedavg_model_name
 
+        if proposed_base_model_path == local_base_model_path:
+            proposed_self_update_payload = self_update_payload
+            proposed_source_update_payloads = source_update_payloads
+        else:
+            proposed_self_state_dict, proposed_self_final_loss = adapt_state_dict(
+                base_state_dict=proposed_shared_init_state,
+                adapt_input_tensor=target_payload["adapt_input"],
+                adapt_target_tensor=target_payload["adapt_target"],
+                epochs=FEW_SHOT_EPOCHS,
+                log_tag=f"proposed_self_station{station_id}_class{i_class}",
+                model_label="Proposed-A:self_update",
+            )
+            proposed_target_val_loss = evaluate_state_dict_loss(
+                proposed_self_state_dict,
+                target_payload["val_input"],
+                target_payload["val_target"],
+            )
+            proposed_self_update_payload = {
+                "station_id": station_id,
+                "state_dict": proposed_self_state_dict,
+                "effective_window_count": target_payload["full_window_count"],
+                "source_val_loss": (
+                    proposed_self_final_loss
+                    if proposed_self_final_loss is not None
+                    else proposed_target_val_loss
+                ),
+                "target_val_loss": proposed_target_val_loss,
+            }
+            proposed_source_update_payloads = build_source_update_payloads(
+                shared_init_state_dict=proposed_shared_init_state,
+                target_station_id=station_id,
+                class_idx=i_class,
+                target_payload=target_payload,
+                log_prefix="proposed_source",
+            )
+
         proposed_aggregate_state, proposed_weight_map = aggregate_extreme_updates_weighted(
             target_station_id=station_id,
-            self_update_payload=self_update_payload,
-            source_update_payloads=source_update_payloads,
+            self_update_payload=proposed_self_update_payload,
+            source_update_payloads=proposed_source_update_payloads,
         )
         proposed_final_state, _ = run_target_refinement(
             base_state_dict=proposed_aggregate_state,
@@ -1787,6 +2059,9 @@ export_convergence_report(
         "train_meta_only_baseline": TRAIN_META_ONLY_BASELINE,
         "skip_local_pretrain": SKIP_LOCAL_PRETRAIN,
         "skip_local_meta": SKIP_LOCAL_META,
+        "enable_fed_normal_meta_proposed": ENABLE_FED_NORMAL_META_PROPOSED,
+        "fed_normal_meta_self_floor": FED_NORMAL_META_SELF_FLOOR,
+        "skip_fed_normal_meta": SKIP_FED_NORMAL_META,
         "pretrain_epochs": PRETRAIN_EPOCHS,
         "proposed_meta_epochs": PROPOSED_META_EPOCHS,
         "meta_only_meta_epochs": META_ONLY_META_EPOCHS,
