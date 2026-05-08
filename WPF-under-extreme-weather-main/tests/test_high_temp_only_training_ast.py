@@ -21,7 +21,9 @@ class HighTempOnlyTrainingAstTest(unittest.TestCase):
         text = TRAIN_FILE.read_text(encoding="utf-8")
 
         for token in [
-            "few_shot_model_count = 0 if SKIP_EXTREME_ADAPTATION_STAGE else len(station_ids) * num_extreme_classes * (4 if TRAIN_META_ONLY_BASELINE else 3)",
+            "legacy_extreme_model_multiplier = 0 if SKIP_LEGACY_EXTREME_ADAPTATION else (4 if TRAIN_META_ONLY_BASELINE else 3)",
+            "target_aware_selective_ft_multiplier = 1 if ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT else 0",
+            "legacy_extreme_model_multiplier + target_aware_selective_ft_multiplier",
             "for class_index in range(num_extreme_classes):",
             "for i_class in range(num_extreme_classes):",
             "print(f\"    极端天气: {num_extreme_classes}类\")",

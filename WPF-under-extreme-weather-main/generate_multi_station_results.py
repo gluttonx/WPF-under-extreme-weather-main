@@ -130,14 +130,27 @@ RESULTS_OUTPUT_PATH = os.getenv(
 )
 BASE_MODEL_OUTPUT_DIR = os.getenv("BASE_MODEL_OUTPUT_DIR", MODEL_OUTPUT_DIR)
 TARGET_AWARE_BASE_MODEL_OUTPUT_DIR = os.getenv("TARGET_AWARE_BASE_MODEL_OUTPUT_DIR", MODEL_OUTPUT_DIR)
+TARGET_AWARE_SELECTIVE_FED_BASE_MODEL_OUTPUT_DIR = os.getenv(
+    "TARGET_AWARE_SELECTIVE_FED_BASE_MODEL_OUTPUT_DIR",
+    TARGET_AWARE_BASE_MODEL_OUTPUT_DIR,
+)
 HIGH_TEMP_ONLY_SUMMER_PROTOCOL = os.getenv("HIGH_TEMP_ONLY_SUMMER_PROTOCOL", "0") != "0"
 ENABLE_FED_NORMAL_META_PROPOSED = os.getenv("ENABLE_FED_NORMAL_META_PROPOSED", "0") != "0"
 ENABLE_SELECTIVE_FED_NORMAL_META = os.getenv("ENABLE_SELECTIVE_FED_NORMAL_META", "0") != "0"
 ENABLE_TARGET_AWARE_META_NOFT = os.getenv("ENABLE_TARGET_AWARE_META_NOFT", "0") != "0"
 ENABLE_TARGET_AWARE_SELECTIVE_FED_META = os.getenv("ENABLE_TARGET_AWARE_SELECTIVE_FED_META", "0") != "0"
+ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT = os.getenv("ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT", "0") != "0"
+ENABLE_TARGET_AWARE_SELECTIVE_FED_BIAS_CAL = os.getenv("ENABLE_TARGET_AWARE_SELECTIVE_FED_BIAS_CAL", "0") != "0"
 SKIP_TARGET_AWARE_PRETRAIN = os.getenv("SKIP_TARGET_AWARE_PRETRAIN", "0") != "0"
 SKIP_TARGET_AWARE_META = os.getenv("SKIP_TARGET_AWARE_META", "0") != "0"
+SKIP_TARGET_AWARE_SELECTIVE_FED_META = os.getenv("SKIP_TARGET_AWARE_SELECTIVE_FED_META", "0") != "0"
 EVAL_MODEL_SET = os.getenv("EVAL_MODEL_SET", "").strip()
+TARGET_AWARE_SELECTIVE_FED_BIAS_CAL_MIN = float(os.getenv("TARGET_AWARE_SELECTIVE_FED_BIAS_CAL_MIN", "0.0"))
+TARGET_AWARE_SELECTIVE_FED_BIAS_CAL_MAX = float(os.getenv("TARGET_AWARE_SELECTIVE_FED_BIAS_CAL_MAX", "0.15"))
+TARGET_AWARE_SELECTIVE_FED_PROXY_NORMAL_MAX_WINDOWS = int(os.getenv("TARGET_AWARE_SELECTIVE_FED_PROXY_NORMAL_MAX_WINDOWS", "8"))
+HWA_WIND_FEATURE_INDEX = int(os.getenv("HWA_WIND_FEATURE_INDEX", "0"))
+HWA_WIND_THRESHOLD = float(os.getenv("HWA_WIND_THRESHOLD", "10.0"))
+TARGET_AWARE_META_WIND_MEAN_THRESHOLD = float(os.getenv("TARGET_AWARE_META_WIND_MEAN_THRESHOLD", "13.9"))
 
 
 def resolve_model_path(filename):
@@ -156,6 +169,12 @@ def resolve_target_aware_base_model_path(filename):
     if os.path.isabs(filename):
         return filename
     return os.path.join(TARGET_AWARE_BASE_MODEL_OUTPUT_DIR, filename)
+
+
+def resolve_target_aware_selective_fed_base_model_path(filename):
+    if os.path.isabs(filename):
+        return filename
+    return os.path.join(TARGET_AWARE_SELECTIVE_FED_BASE_MODEL_OUTPUT_DIR, filename)
 
 
 def ensure_parent_dir(path):
@@ -280,6 +299,158 @@ def calc_paper_metrics(true_events, pred_events, cap_norm=1.0):
     )
 
 
+def reshape_sequence_to_windows(array, feature_count):
+    array_np = np.asarray(array, dtype=np.float32).reshape(-1, feature_count)
+    usable_length = (array_np.shape[0] // len_realp) * len_realp
+    if usable_length <= 0:
+        return np.empty((0, len_realp, feature_count), dtype=np.float32)
+    return array_np[:usable_length].reshape(-1, len_realp, feature_count).astype(np.float32)
+
+
+def station_nwp_feature_scale(P_nwp, feature_index):
+    scale = float(np.max(np.abs(P_nwp[:, feature_index]), axis=0))
+    return scale if scale > 0.0 else 1.0
+
+
+def build_extreme_support_proxy_windows(wf_1, P_nwp, class_idx=0):
+    power_key = f"p_extre_class{class_idx + 1}"
+    nwp_key = f"nwp_extre_class{class_idx + 1}_"
+    if power_key not in wf_1 or nwp_key not in wf_1:
+        return (
+            np.empty((0, len_realp, dem_realc), dtype=np.float32),
+            np.empty((0, len_realp), dtype=np.float32),
+        )
+
+    nwp_extreme = wf_1[nwp_key]
+    nwp_windows = None
+    for feature_idx in range(dem_realc):
+        feature_seq = nwp_extreme[0, feature_idx].reshape(-1, 1)
+        feature_windows = reshape_sequence_to_windows(
+            feature_seq / station_nwp_feature_scale(P_nwp, feature_idx),
+            1,
+        )
+        nwp_windows = (
+            feature_windows
+            if nwp_windows is None
+            else np.concatenate((nwp_windows, feature_windows), axis=2)
+        )
+    power_windows = reshape_sequence_to_windows(wf_1[power_key], dem_realp).reshape(-1, len_realp)
+    window_count = min(nwp_windows.shape[0], power_windows.shape[0])
+    return nwp_windows[:window_count].astype(np.float32), power_windows[:window_count].astype(np.float32)
+
+
+def build_normal_high_wind_like_proxy_windows(wf_1, P_nwp):
+    max_windows = max(0, int(TARGET_AWARE_SELECTIVE_FED_PROXY_NORMAL_MAX_WINDOWS))
+    if max_windows <= 0 or "p_conven_class" not in wf_1 or "nwp_conven_class_" not in wf_1:
+        return (
+            np.empty((0, len_realp, dem_realc), dtype=np.float32),
+            np.empty((0, len_realp), dtype=np.float32),
+        )
+
+    p_conven_class = wf_1["p_conven_class"]
+    nwp_conven_class = wf_1["nwp_conven_class_"]
+    candidates = []
+    for class_idx in range(np.size(p_conven_class, axis=1)):
+        class_nwp_windows = None
+        raw_wind_windows = None
+        for feature_idx in range(dem_realc):
+            feature_seq = nwp_conven_class[0, feature_idx][0, class_idx].reshape(-1, 1)
+            feature_windows_raw = reshape_sequence_to_windows(feature_seq, 1)
+            if feature_idx == HWA_WIND_FEATURE_INDEX:
+                raw_wind_windows = feature_windows_raw.reshape(-1, len_realp)
+            feature_windows = feature_windows_raw / station_nwp_feature_scale(P_nwp, feature_idx)
+            class_nwp_windows = (
+                feature_windows.astype(np.float32)
+                if class_nwp_windows is None
+                else np.concatenate((class_nwp_windows, feature_windows.astype(np.float32)), axis=2)
+            )
+
+        class_power_windows = reshape_sequence_to_windows(
+            p_conven_class[0, class_idx],
+            dem_realp,
+        ).reshape(-1, len_realp)
+        window_count = min(class_nwp_windows.shape[0], class_power_windows.shape[0])
+        if window_count <= 0:
+            continue
+        class_nwp_windows = class_nwp_windows[:window_count]
+        class_power_windows = class_power_windows[:window_count]
+        raw_wind_windows = raw_wind_windows[:window_count]
+        mean_wind = np.mean(raw_wind_windows, axis=1)
+        max_wind = np.max(raw_wind_windows, axis=1)
+        highwind_mask = (mean_wind >= HWA_WIND_THRESHOLD) | (max_wind >= TARGET_AWARE_META_WIND_MEAN_THRESHOLD)
+        for window_idx in np.where(highwind_mask)[0]:
+            score = float(mean_wind[window_idx] + 0.25 * max_wind[window_idx])
+            candidates.append((score, class_nwp_windows[window_idx], class_power_windows[window_idx]))
+
+    if not candidates:
+        return (
+            np.empty((0, len_realp, dem_realc), dtype=np.float32),
+            np.empty((0, len_realp), dtype=np.float32),
+        )
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    selected = candidates[:max_windows]
+    return (
+        np.stack([item[1] for item in selected], axis=0).astype(np.float32),
+        np.stack([item[2] for item in selected], axis=0).astype(np.float32),
+    )
+
+
+def build_bias_calibration_proxy_windows(wf_1, P_nwp):
+    extreme_nwp, extreme_power = build_extreme_support_proxy_windows(wf_1, P_nwp, class_idx=0)
+    normal_nwp, normal_power = build_normal_high_wind_like_proxy_windows(wf_1, P_nwp)
+    input_parts = []
+    target_parts = []
+    if extreme_nwp.shape[0] > 0:
+        input_parts.append(extreme_nwp)
+        target_parts.append(extreme_power)
+    if normal_nwp.shape[0] > 0:
+        input_parts.append(normal_nwp)
+        target_parts.append(normal_power)
+    if not input_parts:
+        return (
+            np.empty((0, len_realp, dem_realc), dtype=np.float32),
+            np.empty((0, len_realp), dtype=np.float32),
+        )
+    return (
+        np.concatenate(input_parts, axis=0).astype(np.float32),
+        np.concatenate(target_parts, axis=0).astype(np.float32),
+    )
+
+
+def compute_target_aware_selective_fed_bias_calibration(station_id, wf_1, P_nwp, model_file):
+    proxy_input, proxy_target = build_bias_calibration_proxy_windows(wf_1, P_nwp)
+    record = {
+        "Station": station_id,
+        "Proxy_Windows": int(proxy_input.shape[0]),
+        "Bias_Raw": 0.0,
+        "Bias_Applied": 0.0,
+        "Proxy_True_Mean": np.nan,
+        "Proxy_Pred_Mean": np.nan,
+        "Proxy_nMAE_%": np.nan,
+    }
+    if proxy_input.shape[0] == 0 or not os.path.exists(model_file):
+        return 0.0, record
+
+    model_test.load_state_dict(torch.load(model_file, map_location=device))
+    model_test.eval()
+    with torch.no_grad():
+        proxy_pred = model_test(torch.tensor(proxy_input, dtype=torch.float32).to(device))
+        proxy_pred_np = proxy_pred.to(device0).numpy().reshape(proxy_target.shape)
+
+    raw_bias = float(np.mean(proxy_target - proxy_pred_np))
+    bias_min = min(TARGET_AWARE_SELECTIVE_FED_BIAS_CAL_MIN, TARGET_AWARE_SELECTIVE_FED_BIAS_CAL_MAX)
+    bias_max = max(TARGET_AWARE_SELECTIVE_FED_BIAS_CAL_MIN, TARGET_AWARE_SELECTIVE_FED_BIAS_CAL_MAX)
+    applied_bias = float(np.clip(raw_bias, bias_min, bias_max))
+    record.update({
+        "Bias_Raw": raw_bias,
+        "Bias_Applied": applied_bias,
+        "Proxy_True_Mean": float(np.mean(proxy_target)),
+        "Proxy_Pred_Mean": float(np.mean(proxy_pred_np)),
+        "Proxy_nMAE_%": float(np.mean(np.mean(np.abs(proxy_target - proxy_pred_np), axis=1)) * 100.0),
+    })
+    return applied_bias, record
+
+
 def get_local_pretrain_model_path(station_id):
     return resolve_base_model_path(f"model_fore_pre_station{station_id}_local.pth")
 
@@ -301,6 +472,10 @@ def get_target_aware_meta_model_path(station_id):
 
 
 def get_target_aware_selective_fed_meta_model_path(station_id):
+    if SKIP_TARGET_AWARE_SELECTIVE_FED_META:
+        return resolve_target_aware_selective_fed_base_model_path(
+            f"model_fore_train_task_query_target_aware_selective_fed_meta_station{station_id}.pth"
+        )
     return resolve_model_path(f"model_fore_train_task_query_target_aware_selective_fed_meta_station{station_id}.pth")
 
 
@@ -337,6 +512,10 @@ def get_fed_meta_local_ft_model_path(station_id, class_idx):
     return resolve_model_path(f"model_fore_station{station_id}_extreme{class_idx}_fed_meta_local_ft.pth")
 
 
+def get_target_aware_selective_fed_local_ft_model_path(station_id, class_idx):
+    return resolve_model_path(f"model_fore_station{station_id}_extreme{class_idx}_target_aware_selective_fed_local_ft.pth")
+
+
 def infer_training_durations_from_convergence_report():
     duration_map = {
         'Pretrain': np.nan,
@@ -344,6 +523,8 @@ def infer_training_durations_from_convergence_report():
         TARGET_AWARE_PRETRAIN_MODEL_NAME: np.nan,
         TARGET_AWARE_META_NOFT_MODEL_NAME: np.nan,
         TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME: np.nan,
+        TARGET_AWARE_SELECTIVE_FED_META_BIAS_CAL_MODEL_NAME: np.nan,
+        TARGET_AWARE_SELECTIVE_FED_META_LOCAL_FT_MODEL_NAME: np.nan,
         'LMT': np.nan,
         VANILLA_FED_NORMAL_META_NOFT_MODEL_NAME: np.nan,
         SELECTIVE_FED_NORMAL_META_NOFT_MODEL_NAME: np.nan,
@@ -387,6 +568,10 @@ def infer_training_durations_from_convergence_report():
     target_aware_pretrain_sec = sum_elapsed(stage_type="target_aware_pretrain")
     target_aware_meta_sec = sum_elapsed(stage_type="target_aware_meta")
     target_aware_selective_fed_meta_sec = sum_elapsed(stage_type="target_aware_selective_fed_meta")
+    target_aware_selective_fed_local_ft_sec = sum_elapsed(
+        stage_type="few_shot",
+        stage_id_prefix="target_aware_selective_fed_local_ft_station",
+    )
     fed_normal_meta_sec = sum_elapsed(stage_type="fed_normal_meta")
     lmt_few_shot_sec = sum_elapsed(stage_type="few_shot", stage_id_prefix="lmt_station")
     shared_source_update_sec = sum_elapsed(stage_type="few_shot", stage_id_prefix="extreme_source_station")
@@ -414,6 +599,16 @@ def infer_training_durations_from_convergence_report():
         duration_map[TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME] = target_aware_pretrain_sec + target_aware_selective_fed_meta_sec
     elif not np.isnan(target_aware_selective_fed_meta_sec):
         duration_map[TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME] = target_aware_selective_fed_meta_sec
+    duration_map[TARGET_AWARE_SELECTIVE_FED_META_BIAS_CAL_MODEL_NAME] = duration_map[
+        TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME
+    ]
+    if not np.isnan(target_aware_selective_fed_local_ft_sec):
+        target_aware_selective_prefix_sec = duration_map[TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME]
+        duration_map[TARGET_AWARE_SELECTIVE_FED_META_LOCAL_FT_MODEL_NAME] = (
+            target_aware_selective_fed_local_ft_sec
+            if np.isnan(target_aware_selective_prefix_sec)
+            else target_aware_selective_prefix_sec + target_aware_selective_fed_local_ft_sec
+        )
     if not np.isnan(local_prefix_sec):
         duration_map[LOCAL_META_NOFT_MODEL_NAME] = local_prefix_sec
     if not np.isnan(local_prefix_sec) and not np.isnan(lmt_few_shot_sec):
@@ -447,6 +642,8 @@ def infer_training_durations_from_tensorboard():
         TARGET_AWARE_PRETRAIN_MODEL_NAME: np.nan,
         TARGET_AWARE_META_NOFT_MODEL_NAME: np.nan,
         TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME: np.nan,
+        TARGET_AWARE_SELECTIVE_FED_META_BIAS_CAL_MODEL_NAME: np.nan,
+        TARGET_AWARE_SELECTIVE_FED_META_LOCAL_FT_MODEL_NAME: np.nan,
         'LMT': np.nan,
         VANILLA_FED_NORMAL_META_NOFT_MODEL_NAME: np.nan,
         SELECTIVE_FED_NORMAL_META_NOFT_MODEL_NAME: np.nan,
@@ -528,6 +725,9 @@ def infer_training_durations_from_tensorboard():
         return float(max(ends) - min(starts))
 
     lmt_few_shot_sec = prefix_span_seconds('loss_mse_lmt_station')
+    target_aware_selective_fed_local_ft_sec = prefix_span_seconds(
+        'loss_mse_target_aware_selective_fed_local_ft_station'
+    )
     shared_source_update_sec = prefix_span_seconds('loss_mse_extreme_source_station')
     fedavg_refine_sec = prefix_span_seconds('loss_mse_extreme_fedavg_station')
     proposed_refine_sec = prefix_span_seconds('loss_mse_proposed_a_station')
@@ -542,6 +742,16 @@ def infer_training_durations_from_tensorboard():
         duration_map[TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME] = target_aware_pretrain_sec + target_aware_selective_fed_meta_sec
     elif not np.isnan(target_aware_selective_fed_meta_sec):
         duration_map[TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME] = target_aware_selective_fed_meta_sec
+    duration_map[TARGET_AWARE_SELECTIVE_FED_META_BIAS_CAL_MODEL_NAME] = duration_map[
+        TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME
+    ]
+    if not np.isnan(target_aware_selective_fed_local_ft_sec):
+        target_aware_selective_prefix_sec = duration_map[TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME]
+        duration_map[TARGET_AWARE_SELECTIVE_FED_META_LOCAL_FT_MODEL_NAME] = (
+            target_aware_selective_fed_local_ft_sec
+            if np.isnan(target_aware_selective_prefix_sec)
+            else target_aware_selective_prefix_sec + target_aware_selective_fed_local_ft_sec
+        )
     if not np.isnan(local_pretrain_sec) and not np.isnan(local_meta_sec):
         shared_prefix_sec = local_pretrain_sec + local_meta_sec
         duration_map[LOCAL_META_NOFT_MODEL_NAME] = shared_prefix_sec
@@ -580,6 +790,8 @@ LOCAL_META_NOFT_MODEL_NAME = 'Local-Meta-NoFT'
 TARGET_AWARE_PRETRAIN_MODEL_NAME = 'Target-Aware Pretrain'
 TARGET_AWARE_META_NOFT_MODEL_NAME = 'Target-Aware Meta-NoFT'
 TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME = 'Target-Aware Selective Fed-Meta-NoFT'
+TARGET_AWARE_SELECTIVE_FED_META_BIAS_CAL_MODEL_NAME = 'Target-Aware Selective Fed-Meta-NoFT + BiasCal'
+TARGET_AWARE_SELECTIVE_FED_META_LOCAL_FT_MODEL_NAME = 'Target-Aware Selective Fed-Meta + Local FT'
 VANILLA_FED_NORMAL_META_NOFT_MODEL_NAME = 'Vanilla Fed-Normal-Meta-NoFT'
 SELECTIVE_FED_NORMAL_META_NOFT_MODEL_NAME = 'Selective Fed-Normal-Meta-NoFT'
 VANILLA_FED_NORMAL_META_LOCAL_FT_MODEL_NAME = 'Vanilla Fed-Normal-Meta + Local FT'
@@ -604,6 +816,10 @@ def resolve_model_names():
             ])
         if ENABLE_TARGET_AWARE_SELECTIVE_FED_META:
             model_set.append(TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME)
+            if ENABLE_TARGET_AWARE_SELECTIVE_FED_BIAS_CAL:
+                model_set.append(TARGET_AWARE_SELECTIVE_FED_META_BIAS_CAL_MODEL_NAME)
+        if ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT:
+            model_set.append(TARGET_AWARE_SELECTIVE_FED_META_LOCAL_FT_MODEL_NAME)
         if ENABLE_FED_NORMAL_META_PROPOSED or ENABLE_SELECTIVE_FED_NORMAL_META:
             model_set.append(
                 SELECTIVE_FED_NORMAL_META_NOFT_MODEL_NAME
@@ -651,6 +867,8 @@ model_test.eval()  # 推理必须eval，否则dropout会导致结果随机漂移
 all_results = []
 
 print("\n生成预测...")
+bias_calibration_by_station = {}
+bias_calibration_records = []
 for station_id in station_ids:
     print(f"\n场站 {station_id}:")
     
@@ -677,6 +895,7 @@ for station_id in station_ids:
     target_aware_selective_fed_meta_model_file = get_target_aware_selective_fed_meta_model_path(station_id)
     fed_meta_noft_model_file = get_fed_normal_meta_model_path(station_id)
     lmt_model_files = {}
+    target_aware_selective_fed_local_ft_model_files = {}
     fed_meta_local_ft_model_files = {}
     extreme_fedavg_model_files = {}
     proposed_a_model_files = {}
@@ -706,6 +925,27 @@ for station_id in station_ids:
             print(f"  ✓ {TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME} 使用: {target_aware_selective_fed_meta_model_file}")
         else:
             print(f"  ✗ {TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME} 模型不存在: {target_aware_selective_fed_meta_model_file}")
+    if TARGET_AWARE_SELECTIVE_FED_META_BIAS_CAL_MODEL_NAME in model_names:
+        if os.path.exists(target_aware_selective_fed_meta_model_file):
+            bias_value, bias_record = compute_target_aware_selective_fed_bias_calibration(
+                station_id,
+                wf_1,
+                P_nwp,
+                target_aware_selective_fed_meta_model_file,
+            )
+            bias_calibration_by_station[str(station_id)] = bias_value
+            bias_calibration_records.append(bias_record)
+            print(
+                f"  ✓ {TARGET_AWARE_SELECTIVE_FED_META_BIAS_CAL_MODEL_NAME} 使用: "
+                f"{target_aware_selective_fed_meta_model_file}, bias={bias_value:.6f}, "
+                f"proxy_windows={bias_record['Proxy_Windows']}"
+            )
+        else:
+            bias_calibration_by_station[str(station_id)] = 0.0
+            print(
+                f"  ✗ {TARGET_AWARE_SELECTIVE_FED_META_BIAS_CAL_MODEL_NAME} "
+                f"模型不存在: {target_aware_selective_fed_meta_model_file}"
+            )
     if active_fed_meta_noft_model_name in model_names:
         if os.path.exists(fed_meta_noft_model_file):
             print(f"  ✓ {active_fed_meta_noft_model_name} 使用: {fed_meta_noft_model_file}")
@@ -714,13 +954,33 @@ for station_id in station_ids:
 
     # 1-4: 类别对应的 LMT 子模型（优先 tuned）
     for i_class in range(num_extreme_classes):
+        target_aware_selective_fed_local_ft_model_file = get_target_aware_selective_fed_local_ft_model_path(
+            station_id,
+            i_class,
+        )
         fed_meta_local_ft_model_file = get_fed_meta_local_ft_model_path(station_id, i_class)
         model_file = resolve_lmt_model_path(station_id, i_class)
         lmt_model_files[i_class] = model_file
+        target_aware_selective_fed_local_ft_model_files[i_class] = (
+            target_aware_selective_fed_local_ft_model_file
+            if os.path.exists(target_aware_selective_fed_local_ft_model_file)
+            else None
+        )
         fed_meta_local_ft_model_files[i_class] = (
             fed_meta_local_ft_model_file if os.path.exists(fed_meta_local_ft_model_file) else None
         )
         class_label = extreme_eval_labels[i_class] if i_class < len(extreme_eval_labels) else f"Class{i_class + 1}"
+        if TARGET_AWARE_SELECTIVE_FED_META_LOCAL_FT_MODEL_NAME in model_names:
+            if target_aware_selective_fed_local_ft_model_files[i_class] is not None:
+                print(
+                    f"  ✓ {TARGET_AWARE_SELECTIVE_FED_META_LOCAL_FT_MODEL_NAME}"
+                    f"(Class{i_class+1}:{class_label}) 使用: {target_aware_selective_fed_local_ft_model_file}"
+                )
+            else:
+                print(
+                    f"  ✗ {TARGET_AWARE_SELECTIVE_FED_META_LOCAL_FT_MODEL_NAME}"
+                    f"(Class{i_class+1}:{class_label}) 模型不存在: {target_aware_selective_fed_local_ft_model_file}"
+                )
         if 'LMT' in model_names and model_file is not None:
             if model_file.endswith("_tuned.pth"):
                 print(f"  ✓ LMT(Class{i_class+1}:{class_label}) 使用 tuned: {model_file}")
@@ -780,6 +1040,10 @@ for station_id in station_ids:
                 model_file = target_aware_meta_model_file if os.path.exists(target_aware_meta_model_file) else None
             elif model_name == TARGET_AWARE_SELECTIVE_FED_META_NOFT_MODEL_NAME:
                 model_file = target_aware_selective_fed_meta_model_file if os.path.exists(target_aware_selective_fed_meta_model_file) else None
+            elif model_name == TARGET_AWARE_SELECTIVE_FED_META_BIAS_CAL_MODEL_NAME:
+                model_file = target_aware_selective_fed_meta_model_file if os.path.exists(target_aware_selective_fed_meta_model_file) else None
+            elif model_name == TARGET_AWARE_SELECTIVE_FED_META_LOCAL_FT_MODEL_NAME:
+                model_file = target_aware_selective_fed_local_ft_model_files.get(eval_class)
             elif model_name in (
                 VANILLA_FED_NORMAL_META_NOFT_MODEL_NAME,
                 SELECTIVE_FED_NORMAL_META_NOFT_MODEL_NAME,
@@ -804,6 +1068,12 @@ for station_id in station_ids:
                 with torch.no_grad():
                     output_class = model_test(input_class_tensor.to(device))
                     pred_events = output_class.to(device0).numpy().reshape(num_samples, len_realp)
+            if model_name == TARGET_AWARE_SELECTIVE_FED_META_BIAS_CAL_MODEL_NAME:
+                pred_events = np.clip(
+                    pred_events + bias_calibration_by_station.get(str(station_id), 0.0),
+                    0.0,
+                    1.0,
+                )
 
             nmae_percent, nrmse_percent, wd_percent, rp_less_005_percent = calc_paper_metrics(
                 true_events, pred_events, cap_norm=cap_norm
@@ -823,6 +1093,12 @@ for station_id in station_ids:
                 'WD_%': round(wd_percent, 4),
                 'R_p<0.05_%': round(rp_less_005_percent, 4)
             })
+
+if bias_calibration_records:
+    bias_calibration_path = resolve_artifact_path("target_aware_selective_fed_bias_calibration.csv")
+    ensure_parent_dir(bias_calibration_path)
+    pd.DataFrame(bias_calibration_records).to_csv(bias_calibration_path, index=False, encoding="utf-8-sig")
+    print(f"\nBias calibration 参数已保存: {bias_calibration_path}")
 
 print(f"\n计算Overall Average（按Extreme_Class + Model跨{len(station_ids)}场站平均）...")
 results_long_df = pd.DataFrame(all_results)
@@ -949,7 +1225,7 @@ print(f"\n生成文件: {RESULTS_OUTPUT_PATH}")
 print(f"总行数: {len(wide_df)}")
 print(f"  - 每场站: {len(model_names)}模型 = {len(model_names)}行")
 print(f"  - {len(station_ids)}场站: {len(station_ids) * len(model_names)}行")
-print(f"  - Overall summaries: 6行")
+print(f"  - Overall summaries: {2 * len(model_names)}行")
 print(f"  - 总计: {len(wide_df)}行")
 
 print("\n" + "="*70)

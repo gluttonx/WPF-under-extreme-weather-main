@@ -21,6 +21,7 @@ USE_PSEUDO_FED = False  # False=去掉 shared pretrain/shared meta，恢复 loca
 
 # ========== 论文口径关键开关 ==========
 TRAIN_META_ONLY_BASELINE = os.getenv("TRAIN_META_ONLY_BASELINE", "0") != "0"
+TRAIN_PRETRAIN_ONLY = os.getenv("TRAIN_PRETRAIN_ONLY", "0") != "0"
 SKIP_LOCAL_PRETRAIN = os.getenv("SKIP_LOCAL_PRETRAIN", "0") != "0"
 SKIP_LOCAL_META = os.getenv("SKIP_LOCAL_META", "0") != "0"
 ENABLE_FED_NORMAL_META_PROPOSED = os.getenv("ENABLE_FED_NORMAL_META_PROPOSED", "0") != "0"
@@ -47,6 +48,8 @@ SKIP_TARGET_AWARE_PRETRAIN = os.getenv("SKIP_TARGET_AWARE_PRETRAIN", "0") != "0"
 SKIP_TARGET_AWARE_META = os.getenv("SKIP_TARGET_AWARE_META", "0") != "0"
 ENABLE_TARGET_AWARE_SELECTIVE_FED_META = os.getenv("ENABLE_TARGET_AWARE_SELECTIVE_FED_META", "0") != "0"
 SKIP_TARGET_AWARE_SELECTIVE_FED_META = os.getenv("SKIP_TARGET_AWARE_SELECTIVE_FED_META", "0") != "0"
+ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT = os.getenv("ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT", "0") != "0"
+SKIP_LEGACY_EXTREME_ADAPTATION = os.getenv("SKIP_LEGACY_EXTREME_ADAPTATION", "0") != "0"
 TARGET_AWARE_PRETRAIN_HWA_LOSS = os.getenv("TARGET_AWARE_PRETRAIN_HWA_LOSS", "1") != "0"
 TARGET_AWARE_META_CDRM_WEIGHT = float(os.getenv("TARGET_AWARE_META_CDRM_WEIGHT", "0.0"))
 TARGET_AWARE_META_SIM_FLOOR = float(os.getenv("TARGET_AWARE_META_SIM_FLOOR", "0.05"))
@@ -83,6 +86,20 @@ def resolve_artifact_path(filename):
 MODEL_OUTPUT_DIR = os.getenv("MODEL_OUTPUT_DIR", resolve_artifact_path("models") if ARTIFACT_DIR not in ("", ".") else ".")
 BASE_MODEL_OUTPUT_DIR = os.getenv("BASE_MODEL_OUTPUT_DIR", MODEL_OUTPUT_DIR)
 TARGET_AWARE_BASE_MODEL_OUTPUT_DIR = os.getenv("TARGET_AWARE_BASE_MODEL_OUTPUT_DIR", MODEL_OUTPUT_DIR)
+TARGET_AWARE_SELECTIVE_FED_BASE_MODEL_OUTPUT_DIR = os.getenv(
+    "TARGET_AWARE_SELECTIVE_FED_BASE_MODEL_OUTPUT_DIR",
+    TARGET_AWARE_BASE_MODEL_OUTPUT_DIR,
+)
+LOCAL_PRETRAIN_INIT_MODEL_DIR = os.getenv("LOCAL_PRETRAIN_INIT_MODEL_DIR", "")
+LOCAL_META_INIT_MODEL_DIR = os.getenv("LOCAL_META_INIT_MODEL_DIR", "")
+TARGET_AWARE_PRETRAIN_INIT_MODEL_DIR = os.getenv("TARGET_AWARE_PRETRAIN_INIT_MODEL_DIR", "")
+TARGET_AWARE_META_INIT_MODEL_DIR = os.getenv("TARGET_AWARE_META_INIT_MODEL_DIR", "")
+TARGET_AWARE_SELECTIVE_FED_META_INIT_MODEL_DIR = os.getenv("TARGET_AWARE_SELECTIVE_FED_META_INIT_MODEL_DIR", "")
+LOCAL_PRETRAIN_EPOCH_OFFSET = int(os.getenv("LOCAL_PRETRAIN_EPOCH_OFFSET", "0"))
+LOCAL_META_EPOCH_OFFSET = int(os.getenv("LOCAL_META_EPOCH_OFFSET", "0"))
+TARGET_AWARE_PRETRAIN_EPOCH_OFFSET = int(os.getenv("TARGET_AWARE_PRETRAIN_EPOCH_OFFSET", "0"))
+TARGET_AWARE_META_EPOCH_OFFSET = int(os.getenv("TARGET_AWARE_META_EPOCH_OFFSET", "0"))
+TARGET_AWARE_SELECTIVE_FED_META_EPOCH_OFFSET = int(os.getenv("TARGET_AWARE_SELECTIVE_FED_META_EPOCH_OFFSET", "0"))
 if BASE_MODEL_OUTPUT_DIR != MODEL_OUTPUT_DIR:
     can_reuse_base_dir = SKIP_LOCAL_PRETRAIN and SKIP_LOCAL_META
     if not can_reuse_base_dir:
@@ -96,6 +113,7 @@ ALL_STATIONS_TEST_RESULTS_PATH = os.getenv(
     resolve_artifact_path("all_stations_test_results.mat"),
 )
 FEW_SHOT_EPOCHS = int(os.getenv("FEW_SHOT_EPOCHS", "50"))             # 论文口径：每个极端天气 fine-tune 50 epochs
+FEW_SHOT_LR = float(os.getenv("FEW_SHOT_LR", "0.0002"))
 SKIP_EXTREME_ADAPTATION_STAGE = os.getenv("SKIP_EXTREME_ADAPTATION_STAGE", "0") != "0"
 FEW_SHOT_USE_CDRM = False
 FEW_SHOT_CDRM_WEIGHT = 5.0
@@ -250,6 +268,20 @@ def resolve_target_aware_base_model_path(filename):
     return os.path.join(TARGET_AWARE_BASE_MODEL_OUTPUT_DIR, filename)
 
 
+def resolve_target_aware_selective_fed_base_model_path(filename):
+    if os.path.isabs(filename):
+        return filename
+    return os.path.join(TARGET_AWARE_SELECTIVE_FED_BASE_MODEL_OUTPUT_DIR, filename)
+
+
+def resolve_init_model_path(init_model_dir, filename):
+    if not init_model_dir:
+        return None
+    if os.path.isabs(filename):
+        return filename
+    return os.path.join(init_model_dir, filename)
+
+
 def resolve_fed_normal_meta_model_path(filename):
     if SKIP_FED_NORMAL_META:
         return resolve_base_model_path(filename)
@@ -274,7 +306,19 @@ def print_protocol_banner():
     progress_log(f"  model_output_dir: {MODEL_OUTPUT_DIR}")
     progress_log(f"  base_model_output_dir: {BASE_MODEL_OUTPUT_DIR}")
     progress_log(f"  target_aware_base_model_output_dir: {TARGET_AWARE_BASE_MODEL_OUTPUT_DIR}")
+    progress_log(f"  target_aware_selective_fed_base_model_output_dir: {TARGET_AWARE_SELECTIVE_FED_BASE_MODEL_OUTPUT_DIR}")
+    progress_log(f"  local_pretrain_init_model_dir: {LOCAL_PRETRAIN_INIT_MODEL_DIR or '(none)'}")
+    progress_log(f"  local_meta_init_model_dir: {LOCAL_META_INIT_MODEL_DIR or '(none)'}")
+    progress_log(f"  target_aware_pretrain_init_model_dir: {TARGET_AWARE_PRETRAIN_INIT_MODEL_DIR or '(none)'}")
+    progress_log(f"  target_aware_meta_init_model_dir: {TARGET_AWARE_META_INIT_MODEL_DIR or '(none)'}")
+    progress_log(f"  target_aware_selective_fed_meta_init_model_dir: {TARGET_AWARE_SELECTIVE_FED_META_INIT_MODEL_DIR or '(none)'}")
+    progress_log(f"  local_pretrain_epoch_offset: {LOCAL_PRETRAIN_EPOCH_OFFSET}")
+    progress_log(f"  local_meta_epoch_offset: {LOCAL_META_EPOCH_OFFSET}")
+    progress_log(f"  target_aware_pretrain_epoch_offset: {TARGET_AWARE_PRETRAIN_EPOCH_OFFSET}")
+    progress_log(f"  target_aware_meta_epoch_offset: {TARGET_AWARE_META_EPOCH_OFFSET}")
+    progress_log(f"  target_aware_selective_fed_meta_epoch_offset: {TARGET_AWARE_SELECTIVE_FED_META_EPOCH_OFFSET}")
     progress_log(f"  logs_train_dir: {LOGS_TRAIN_DIR}")
+    progress_log(f"  train_pretrain_only: {TRAIN_PRETRAIN_ONLY}")
     progress_log(f"  enable_fed_normal_meta_proposed: {ENABLE_FED_NORMAL_META_PROPOSED}")
     progress_log(f"  fed_normal_meta_self_floor: {FED_NORMAL_META_SELF_FLOOR}")
     progress_log(f"  skip_fed_normal_meta: {SKIP_FED_NORMAL_META}")
@@ -299,6 +343,8 @@ def print_protocol_banner():
     progress_log(f"  skip_target_aware_meta: {SKIP_TARGET_AWARE_META}")
     progress_log(f"  enable_target_aware_selective_fed_meta: {ENABLE_TARGET_AWARE_SELECTIVE_FED_META}")
     progress_log(f"  skip_target_aware_selective_fed_meta: {SKIP_TARGET_AWARE_SELECTIVE_FED_META}")
+    progress_log(f"  enable_target_aware_selective_fed_local_ft: {ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT}")
+    progress_log(f"  skip_legacy_extreme_adaptation: {SKIP_LEGACY_EXTREME_ADAPTATION}")
     progress_log(f"  target_aware_pretrain_hwa_loss: {TARGET_AWARE_PRETRAIN_HWA_LOSS}")
     progress_log(f"  target_aware_meta_cdrm_weight: {TARGET_AWARE_META_CDRM_WEIGHT}")
     progress_log(f"  target_aware_meta_sim_floor: {TARGET_AWARE_META_SIM_FLOOR}")
@@ -316,6 +362,7 @@ def print_protocol_banner():
     progress_log(f"  target_aware_selective_fed_proxy_normal_weight: {TARGET_AWARE_SELECTIVE_FED_PROXY_NORMAL_WEIGHT}")
     progress_log(f"  global_seed: {GLOBAL_SEED}")
     progress_log(f"  skip_extreme_adaptation_stage: {SKIP_EXTREME_ADAPTATION_STAGE}")
+    progress_log(f"  few_shot_lr: {FEW_SHOT_LR}")
     if ENABLE_SELECTIVE_FED_NORMAL_META:
         progress_log("  selective_fed_meta_mode: target_proxy_validated")
 
@@ -698,10 +745,18 @@ def get_target_aware_meta_model_path(station_id):
 
 
 def get_target_aware_selective_fed_meta_support_model_path(station_id):
+    if SKIP_TARGET_AWARE_SELECTIVE_FED_META:
+        return resolve_target_aware_selective_fed_base_model_path(
+            f"model_fore_train_task_support_target_aware_selective_fed_meta_station{station_id}.pth"
+        )
     return resolve_model_path(f"model_fore_train_task_support_target_aware_selective_fed_meta_station{station_id}.pth")
 
 
 def get_target_aware_selective_fed_meta_model_path(station_id):
+    if SKIP_TARGET_AWARE_SELECTIVE_FED_META:
+        return resolve_target_aware_selective_fed_base_model_path(
+            f"model_fore_train_task_query_target_aware_selective_fed_meta_station{station_id}.pth"
+        )
     return resolve_model_path(f"model_fore_train_task_query_target_aware_selective_fed_meta_station{station_id}.pth")
 
 
@@ -747,6 +802,20 @@ def get_proposed_a_model_path(station_id, class_idx):
 
 def get_fed_meta_local_ft_model_path(station_id, class_idx):
     return resolve_model_path(f"model_fore_station{station_id}_extreme{class_idx}_fed_meta_local_ft.pth")
+
+
+def get_target_aware_selective_fed_local_ft_model_path(station_id, class_idx):
+    return resolve_model_path(f"model_fore_station{station_id}_extreme{class_idx}_target_aware_selective_fed_local_ft.pth")
+
+
+def load_stage_init_state(init_model_dir, filename, fallback_state_dict, stage_label):
+    init_path = resolve_init_model_path(init_model_dir, filename)
+    if init_path is None:
+        return copy.deepcopy(fallback_state_dict)
+    if not os.path.exists(init_path):
+        raise FileNotFoundError(f"{stage_label} resume checkpoint missing: {init_path}")
+    progress_log(f"✓ {stage_label} 从 checkpoint 初始化: {init_path}")
+    return torch.load(init_path, map_location=device)
 
 
 def get_local_extreme_base_model_path(station_id):
@@ -1365,15 +1434,23 @@ def run_local_pretraining():
             progress_log(f"✓ 跳过本地预训练，复用已有 checkpoint: {save_path}")
             continue
 
-        model_fore_pre.load_state_dict(copy.deepcopy(pretrain_random_init_state))
+        init_state = load_stage_init_state(
+            LOCAL_PRETRAIN_INIT_MODEL_DIR,
+            f"model_fore_pre_station{station_id}_local.pth",
+            pretrain_random_init_state,
+            f"local pretrain station {station_id}",
+        )
+        model_fore_pre.load_state_dict(init_state)
         optimizer_local = torch.optim.Adam(
             model_fore_pre.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999)
         )
         start_time = time.time()
+        epoch_offset = max(0, int(LOCAL_PRETRAIN_EPOCH_OFFSET))
+        total_epochs = epoch_offset + epoch1_pre
         pretrain_convergence_record = initialize_convergence_record(
             stage_type="local_pretrain",
             stage_id=station_id,
-            total_epochs=epoch1_pre,
+            total_epochs=total_epochs,
             patience=CONVERGENCE_PATIENCE_PRETRAIN,
         )
         train_input = clients_train_tensor[station_id]['input']
@@ -1381,7 +1458,8 @@ def run_local_pretraining():
         train_hwa_weight = clients_train_tensor[station_id]['hwa_weight']
 
         for i in range(epoch1_pre):
-            penalty_weight = get_pretrain_penalty_weight(i)
+            global_epoch = epoch_offset + i
+            penalty_weight = get_pretrain_penalty_weight(global_epoch)
             loss1_display, loss2_display = run_single_pretrain_epoch(
                 train_input,
                 train_target,
@@ -1390,16 +1468,16 @@ def run_local_pretraining():
                 hwa_weight=train_hwa_weight,
                 use_hwa_loss=TARGET_AWARE_PRETRAIN_HWA_LOSS,
             )
-            update_convergence_record(pretrain_convergence_record, i, loss2_display)
+            update_convergence_record(pretrain_convergence_record, global_epoch, loss2_display)
 
             if should_log_epoch(i, epoch1_pre, interval=PRETRAIN_LOG_INTERVAL):
                 end_time = time.time()
                 print(end_time - start_time)
                 print(
-                    f"[station {station_id}] [Epoch {i}/{epoch1_pre}] [loss_mse: {loss2_display:.6f}] "
+                    f"[station {station_id}] [Epoch {global_epoch + 1}/{total_epochs}] [loss_mse: {loss2_display:.6f}] "
                 )
-                writer1.add_scalar(f"loss_mse_pre_station{station_id}", loss1_display, i)
-                writer2.add_scalar(f"loss_mse_pre_station{station_id}", loss2_display, i)
+                writer1.add_scalar(f"loss_mse_pre_station{station_id}", loss1_display, global_epoch)
+                writer2.add_scalar(f"loss_mse_pre_station{station_id}", loss2_display, global_epoch)
 
         register_convergence_record(pretrain_convergence_record)
         model_fore_pre.eval()
@@ -1425,15 +1503,23 @@ def run_target_aware_pretraining():
             progress_log(f"✓ 跳过Target-Aware预训练，复用已有 checkpoint: {save_path}")
             continue
 
-        model_fore_pre.load_state_dict(copy.deepcopy(pretrain_random_init_state))
+        init_state = load_stage_init_state(
+            TARGET_AWARE_PRETRAIN_INIT_MODEL_DIR,
+            f"model_fore_pre_station{station_id}_target_aware.pth",
+            pretrain_random_init_state,
+            f"target-aware pretrain station {station_id}",
+        )
+        model_fore_pre.load_state_dict(init_state)
         optimizer_local = torch.optim.Adam(
             model_fore_pre.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999)
         )
         start_time = time.time()
+        epoch_offset = max(0, int(TARGET_AWARE_PRETRAIN_EPOCH_OFFSET))
+        total_epochs = epoch_offset + epoch1_pre
         pretrain_convergence_record = initialize_convergence_record(
             stage_type="target_aware_pretrain",
             stage_id=station_id,
-            total_epochs=epoch1_pre,
+            total_epochs=total_epochs,
             patience=CONVERGENCE_PATIENCE_PRETRAIN,
         )
         if HWA_PRETRAIN_WINDOWED:
@@ -1446,7 +1532,8 @@ def run_target_aware_pretraining():
             train_hwa_weight = clients_train_tensor[station_id]['hwa_weight']
 
         for i in range(epoch1_pre):
-            penalty_weight = get_pretrain_penalty_weight(i)
+            global_epoch = epoch_offset + i
+            penalty_weight = get_pretrain_penalty_weight(global_epoch)
             loss1_display, loss2_display = run_single_pretrain_epoch(
                 train_input,
                 train_target,
@@ -1454,17 +1541,17 @@ def run_target_aware_pretraining():
                 penalty_weight,
                 hwa_weight=train_hwa_weight,
             )
-            update_convergence_record(pretrain_convergence_record, i, loss2_display)
+            update_convergence_record(pretrain_convergence_record, global_epoch, loss2_display)
 
             if should_log_epoch(i, epoch1_pre, interval=PRETRAIN_LOG_INTERVAL):
                 end_time = time.time()
                 print(end_time - start_time)
                 print(
-                    f"[target-aware station {station_id}] [Epoch {i}/{epoch1_pre}] "
+                    f"[target-aware station {station_id}] [Epoch {global_epoch + 1}/{total_epochs}] "
                     f"[loss_mse: {loss2_display:.6f}] "
                 )
-                writer1.add_scalar(f"loss_mse_target_aware_pre_station{station_id}", loss1_display, i)
-                writer2.add_scalar(f"loss_mse_target_aware_pre_station{station_id}", loss2_display, i)
+                writer1.add_scalar(f"loss_mse_target_aware_pre_station{station_id}", loss1_display, global_epoch)
+                writer2.add_scalar(f"loss_mse_target_aware_pre_station{station_id}", loss2_display, global_epoch)
 
         register_convergence_record(pretrain_convergence_record)
         model_fore_pre.eval()
@@ -1508,6 +1595,42 @@ else:
 
 
 run_target_aware_pretraining()
+
+if TRAIN_PRETRAIN_ONLY:
+    export_convergence_report(
+        CONVERGENCE_REPORT_PATH,
+        convergence_records,
+        {
+            "protocol_name": PROTOCOL_NAME,
+            "protocol_data_dir": PROTOCOL_DATA_DIR,
+            "protocol_metadata_path": PROTOCOL_METADATA_PATH,
+            "artifact_dir": ARTIFACT_DIR,
+            "model_output_dir": MODEL_OUTPUT_DIR,
+            "base_model_output_dir": BASE_MODEL_OUTPUT_DIR,
+            "target_aware_base_model_output_dir": TARGET_AWARE_BASE_MODEL_OUTPUT_DIR,
+            "local_pretrain_init_model_dir": LOCAL_PRETRAIN_INIT_MODEL_DIR,
+            "target_aware_pretrain_init_model_dir": TARGET_AWARE_PRETRAIN_INIT_MODEL_DIR,
+            "local_pretrain_epoch_offset": LOCAL_PRETRAIN_EPOCH_OFFSET,
+            "target_aware_pretrain_epoch_offset": TARGET_AWARE_PRETRAIN_EPOCH_OFFSET,
+            "logs_train_dir": LOGS_TRAIN_DIR,
+            "yearly_protocol_enabled": YEARLY_PROTOCOL_ENABLED,
+            "seasonal_protocol_enabled": SEASONAL_PROTOCOL_ENABLED,
+            "use_federation": USE_FEDERATION,
+            "use_pseudo_fed": USE_PSEUDO_FED,
+            "train_meta_only_baseline": TRAIN_META_ONLY_BASELINE,
+            "train_pretrain_only": TRAIN_PRETRAIN_ONLY,
+            "skip_local_pretrain": SKIP_LOCAL_PRETRAIN,
+            "enable_target_aware_meta_noft": ENABLE_TARGET_AWARE_META_NOFT,
+            "skip_target_aware_pretrain": SKIP_TARGET_AWARE_PRETRAIN,
+            "hwa_pretrain_windowed": HWA_PRETRAIN_WINDOWED,
+            "target_aware_pretrain_hwa_loss": TARGET_AWARE_PRETRAIN_HWA_LOSS,
+            "global_seed": GLOBAL_SEED,
+            "pretrain_epochs": PRETRAIN_EPOCHS,
+            "pretrain_log_interval": PRETRAIN_LOG_INTERVAL,
+        },
+    )
+    progress_log("✓ TRAIN_PRETRAIN_ONLY=1：预训练完成，跳过 meta/fine-tune/eval 阶段")
+    raise SystemExit(0)
 
 
 def sample_meta_batch(sample_station_ids=None, target_aware=False, target_station_id=None):
@@ -2090,6 +2213,7 @@ def run_meta_training(
     sample_station_ids=None,
     target_aware=False,
     target_station_id=None,
+    epoch_offset=0,
 ):
     """
     单次元训练过程：
@@ -2107,10 +2231,14 @@ def run_meta_training(
     if target_station_id is None:
         target_station_id = sample_station_ids[0]
     total_task_pool = sum(np.size(all_stations_full_data[s]['p_conven_class'], axis=1) for s in sample_station_ids)
+    epoch_offset = max(0, int(epoch_offset))
+    total_epochs = epoch_offset + int(epoch_train_task)
     print(
         f"  tasks_per_epoch={META_TASKS_PER_EPOCH}, task_pool={total_task_pool} "
         f"({len(sample_station_ids)} stations: {', '.join(sample_station_ids)})"
     )
+    if epoch_offset:
+        print(f"  resume_epoch_offset={epoch_offset}, total_epoch_after_run={total_epochs}")
     print("=" * 70)
 
     support_params = get_meta_trainable_params(
@@ -2131,7 +2259,7 @@ def run_meta_training(
         convergence_record = initialize_convergence_record(
             stage_type="local_meta",
             stage_id=meta_tag,
-            total_epochs=epoch_train_task,
+            total_epochs=total_epochs,
             patience=CONVERGENCE_PATIENCE_META,
         )
     elif meta_tag.startswith("target_aware_meta_station"):
@@ -2139,7 +2267,7 @@ def run_meta_training(
         convergence_record = initialize_convergence_record(
             stage_type=stage_type,
             stage_id=meta_tag,
-            total_epochs=epoch_train_task,
+            total_epochs=total_epochs,
             patience=CONVERGENCE_PATIENCE_META,
         )
     else:
@@ -2147,11 +2275,12 @@ def run_meta_training(
         convergence_record = initialize_convergence_record(
             stage_type=stage_type,
             stage_id=meta_tag,
-            total_epochs=epoch_train_task,
+            total_epochs=total_epochs,
             patience=CONVERGENCE_PATIENCE_META,
         )
 
     for i_t in range(epoch_train_task):
+        global_epoch = epoch_offset + i_t
         (
             Train_target_support,
             Train_input_support,
@@ -2167,7 +2296,7 @@ def run_meta_training(
 
         print(
             "[##################################################################"
-            f"——{meta_tag}:train_task_support_Epoch {i_t}/{epoch_train_task}——"
+            f"——{meta_tag}:train_task_support_Epoch {global_epoch + 1}/{total_epochs}——"
             "############################################################]"
         )
 
@@ -2202,12 +2331,12 @@ def run_meta_training(
         support_state = copy.deepcopy(model_fore_train_task_support.state_dict())
         torch.save(support_state, support_model_path)
 
-        writer1.add_scalar(f"loss_penalty_train_task_support_{meta_tag}", loss1.item(), i_t)
-        writer2.add_scalar(f"loss_mse_train_task_support_{meta_tag}", loss2.item(), i_t)
+        writer1.add_scalar(f"loss_penalty_train_task_support_{meta_tag}", loss1.item(), global_epoch)
+        writer2.add_scalar(f"loss_mse_train_task_support_{meta_tag}", loss2.item(), global_epoch)
 
         print(
             "[##################################################################"
-            f"——{meta_tag}:train_task_query_Epoch {i_t}/{epoch_train_task}——"
+            f"——{meta_tag}:train_task_query_Epoch {global_epoch + 1}/{total_epochs}——"
             "############################################################]"
         )
 
@@ -2238,14 +2367,14 @@ def run_meta_training(
         model_fore_train_task_query.eval()
         torch.save(model_fore_train_task_query.state_dict(), query_model_path)
 
-        writer1.add_scalar(f"loss_penalty_train_task_query_{meta_tag}", loss1_q.item(), i_t)
-        writer2.add_scalar(f"loss_mse_train_task_query_{meta_tag}", loss2_q.item(), i_t)
-        update_convergence_record(convergence_record, i_t, loss2_q.item())
+        writer1.add_scalar(f"loss_penalty_train_task_query_{meta_tag}", loss1_q.item(), global_epoch)
+        writer2.add_scalar(f"loss_mse_train_task_query_{meta_tag}", loss2_q.item(), global_epoch)
+        update_convergence_record(convergence_record, global_epoch, loss2_q.item())
 
         if should_log_epoch(i_t, epoch_train_task, interval=META_LOG_INTERVAL):
             progress_log(
                 f"  收敛追踪[{stage_type}:{meta_tag}] "
-                f"epoch={i_t + 1}/{epoch_train_task} "
+                f"epoch={global_epoch + 1}/{total_epochs} "
                 f"query_mse={loss2_q.item():.6f}"
             )
 
@@ -2294,16 +2423,28 @@ def run_local_meta_training():
                 )
             progress_log(f"✓ 跳过本地元训练，复用已有 checkpoint: {local_meta_path}")
             continue
+        if LOCAL_META_INIT_MODEL_DIR:
+            local_meta_init_path = resolve_init_model_path(
+                LOCAL_META_INIT_MODEL_DIR,
+                f"model_fore_train_task_query_local_meta_station{station_id}.pth",
+            )
+            if not os.path.exists(local_meta_init_path):
+                raise FileNotFoundError(f"local meta station {station_id} resume checkpoint missing: {local_meta_init_path}")
+            progress_log(f"✓ local meta station {station_id} 从 checkpoint 初始化: {local_meta_init_path}")
+            local_meta_init_state = torch.load(local_meta_init_path, map_location=device)
+        else:
+            local_meta_init_state = torch.load(local_pretrain_path, map_location=device)
         run_meta_training(
             meta_tag=f"local_meta_station{station_id}",
-            init_state_dict=torch.load(local_pretrain_path),
+            init_state_dict=local_meta_init_state,
             support_model_path=get_local_meta_support_model_path(station_id),
             query_model_path=local_meta_path,
             epoch_train_task=PROPOSED_META_EPOCHS,
             use_cdrm=True,
             train_all_params=False,
             disable_lwp=False,
-            sample_station_ids=[station_id]
+            sample_station_ids=[station_id],
+            epoch_offset=LOCAL_META_EPOCH_OFFSET,
         )
 
         if TRAIN_META_ONLY_BASELINE:
@@ -2343,9 +2484,22 @@ def run_target_aware_meta_training():
             raise FileNotFoundError(
                 f"Target-Aware元训练缺少预训练 checkpoint: {target_aware_pretrain_path}"
             )
+        if TARGET_AWARE_META_INIT_MODEL_DIR:
+            target_aware_meta_init_path = resolve_init_model_path(
+                TARGET_AWARE_META_INIT_MODEL_DIR,
+                f"model_fore_train_task_query_target_aware_meta_station{station_id}.pth",
+            )
+            if not os.path.exists(target_aware_meta_init_path):
+                raise FileNotFoundError(
+                    f"target-aware meta station {station_id} resume checkpoint missing: {target_aware_meta_init_path}"
+                )
+            progress_log(f"✓ target-aware meta station {station_id} 从 checkpoint 初始化: {target_aware_meta_init_path}")
+            target_aware_meta_init_state = torch.load(target_aware_meta_init_path, map_location=device)
+        else:
+            target_aware_meta_init_state = torch.load(target_aware_pretrain_path, map_location=device)
         run_meta_training(
             meta_tag=f"target_aware_meta_station{station_id}",
-            init_state_dict=torch.load(target_aware_pretrain_path),
+            init_state_dict=target_aware_meta_init_state,
             support_model_path=get_target_aware_meta_support_model_path(station_id),
             query_model_path=target_aware_meta_path,
             epoch_train_task=PROPOSED_META_EPOCHS,
@@ -2356,6 +2510,7 @@ def run_target_aware_meta_training():
             sample_station_ids=[station_id],
             target_aware=True,
             target_station_id=station_id,
+            epoch_offset=TARGET_AWARE_META_EPOCH_OFFSET,
         )
 
 
@@ -2405,21 +2560,41 @@ def run_target_aware_selective_fed_meta_training():
         if proxy_input_tensor.shape[0] == 0:
             raise ValueError(f"Target station {station_id} has no proxy windows for selective fed validation")
 
-        current_state = torch.load(target_aware_pretrain_path, map_location=device)
+        if TARGET_AWARE_SELECTIVE_FED_META_INIT_MODEL_DIR:
+            selective_init_path = resolve_init_model_path(
+                TARGET_AWARE_SELECTIVE_FED_META_INIT_MODEL_DIR,
+                f"model_fore_train_task_query_target_aware_selective_fed_meta_station{station_id}.pth",
+            )
+            if not os.path.exists(selective_init_path):
+                raise FileNotFoundError(
+                    f"Target-Aware Selective Fed Meta station {station_id} resume checkpoint missing: {selective_init_path}"
+                )
+            progress_log(f"✓ Target-Aware Selective Fed Meta station {station_id} 从 checkpoint 初始化: {selective_init_path}")
+            current_state = torch.load(selective_init_path, map_location=device)
+        else:
+            current_state = torch.load(target_aware_pretrain_path, map_location=device)
         selective_tag = f"target_aware_selective_fed_meta_station{station_id}"
+        epoch_offset = max(0, int(TARGET_AWARE_SELECTIVE_FED_META_EPOCH_OFFSET))
+        total_epochs = epoch_offset + PROPOSED_META_EPOCHS
+        if epoch_offset:
+            progress_log(
+                f"  Target-Aware Selective Fed Meta resume_epoch_offset={epoch_offset}, "
+                f"total_epoch_after_run={total_epochs}"
+            )
         convergence_record = initialize_convergence_record(
             stage_type="target_aware_selective_fed_meta",
             stage_id=selective_tag,
-            total_epochs=PROPOSED_META_EPOCHS,
+            total_epochs=total_epochs,
             patience=CONVERGENCE_PATIENCE_META,
         )
 
         for i_t in range(PROPOSED_META_EPOCHS):
+            global_epoch = epoch_offset + i_t
             self_state, self_query_loss = run_meta_support_query_update(
                 base_state_dict=current_state,
                 sample_station_ids=[station_id],
                 meta_tag=f"{selective_tag}_self",
-                epoch_idx=i_t,
+                epoch_idx=global_epoch,
                 use_cdrm=use_cdrm,
                 cdrm_weight=TARGET_AWARE_META_CDRM_WEIGHT,
                 train_all_params=False,
@@ -2444,7 +2619,7 @@ def run_target_aware_selective_fed_meta_training():
                     base_state_dict=current_state,
                     sample_station_ids=[source_station_id],
                     meta_tag=f"{selective_tag}_source{source_station_id}",
-                    epoch_idx=i_t,
+                    epoch_idx=global_epoch,
                     use_cdrm=use_cdrm,
                     cdrm_weight=TARGET_AWARE_META_CDRM_WEIGHT,
                     train_all_params=False,
@@ -2531,12 +2706,23 @@ def run_target_aware_selective_fed_meta_training():
 
             torch.save(current_state, selective_support_path)
             torch.save(current_state, selective_meta_path)
-            update_convergence_record(convergence_record, i_t, aggregate_proxy_loss)
+            writer2.add_scalar(
+                f"loss_mse_target_aware_selective_fed_meta_proxy_station{station_id}",
+                float(aggregate_proxy_loss),
+                global_epoch,
+            )
+            if self_proxy_loss is not None:
+                writer2.add_scalar(
+                    f"loss_mse_target_aware_selective_fed_meta_self_proxy_station{station_id}",
+                    float(self_proxy_loss),
+                    global_epoch,
+                )
+            update_convergence_record(convergence_record, global_epoch, aggregate_proxy_loss)
 
             if should_log_epoch(i_t, PROPOSED_META_EPOCHS, interval=META_LOG_INTERVAL):
                 progress_log(
                     f"  target_aware_selective_fed[target={station_id}] "
-                    f"epoch={i_t + 1}/{PROPOSED_META_EPOCHS} "
+                    f"epoch={global_epoch + 1}/{total_epochs} "
                     f"self_proxy_loss={self_proxy_loss} "
                     f"aggregate_proxy_loss={aggregate_proxy_loss} "
                     f"accepted_sources={[item['source_station_id'] for item in selected_sources]} "
@@ -2740,7 +2926,12 @@ else:
 
 
 ## test_task_support
-few_shot_model_count = 0 if SKIP_EXTREME_ADAPTATION_STAGE else len(station_ids) * num_extreme_classes * (4 if TRAIN_META_ONLY_BASELINE else 3)
+legacy_extreme_model_multiplier = 0 if SKIP_LEGACY_EXTREME_ADAPTATION else (4 if TRAIN_META_ONLY_BASELINE else 3)
+target_aware_selective_ft_multiplier = 1 if ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT else 0
+few_shot_model_count = (
+    0 if SKIP_EXTREME_ADAPTATION_STAGE
+    else len(station_ids) * num_extreme_classes * (legacy_extreme_model_multiplier + target_aware_selective_ft_multiplier)
+)
 if SKIP_EXTREME_ADAPTATION_STAGE:
     print("##################################################################——————————NoFT协议：跳过test_task_support/Few-shot适应——————————############################################################")
 else:
@@ -3020,7 +3211,7 @@ def adapt_state_dict(
     model_fore_test_task_support.load_state_dict(copy.deepcopy(base_state_dict))
     last_finite_state = copy.deepcopy(base_state_dict)
     optimizer = torch.optim.Adam(
-        model_fore_test_task_support.get_trainable_params(), lr=0.0002, betas=(0.5, 0.999)
+        model_fore_test_task_support.get_trainable_params(), lr=FEW_SHOT_LR, betas=(0.5, 0.999)
     )
     adapt_input_device = adapt_input_tensor.to(device)
     adapt_target_device = adapt_target_tensor.to(device)
@@ -3490,6 +3681,35 @@ for station_id in ([] if SKIP_EXTREME_ADAPTATION_STAGE else station_ids):
             f"{target_payload['val_input'].shape[0]}"
         )
 
+        if ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT:
+            if not ENABLE_TARGET_AWARE_SELECTIVE_FED_META:
+                raise RuntimeError(
+                    "Target-Aware Selective Fed-Meta + Local FT requires ENABLE_TARGET_AWARE_SELECTIVE_FED_META=1"
+                )
+            target_aware_selective_base_path = get_target_aware_selective_fed_meta_model_path(station_id)
+            if not os.path.exists(target_aware_selective_base_path):
+                raise FileNotFoundError(
+                    "Target-Aware Selective Fed-Meta + Local FT缺少NoFT checkpoint: "
+                    f"{target_aware_selective_base_path}"
+                )
+            target_aware_selective_ft_state_dict, _ = adapt_state_dict(
+                base_state_dict=torch.load(target_aware_selective_base_path, map_location=device),
+                adapt_input_tensor=target_payload["all_input"],
+                adapt_target_tensor=target_payload["all_target"],
+                epochs=FEW_SHOT_EPOCHS,
+                log_tag=f"target_aware_selective_fed_local_ft_station{station_id}_class{i_class}",
+                model_label="Target-Aware Selective Fed-Meta + Local FT",
+            )
+            target_aware_selective_ft_model_name = get_target_aware_selective_fed_local_ft_model_path(station_id, i_class)
+            save_state_dict(target_aware_selective_ft_state_dict, target_aware_selective_ft_model_name)
+            print(f"    ✓ 保存(Target-Aware Selective Fed-Meta + Local FT): {target_aware_selective_ft_model_name}")
+            all_personalized_models[
+                f'target_aware_selective_fed_local_ft_{station_id}_class{i_class}'
+            ] = target_aware_selective_ft_model_name
+
+        if SKIP_LEGACY_EXTREME_ADAPTATION:
+            continue
+
         local_base_model_path = get_local_extreme_base_model_path(station_id)
         proposed_base_model_path = get_proposed_a_base_model_path(station_id)
         local_shared_init_state = torch.load(local_base_model_path, map_location=device)
@@ -3695,11 +3915,16 @@ for station_id in station_ids:
         if ENABLE_FED_NORMAL_META_PROPOSED or ENABLE_SELECTIVE_FED_NORMAL_META:
             model_paths["fed_meta_noft"] = get_fed_normal_meta_model_path(station_id)
         if not SKIP_EXTREME_ADAPTATION_STAGE:
-            model_paths["lmt"] = get_lmt_model_path(station_id, i_class)
-            if ENABLE_FED_NORMAL_META_PROPOSED or ENABLE_SELECTIVE_FED_NORMAL_META:
-                model_paths["fed_meta_local_ft"] = get_fed_meta_local_ft_model_path(station_id, i_class)
-            model_paths["extreme_fedavg"] = get_extreme_fedavg_model_path(station_id, i_class)
-            model_paths["proposed_a"] = get_proposed_a_model_path(station_id, i_class)
+            if ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT:
+                model_paths[
+                    "target_aware_selective_fed_local_ft"
+                ] = get_target_aware_selective_fed_local_ft_model_path(station_id, i_class)
+            if not SKIP_LEGACY_EXTREME_ADAPTATION:
+                model_paths["lmt"] = get_lmt_model_path(station_id, i_class)
+                if ENABLE_FED_NORMAL_META_PROPOSED or ENABLE_SELECTIVE_FED_NORMAL_META:
+                    model_paths["fed_meta_local_ft"] = get_fed_meta_local_ft_model_path(station_id, i_class)
+                model_paths["extreme_fedavg"] = get_extreme_fedavg_model_path(station_id, i_class)
+                model_paths["proposed_a"] = get_proposed_a_model_path(station_id, i_class)
 
         for model_key, model_name in model_paths.items():
             if not os.path.exists(model_name):
@@ -3724,10 +3949,13 @@ for station_id in station_ids:
                 else "Vanilla Fed-Normal-Meta-NoFT"
             )
         if not SKIP_EXTREME_ADAPTATION_STAGE:
-            logged_labels.append("LMT")
-            if ENABLE_FED_NORMAL_META_PROPOSED or ENABLE_SELECTIVE_FED_NORMAL_META:
-                logged_labels.append(fed_meta_local_ft_label)
-            logged_labels.extend(["Extreme-FedAvg", "Proposed-A"])
+            if ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT:
+                logged_labels.append("Target-Aware Selective Fed-Meta + Local FT")
+            if not SKIP_LEGACY_EXTREME_ADAPTATION:
+                logged_labels.append("LMT")
+                if ENABLE_FED_NORMAL_META_PROPOSED or ENABLE_SELECTIVE_FED_NORMAL_META:
+                    logged_labels.append(fed_meta_local_ft_label)
+                logged_labels.extend(["Extreme-FedAvg", "Proposed-A"])
         print(f"  ✓ 极端类别{i_class+1}({class_label})（{'/'.join(logged_labels)}）")
 
 # 保存所有结果
@@ -3748,6 +3976,17 @@ export_convergence_report(
         "model_output_dir": MODEL_OUTPUT_DIR,
         "base_model_output_dir": BASE_MODEL_OUTPUT_DIR,
         "target_aware_base_model_output_dir": TARGET_AWARE_BASE_MODEL_OUTPUT_DIR,
+        "target_aware_selective_fed_base_model_output_dir": TARGET_AWARE_SELECTIVE_FED_BASE_MODEL_OUTPUT_DIR,
+        "local_pretrain_init_model_dir": LOCAL_PRETRAIN_INIT_MODEL_DIR,
+        "local_meta_init_model_dir": LOCAL_META_INIT_MODEL_DIR,
+        "target_aware_pretrain_init_model_dir": TARGET_AWARE_PRETRAIN_INIT_MODEL_DIR,
+        "target_aware_meta_init_model_dir": TARGET_AWARE_META_INIT_MODEL_DIR,
+        "target_aware_selective_fed_meta_init_model_dir": TARGET_AWARE_SELECTIVE_FED_META_INIT_MODEL_DIR,
+        "local_pretrain_epoch_offset": LOCAL_PRETRAIN_EPOCH_OFFSET,
+        "local_meta_epoch_offset": LOCAL_META_EPOCH_OFFSET,
+        "target_aware_pretrain_epoch_offset": TARGET_AWARE_PRETRAIN_EPOCH_OFFSET,
+        "target_aware_meta_epoch_offset": TARGET_AWARE_META_EPOCH_OFFSET,
+        "target_aware_selective_fed_meta_epoch_offset": TARGET_AWARE_SELECTIVE_FED_META_EPOCH_OFFSET,
         "logs_train_dir": LOGS_TRAIN_DIR,
         "all_stations_test_results_path": ALL_STATIONS_TEST_RESULTS_PATH,
         "sample_interval_hours": SAMPLE_INTERVAL_HOURS,
@@ -3760,6 +3999,7 @@ export_convergence_report(
         "use_federation": USE_FEDERATION,
         "use_pseudo_fed": USE_PSEUDO_FED,
         "train_meta_only_baseline": TRAIN_META_ONLY_BASELINE,
+        "train_pretrain_only": TRAIN_PRETRAIN_ONLY,
         "skip_local_pretrain": SKIP_LOCAL_PRETRAIN,
         "skip_local_meta": SKIP_LOCAL_META,
         "enable_fed_normal_meta_proposed": ENABLE_FED_NORMAL_META_PROPOSED,
@@ -3786,6 +4026,8 @@ export_convergence_report(
         "skip_target_aware_meta": SKIP_TARGET_AWARE_META,
         "enable_target_aware_selective_fed_meta": ENABLE_TARGET_AWARE_SELECTIVE_FED_META,
         "skip_target_aware_selective_fed_meta": SKIP_TARGET_AWARE_SELECTIVE_FED_META,
+        "enable_target_aware_selective_fed_local_ft": ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT,
+        "skip_legacy_extreme_adaptation": SKIP_LEGACY_EXTREME_ADAPTATION,
         "target_aware_pretrain_hwa_loss": TARGET_AWARE_PRETRAIN_HWA_LOSS,
         "target_aware_meta_cdrm_weight": TARGET_AWARE_META_CDRM_WEIGHT,
         "target_aware_meta_sim_floor": TARGET_AWARE_META_SIM_FLOOR,
@@ -3807,6 +4049,7 @@ export_convergence_report(
         "proposed_meta_epochs": PROPOSED_META_EPOCHS,
         "meta_only_meta_epochs": META_ONLY_META_EPOCHS,
         "few_shot_epochs": FEW_SHOT_EPOCHS,
+        "few_shot_lr": FEW_SHOT_LR,
         "skip_extreme_adaptation_stage": SKIP_EXTREME_ADAPTATION_STAGE,
         "pretrain_log_interval": PRETRAIN_LOG_INTERVAL,
         "meta_log_interval": META_LOG_INTERVAL,
@@ -3839,10 +4082,14 @@ print("✓✓✓ 训练和测试全部完成！")
 if SKIP_EXTREME_ADAPTATION_STAGE:
     print("NoFT协议未生成个性化微调模型")
 else:
-    summary_labels = ["LMT"]
-    if ENABLE_FED_NORMAL_META_PROPOSED or ENABLE_SELECTIVE_FED_NORMAL_META:
-        summary_labels.append(fed_meta_local_ft_label)
-    summary_labels.extend(["Extreme-FedAvg", "Proposed-A"])
+    summary_labels = []
+    if ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT:
+        summary_labels.append("Target-Aware Selective Fed-Meta + Local FT")
+    if not SKIP_LEGACY_EXTREME_ADAPTATION:
+        summary_labels.append("LMT")
+        if ENABLE_FED_NORMAL_META_PROPOSED or ENABLE_SELECTIVE_FED_NORMAL_META:
+            summary_labels.append(fed_meta_local_ft_label)
+        summary_labels.extend(["Extreme-FedAvg", "Proposed-A"])
     print(f"生成的个性化微调模型: {len(all_personalized_models)}个（含 {' / '.join(summary_labels)}）")
 print("="*70)
 

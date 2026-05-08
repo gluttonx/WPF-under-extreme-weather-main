@@ -27,6 +27,12 @@ class ConvergenceMonitorAstTest(unittest.TestCase):
         self.assertIn("register_convergence_record(convergence_record)", text)
         self.assertIn("export_convergence_report(", text)
 
+    def test_training_logs_selective_fed_proxy_loss_by_epoch(self):
+        text = TRAIN_FILE.read_text(encoding="utf-8")
+        self.assertIn("loss_mse_target_aware_selective_fed_meta_proxy_station", text)
+        self.assertIn("TARGET_AWARE_SELECTIVE_FED_META_EPOCH_OFFSET", text)
+        self.assertIn("global_epoch = epoch_offset + i_t", text)
+
 
 if __name__ == "__main__":
     unittest.main()
