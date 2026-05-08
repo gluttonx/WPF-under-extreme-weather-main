@@ -1,0 +1,299 @@
+{
+  "protocol_name": "six_station_2h_6point_high_temp_only_summer_protocol",
+  "train_years": [
+    2023
+  ],
+  "test_years": [
+    2024
+  ],
+  "sample_interval_hours": 2,
+  "downsample_offset": 1,
+  "len_realp": 6,
+  "points_per_day": 12,
+  "window_span_hours": 12,
+  "protocol_data_dir": "/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_temp_only_summer_six_station",
+  "protocol_metadata_path": "/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_temp_only_summer_six_station/protocol_metadata.json",
+  "phase_augmentation_enabled": true,
+  "phase_augment_station_map": {
+    "58": "61",
+    "59": "62",
+    "60": "63"
+  },
+  "normal_support_total_points": "all",
+  "normal_support_points_by_year": {
+    "2023": 0
+  },
+  "normal_sampling_policy": "single_year_summer_all_available_normal",
+  "extreme_support_window_cap": "all",
+  "extreme_support_sampling_policy": "single_year_summer_all_available_high_temp",
+  "num_conventional_classes": 6,
+  "conventional_classes_by_station": {
+    "58": 7,
+    "61": 7,
+    "59": 6,
+    "62": 6,
+    "60": 5,
+    "63": 5
+  },
+  "extreme_class_names": [
+    "high_temp"
+  ],
+  "extreme_eval_labels": [
+    "HighTemperature"
+  ],
+  "num_extreme_classes": 1,
+  "stations": [
+    {
+      "station_id": "58",
+      "source_station_id": "058",
+      "main_sheet": "jilin_058",
+      "train_workbook": "2223jilin_058_processed_4classes.xlsx",
+      "test_workbook": "24jilin_058_processed_4classes.xlsx",
+      "train_capacity": 50.0,
+      "test_capacity": 50.0,
+      "asset_path": "58wf_4_train.mat",
+      "train_years": [
+        2023
+      ],
+      "test_years": [
+        2024
+      ],
+      "main_support_hours": 1072,
+      "main_test_hours": 11,
+      "conventional_support_hours": 1072,
+      "normal_support_total_points": "all",
+      "normal_support_points_by_year": {
+        "2023": 1072
+      },
+      "normal_sampling_policy": "single_year_summer_all_available_normal",
+      "extreme_support_window_counts": {
+        "high_temp": 5
+      },
+      "extreme_test_window_counts": {
+        "high_temp": 1
+      },
+      "extreme_support_window_cap": "all",
+      "extreme_support_sampling_policy": "single_year_summer_all_available_high_temp",
+      "num_conventional_classes": 7,
+      "protocol_name": "six_station_2h_6point_high_temp_only_summer_protocol",
+      "sample_interval_hours": 2,
+      "downsample_offset": 1,
+      "len_realp": 6,
+      "points_per_day": 12,
+      "window_span_hours": 12,
+      "phase_augmentation_enabled": true,
+      "phase_role": "base",
+      "phase_source_station_id": "58"
+    },
+    {
+      "station_id": "59",
+      "source_station_id": "059",
+      "main_sheet": "jilin_059",
+      "train_workbook": "2223jilin_059_processed_4classes.xlsx",
+      "test_workbook": "24jilin_059_processed_4classes.xlsx",
+      "train_capacity": 50.0,
+      "test_capacity": 100.0,
+      "asset_path": "59wf_4_train.mat",
+      "train_years": [
+        2023
+      ],
+      "test_years": [
+        2024
+      ],
+      "main_support_hours": 1060,
+      "main_test_hours": 14,
+      "conventional_support_hours": 1060,
+      "normal_support_total_points": "all",
+      "normal_support_points_by_year": {
+        "2023": 1060
+      },
+      "normal_sampling_policy": "single_year_summer_all_available_normal",
+      "extreme_support_window_counts": {
+        "high_temp": 7
+      },
+      "extreme_test_window_counts": {
+        "high_temp": 2
+      },
+      "extreme_support_window_cap": "all",
+      "extreme_support_sampling_policy": "single_year_summer_all_available_high_temp",
+      "num_conventional_classes": 6,
+      "protocol_name": "six_station_2h_6point_high_temp_only_summer_protocol",
+      "sample_interval_hours": 2,
+      "downsample_offset": 1,
+      "len_realp": 6,
+      "points_per_day": 12,
+      "window_span_hours": 12,
+      "phase_augmentation_enabled": true,
+      "phase_role": "base",
+      "phase_source_station_id": "59"
+    },
+    {
+      "station_id": "60",
+      "source_station_id": "060",
+      "main_sheet": "jilin_060",
+      "train_workbook": "2223jilin_060_processed_4classes.xlsx",
+      "test_workbook": "24jilin_060_processed_4classes.xlsx",
+      "train_capacity": 100.0,
+      "test_capacity": 300.0,
+      "asset_path": "60wf_4_train.mat",
+      "train_years": [
+        2023
+      ],
+      "test_years": [
+        2024
+      ],
+      "main_support_hours": 1053,
+      "main_test_hours": 25,
+      "conventional_support_hours": 1053,
+      "normal_support_total_points": "all",
+      "normal_support_points_by_year": {
+        "2023": 1053
+      },
+      "normal_sampling_policy": "single_year_summer_all_available_normal",
+      "extreme_support_window_counts": {
+        "high_temp": 8
+      },
+      "extreme_test_window_counts": {
+        "high_temp": 4
+      },
+      "extreme_support_window_cap": "all",
+      "extreme_support_sampling_policy": "single_year_summer_all_available_high_temp",
+      "num_conventional_classes": 5,
+      "protocol_name": "six_station_2h_6point_high_temp_only_summer_protocol",
+      "sample_interval_hours": 2,
+      "downsample_offset": 1,
+      "len_realp": 6,
+      "points_per_day": 12,
+      "window_span_hours": 12,
+      "phase_augmentation_enabled": true,
+      "phase_role": "base",
+      "phase_source_station_id": "60"
+    },
+    {
+      "station_id": "61",
+      "source_station_id": "058",
+      "main_sheet": "jilin_058",
+      "train_workbook": "2223jilin_058_processed_4classes.xlsx",
+      "test_workbook": "24jilin_058_processed_4classes.xlsx",
+      "train_capacity": 50.0,
+      "test_capacity": 50.0,
+      "asset_path": "61wf_4_train.mat",
+      "train_years": [
+        2023
+      ],
+      "test_years": [
+        2024
+      ],
+      "main_support_hours": 1072,
+      "main_test_hours": 11,
+      "conventional_support_hours": 1072,
+      "normal_support_total_points": "all",
+      "normal_support_points_by_year": {
+        "2023": 1072
+      },
+      "normal_sampling_policy": "single_year_summer_all_available_normal",
+      "extreme_support_window_counts": {
+        "high_temp": 5
+      },
+      "extreme_test_window_counts": {
+        "high_temp": 1
+      },
+      "extreme_support_window_cap": "all",
+      "extreme_support_sampling_policy": "single_year_summer_all_available_high_temp",
+      "num_conventional_classes": 7,
+      "protocol_name": "six_station_2h_6point_high_temp_only_summer_protocol",
+      "sample_interval_hours": 2,
+      "downsample_offset": 0,
+      "len_realp": 6,
+      "points_per_day": 12,
+      "window_span_hours": 12,
+      "phase_augmentation_enabled": true,
+      "phase_role": "complementary",
+      "phase_source_station_id": "58"
+    },
+    {
+      "station_id": "62",
+      "source_station_id": "059",
+      "main_sheet": "jilin_059",
+      "train_workbook": "2223jilin_059_processed_4classes.xlsx",
+      "test_workbook": "24jilin_059_processed_4classes.xlsx",
+      "train_capacity": 50.0,
+      "test_capacity": 100.0,
+      "asset_path": "62wf_4_train.mat",
+      "train_years": [
+        2023
+      ],
+      "test_years": [
+        2024
+      ],
+      "main_support_hours": 1060,
+      "main_test_hours": 15,
+      "conventional_support_hours": 1060,
+      "normal_support_total_points": "all",
+      "normal_support_points_by_year": {
+        "2023": 1060
+      },
+      "normal_sampling_policy": "single_year_summer_all_available_normal",
+      "extreme_support_window_counts": {
+        "high_temp": 7
+      },
+      "extreme_test_window_counts": {
+        "high_temp": 2
+      },
+      "extreme_support_window_cap": "all",
+      "extreme_support_sampling_policy": "single_year_summer_all_available_high_temp",
+      "num_conventional_classes": 6,
+      "protocol_name": "six_station_2h_6point_high_temp_only_summer_protocol",
+      "sample_interval_hours": 2,
+      "downsample_offset": 0,
+      "len_realp": 6,
+      "points_per_day": 12,
+      "window_span_hours": 12,
+      "phase_augmentation_enabled": true,
+      "phase_role": "complementary",
+      "phase_source_station_id": "59"
+    },
+    {
+      "station_id": "63",
+      "source_station_id": "060",
+      "main_sheet": "jilin_060",
+      "train_workbook": "2223jilin_060_processed_4classes.xlsx",
+      "test_workbook": "24jilin_060_processed_4classes.xlsx",
+      "train_capacity": 100.0,
+      "test_capacity": 300.0,
+      "asset_path": "63wf_4_train.mat",
+      "train_years": [
+        2023
+      ],
+      "test_years": [
+        2024
+      ],
+      "main_support_hours": 1053,
+      "main_test_hours": 25,
+      "conventional_support_hours": 1053,
+      "normal_support_total_points": "all",
+      "normal_support_points_by_year": {
+        "2023": 1053
+      },
+      "normal_sampling_policy": "single_year_summer_all_available_normal",
+      "extreme_support_window_counts": {
+        "high_temp": 8
+      },
+      "extreme_test_window_counts": {
+        "high_temp": 4
+      },
+      "extreme_support_window_cap": "all",
+      "extreme_support_sampling_policy": "single_year_summer_all_available_high_temp",
+      "num_conventional_classes": 5,
+      "protocol_name": "six_station_2h_6point_high_temp_only_summer_protocol",
+      "sample_interval_hours": 2,
+      "downsample_offset": 0,
+      "len_realp": 6,
+      "points_per_day": 12,
+      "window_span_hours": 12,
+      "phase_augmentation_enabled": true,
+      "phase_role": "complementary",
+      "phase_source_station_id": "60"
+    }
+  ]
+}
