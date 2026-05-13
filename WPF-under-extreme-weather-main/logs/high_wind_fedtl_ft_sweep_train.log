@@ -1,0 +1,388 @@
+
+======================================================================
+stage=train
+env  PROTOCOL_NAME=four_client_2h_6point_high_wind_spring_noft_protocol PROTOCOL_DATA_DIR=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client PROTOCOL_METADATA_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/protocol_metadata.json SAMPLE_INTERVAL_HOURS=2 DOWNSAMPLE_OFFSET=1 LEN_REALP=6 POINTS_PER_DAY=12 PHASE_AUGMENT_STATIONS=1 PHASE_AUGMENT_COMPLEMENTARY_OFFSET=0 ARTIFACT_DIR=artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k MODEL_OUTPUT_DIR=artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/models BASE_MODEL_OUTPUT_DIR=artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/models TARGET_AWARE_BASE_MODEL_OUTPUT_DIR=artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/models TARGET_AWARE_SELECTIVE_FED_BASE_MODEL_OUTPUT_DIR=artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/models LOCAL_PRETRAIN_INIT_MODEL_DIR= LOCAL_META_INIT_MODEL_DIR= TARGET_AWARE_PRETRAIN_INIT_MODEL_DIR= TARGET_AWARE_META_INIT_MODEL_DIR= TARGET_AWARE_SELECTIVE_FED_META_INIT_MODEL_DIR= LOCAL_PRETRAIN_EPOCH_OFFSET=0 LOCAL_META_EPOCH_OFFSET=0 TARGET_AWARE_PRETRAIN_EPOCH_OFFSET=0 TARGET_AWARE_META_EPOCH_OFFSET=0 TARGET_AWARE_SELECTIVE_FED_META_EPOCH_OFFSET=0 LOGS_TRAIN_DIR=artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/logs_train CONVERGENCE_REPORT_PATH=artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/training_convergence_report.json ALL_STATIONS_TEST_RESULTS_PATH=artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/all_stations_test_results.mat RESULTS_OUTPUT_PATH=artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/results/multi_station_performance.csv TASK_RESULTS_OUTPUT_PATH=artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/results/multi_station_performance_task_level.csv YEARLY_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_ENABLED=0 YEARLY_PROTOCOL_METADATA_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/protocol_metadata.json HIGH_TEMP_ONLY_SUMMER_PROTOCOL=0 HIGH_WIND_SPRING_NOFT_PROTOCOL=1 HIGH_WIND_NORMAL_TRAIN_START=2022-04-01T00:00:00+00:00 HIGH_WIND_NORMAL_TRAIN_END=2022-04-29T16:00:00+00:00 USE_FEDERATION=1 RUN_FEDERATED_PRETRAIN=1 FED_PRETRAIN_ALGO=fedavg FEDAVG_LOCAL_EPOCHS=1 FEDAVG_CLIENT_WEIGHTING=uniform FEDAVG_LR=0.0002 TRAIN_META_ONLY_BASELINE=0 TRAIN_PRETRAIN_ONLY=0 SKIP_LOCAL_PRETRAIN=1 SKIP_LOCAL_META=1 ENABLE_FEDTL_FT=1 ENABLE_FED_NORMAL_META_PROPOSED=0 FED_NORMAL_META_SELF_FLOOR=0.3 SKIP_FED_NORMAL_META=1 FED_NORMAL_META_RESTORE_BEST=0 FED_NORMAL_META_SAVE_BEST=0 FED_NORMAL_META_USE_BEST=0 ENABLE_SELECTIVE_FED_NORMAL_META=0 SELECTIVE_FED_META_PROXY_RATIO=0.2 SELECTIVE_FED_META_SELF_FLOOR=0.5 SELECTIVE_FED_META_GAIN_MARGIN=0.0 SELECTIVE_FED_META_GAIN_GAMMA=1.0 HWA_PRETRAIN_LOSS=0 HWA_META_LOSS=0 HWA_SELECTIVE_PROXY_LOSS=0 HWA_WIND_FEATURE_INDEX=0 HWA_WIND_THRESHOLD=10.0 HWA_WIND_RAMP_END=13.9 HWA_HIGH_WIND_WEIGHT=4.0 HWA_PRETRAIN_WINDOWED=0 ENABLE_TARGET_AWARE_META_NOFT=0 SKIP_TARGET_AWARE_PRETRAIN=0 SKIP_TARGET_AWARE_META=0 ENABLE_TARGET_AWARE_SELECTIVE_FED_META=0 SKIP_TARGET_AWARE_SELECTIVE_FED_META=0 ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT=0 ENABLE_LEGACY_LOCAL_FT=0 ENABLE_TARGET_AWARE_META_BIAS_CAL=0 ENABLE_TARGET_AWARE_SELECTIVE_FED_BIAS_CAL=0 SKIP_LEGACY_EXTREME_ADAPTATION=1 TARGET_AWARE_PRETRAIN_HWA_LOSS=1 TARGET_AWARE_META_CDRM_WEIGHT=0.0 TARGET_AWARE_META_SIM_FLOOR=0.05 TARGET_AWARE_META_TASK_WEIGHT_ETA=1.0 TARGET_AWARE_META_WIND_MEAN_THRESHOLD=13.9 TARGET_AWARE_META_WIND_MAX_THRESHOLD=17.2 TARGET_AWARE_META_MIN_EXTREME_POINTS=3 TARGET_AWARE_SELECTIVE_FED_TOP_K=1 TARGET_AWARE_SELECTIVE_FED_SELF_FLOOR=0.7 TARGET_AWARE_SELECTIVE_FED_SOURCE_ALPHA_CAP=0.3 TARGET_AWARE_SELECTIVE_FED_ALPHA_GRID= TARGET_AWARE_SELECTIVE_FED_GAIN_MARGIN=0.0 TARGET_AWARE_SELECTIVE_FED_GAIN_GAMMA=1.0 TARGET_AWARE_SELECTIVE_FED_PROXY_NORMAL_MAX_WINDOWS=8 TARGET_AWARE_SELECTIVE_FED_PROXY_EXTREME_WEIGHT=2.0 TARGET_AWARE_SELECTIVE_FED_PROXY_NORMAL_WEIGHT=1.0 TARGET_AWARE_SELECTIVE_FED_BIAS_CAL_MIN=0.0 TARGET_AWARE_SELECTIVE_FED_BIAS_CAL_MAX=0.15 GLOBAL_SEED=1029 META_TASKS_PER_EPOCH=2 META_SUPPORT_SHOTS=4 META_QUERY_SHOTS=4 EVAL_MODEL_SET=fedtl-ft SKIP_EXTREME_ADAPTATION_STAGE=0 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=1000 PROPOSED_META_EPOCHS=1000 META_ONLY_META_EPOCHS=1000 FEW_SHOT_EPOCHS=100 FEW_SHOT_LR=5e-5 ENABLE_FT_SWEEP=1 FT_SWEEP_EPOCHS=0,1,2,5,10,20,30,50,75,100 FT_SWEEP_OUTPUT_PATH=artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/ft_sweep_fedtl.csv FT_SWEEP_SAVE_CHECKPOINTS=1 FT_SWEEP_EVAL_TEST=1 EXTREME_TARGET_REFINEMENT_EPOCHS=5 EXTREME_SUPPORT_WINDOW_CAP=0 EXTREME_TARGET_ADAPT_MAX_WINDOWS=0 PRETRAIN_LOG_INTERVAL=50 META_LOG_INTERVAL=50 FEW_SHOT_LOG_INTERVAL=10
+exec /root/miniconda3/bin/python -u DemoModelTraining.py
+======================================================================
+
+libgomp: Invalid value for environment variable OMP_NUM_THREADS
+======================================================================
+数据协议配置
+======================================================================
+  protocol_name: four_client_2h_6point_high_wind_spring_noft_protocol
+  protocol_data_dir: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client
+  protocol_metadata_path: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/protocol_metadata.json
+  yearly_protocol_enabled: True
+  seasonal_protocol_enabled: False
+  sample_interval_hours: 2
+  downsample_offset: 1
+  len_realp: 6
+  points_per_day: 12
+  window_span_hours: 12
+  artifact_dir: artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k
+  model_output_dir: artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/models
+  base_model_output_dir: artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/models
+  target_aware_base_model_output_dir: artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/models
+  target_aware_selective_fed_base_model_output_dir: artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/models
+  local_pretrain_init_model_dir: (none)
+  local_meta_init_model_dir: (none)
+  target_aware_pretrain_init_model_dir: (none)
+  target_aware_meta_init_model_dir: (none)
+  target_aware_selective_fed_meta_init_model_dir: (none)
+  local_pretrain_epoch_offset: 0
+  local_meta_epoch_offset: 0
+  target_aware_pretrain_epoch_offset: 0
+  target_aware_meta_epoch_offset: 0
+  target_aware_selective_fed_meta_epoch_offset: 0
+  logs_train_dir: artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/logs_train
+  train_pretrain_only: False
+  run_federated_pretrain: True
+  fed_pretrain_algo: fedavg
+  fedavg_local_epochs: 1
+  fedavg_client_weighting: uniform
+  enable_fedtl_ft: True
+  enable_ft_sweep: True
+  ft_sweep_epochs: 0,1,2,5,10,20,30,50,75,100
+  enable_fed_normal_meta_proposed: False
+  fed_normal_meta_self_floor: 0.3
+  skip_fed_normal_meta: True
+  fed_normal_meta_restore_best: False
+  fed_normal_meta_save_best: False
+  fed_normal_meta_use_best: False
+  enable_selective_fed_normal_meta: False
+  selective_fed_meta_proxy_ratio: 0.2
+  selective_fed_meta_self_floor: 0.5
+  selective_fed_meta_gain_margin: 0.0
+  selective_fed_meta_gain_gamma: 1.0
+  hwa_pretrain_loss: False
+  hwa_meta_loss: False
+  hwa_selective_proxy_loss: False
+  hwa_wind_feature_index: 0
+  hwa_wind_threshold: 10.0
+  hwa_wind_ramp_end: 13.9
+  hwa_high_wind_weight: 4.0
+  hwa_pretrain_windowed: False
+  enable_target_aware_meta_noft: False
+  skip_target_aware_pretrain: False
+  skip_target_aware_meta: False
+  enable_target_aware_selective_fed_meta: False
+  skip_target_aware_selective_fed_meta: False
+  enable_target_aware_selective_fed_local_ft: False
+  skip_legacy_extreme_adaptation: True
+  target_aware_pretrain_hwa_loss: True
+  target_aware_meta_cdrm_weight: 0.0
+  target_aware_meta_sim_floor: 0.05
+  target_aware_meta_task_weight_eta: 1.0
+  target_aware_meta_wind_mean_threshold: 13.9
+  target_aware_meta_wind_max_threshold: 17.2
+  target_aware_meta_min_extreme_points: 3
+  target_aware_selective_fed_top_k: 1
+  target_aware_selective_fed_self_floor: 0.7
+  target_aware_selective_fed_source_alpha_cap: 0.3
+  target_aware_selective_fed_alpha_grid: (auto)
+  target_aware_selective_fed_gain_margin: 0.0
+  target_aware_selective_fed_proxy_normal_max_windows: 8
+  target_aware_selective_fed_proxy_extreme_weight: 2.0
+  target_aware_selective_fed_proxy_normal_weight: 1.0
+  global_seed: 1029
+  skip_extreme_adaptation_stage: False
+  few_shot_lr: 5e-05
+======================================================================
+联邦模式：加载4个场站数据（59, 60, 62, 63）
+======================================================================
+  加载 /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/59wf_4_train.mat...
+  加载 /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/60wf_4_train.mat...
+  加载 /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/62wf_4_train.mat...
+  加载 /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/63wf_4_train.mat...
+
+======================================================================
+准备所有场站的完整数据（元训练+极端天气+测试集）
+======================================================================
+
+准备联邦客户端数据（常规天气）...
+  处理场站 59...
+    shape: (1, 318, 5) → (1, 318, 1)
+  处理场站 60...
+    shape: (1, 323, 5) → (1, 323, 1)
+  处理场站 62...
+    shape: (1, 319, 5) → (1, 319, 1)
+  处理场站 63...
+    shape: (1, 324, 5) → (1, 324, 1)
+  总数据量: 1284 样本
+
+准备所有场站的元训练和测试数据（4场站一视同仁）...
+
+  场站 59:
+    测试集2023: (2, 6, 1)
+    聚类类别: 4类
+    极端天气: 1类
+
+  场站 60:
+    测试集2023: (2, 6, 1)
+    聚类类别: 4类
+    极端天气: 1类
+
+  场站 62:
+    测试集2023: (2, 6, 1)
+    聚类类别: 4类
+    极端天气: 1类
+
+  场站 63:
+    测试集2023: (2, 6, 1)
+    聚类类别: 4类
+    极端天气: 1类
+
+✓ 所有场站数据准备完成！
+#########################################################################——————————联邦预训练（Federation Pre-train）——————————############################################################
+客户端数量: 4, 场站: 59, 60, 62, 63
+联邦预训练算法: fedavg (local_epochs=1, weighting=uniform)
+0.3624303340911865
+[Epoch 0/1000] [loss_mse: 0.430252] 
+0.6855578422546387
+[Epoch 1/1000] [loss_mse: 0.429262] 
+0.9881103038787842
+[Epoch 2/1000] [loss_mse: 0.428301] 
+1.295379877090454
+[Epoch 3/1000] [loss_mse: 0.427148] 
+1.6046745777130127
+[Epoch 4/1000] [loss_mse: 0.426161] 
+1.9084022045135498
+[Epoch 5/1000] [loss_mse: 0.425028] 
+2.2119343280792236
+[Epoch 6/1000] [loss_mse: 0.424083] 
+2.5127758979797363
+[Epoch 7/1000] [loss_mse: 0.423149] 
+2.820178508758545
+[Epoch 8/1000] [loss_mse: 0.422125] 
+3.117011308670044
+[Epoch 9/1000] [loss_mse: 0.421292] 
+15.4250967502594
+[Epoch 49/1000] [loss_mse: 0.381778] 
+30.86889410018921
+[Epoch 99/1000] [loss_mse: 0.322322] 
+46.206483364105225
+[Epoch 149/1000] [loss_mse: 0.246971] 
+61.88589024543762
+[Epoch 199/1000] [loss_mse: 0.166299] 
+77.5237967967987
+[Epoch 249/1000] [loss_mse: 0.118596] 
+93.16756534576416
+[Epoch 299/1000] [loss_mse: 0.115487] 
+108.66392517089844
+[Epoch 349/1000] [loss_mse: 0.113098] 
+124.116126537323
+[Epoch 399/1000] [loss_mse: 0.111086] 
+139.6161367893219
+[Epoch 449/1000] [loss_mse: 0.109189] 
+155.08015251159668
+[Epoch 499/1000] [loss_mse: 0.105600] 
+170.38003730773926
+[Epoch 549/1000] [loss_mse: 0.102952] 
+185.81370568275452
+[Epoch 599/1000] [loss_mse: 0.098500] 
+201.44319128990173
+[Epoch 649/1000] [loss_mse: 0.094500] 
+217.10335230827332
+[Epoch 699/1000] [loss_mse: 0.091530] 
+232.7724175453186
+[Epoch 749/1000] [loss_mse: 0.087191] 
+248.31380414962769
+[Epoch 799/1000] [loss_mse: 0.078967] 
+263.7299864292145
+[Epoch 849/1000] [loss_mse: 0.069366] 
+279.1516673564911
+[Epoch 899/1000] [loss_mse: 0.060065] 
+294.5413851737976
+[Epoch 949/1000] [loss_mse: 0.050161] 
+309.91045928001404
+[Epoch 999/1000] [loss_mse: 0.043660] 
+  收敛检测[federated_pretrain:all_stations]: 未收敛 (best_epoch=1000, best_loss=0.043660, final_loss=0.043660)
+
+✓ 联邦预训练完成: artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/models/model_fore_pre_federated.pth
+
+======================================================================
+开始本地元训练: station 59
+======================================================================
+✓ FedTL-FT模式跳过本地元训练：该基线只使用联邦预训练 + 本地FT
+
+======================================================================
+开始本地元训练: station 60
+======================================================================
+✓ FedTL-FT模式跳过本地元训练：该基线只使用联邦预训练 + 本地FT
+
+======================================================================
+开始本地元训练: station 62
+======================================================================
+✓ FedTL-FT模式跳过本地元训练：该基线只使用联邦预训练 + 本地FT
+
+======================================================================
+开始本地元训练: station 63
+======================================================================
+✓ FedTL-FT模式跳过本地元训练：该基线只使用联邦预训练 + 本地FT
+##################################################################——————————test_task_support（Few-shot适应：共4个模型）——————————############################################################
+
+======================================================================
+场站 59 的Few-shot适应
+======================================================================
+
+  极端天气类别 1 (HighWind):
+    样本数: 2
+    训练轮数: 100, few-shot loss=MSE
+    adapt/val: 1 / 1
+      [FedTL-FT] [Epoch 1/100] [loss_mse: 0.170942] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 2/100] [loss_mse: 0.174580] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 3/100] [loss_mse: 0.185710] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 4/100] [loss_mse: 0.166383] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 5/100] [loss_mse: 0.160078] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 6/100] [loss_mse: 0.139225] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 7/100] [loss_mse: 0.165621] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 8/100] [loss_mse: 0.185745] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 9/100] [loss_mse: 0.209475] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 10/100] [loss_mse: 0.178608] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station59_class0]: 首次达到收敛条件 @ epoch 11 (best_epoch=6, best_loss=0.139225, final_loss=0.187199)
+      [FedTL-FT] [Epoch 20/100] [loss_mse: 0.189860] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 30/100] [loss_mse: 0.176520] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 40/100] [loss_mse: 0.163298] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 50/100] [loss_mse: 0.184021] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 60/100] [loss_mse: 0.180940] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 70/100] [loss_mse: 0.165137] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 80/100] [loss_mse: 0.158071] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station59_class0]: 首次达到收敛条件 @ epoch 83 (best_epoch=78, best_loss=0.123281, final_loss=0.161800)
+      [FedTL-FT] [Epoch 90/100] [loss_mse: 0.139624] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 100/100] [loss_mse: 0.140251] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station59_class0]: 已收敛 @ epoch 83 (best_epoch=78, best_loss=0.123281, final_loss=0.140251)
+    ✓ 保存(FedTL-FT): artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/models/model_fore_station59_extreme0_fedtl_ft.pth
+
+======================================================================
+场站 60 的Few-shot适应
+======================================================================
+
+  极端天气类别 1 (HighWind):
+    样本数: 2
+    训练轮数: 100, few-shot loss=MSE
+    adapt/val: 1 / 1
+      [FedTL-FT] [Epoch 1/100] [loss_mse: 0.120052] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 2/100] [loss_mse: 0.114436] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 3/100] [loss_mse: 0.140103] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 4/100] [loss_mse: 0.115176] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 5/100] [loss_mse: 0.077232] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 6/100] [loss_mse: 0.083289] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 7/100] [loss_mse: 0.107507] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 8/100] [loss_mse: 0.077548] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 9/100] [loss_mse: 0.089929] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station60_class0]: 首次达到收敛条件 @ epoch 10 (best_epoch=5, best_loss=0.077232, final_loss=0.098021)
+      [FedTL-FT] [Epoch 10/100] [loss_mse: 0.098021] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station60_class0]: 首次达到收敛条件 @ epoch 16 (best_epoch=11, best_loss=0.074588, final_loss=0.102392)
+      [FedTL-FT] [Epoch 20/100] [loss_mse: 0.095887] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 30/100] [loss_mse: 0.087998] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station60_class0]: 首次达到收敛条件 @ epoch 33 (best_epoch=28, best_loss=0.068345, final_loss=0.114312)
+      [FedTL-FT] [Epoch 40/100] [loss_mse: 0.121977] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 50/100] [loss_mse: 0.098022] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station60_class0]: 首次达到收敛条件 @ epoch 52 (best_epoch=47, best_loss=0.058514, final_loss=0.115460)
+      [FedTL-FT] [Epoch 60/100] [loss_mse: 0.061276] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 70/100] [loss_mse: 0.101093] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 80/100] [loss_mse: 0.085752] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station60_class0]: 首次达到收敛条件 @ epoch 81 (best_epoch=76, best_loss=0.056187, final_loss=0.074129)
+  收敛检测[few_shot:fedtl_ft_station60_class0]: 首次达到收敛条件 @ epoch 90 (best_epoch=85, best_loss=0.054137, final_loss=0.076081)
+      [FedTL-FT] [Epoch 90/100] [loss_mse: 0.076081] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 100/100] [loss_mse: 0.065594] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station60_class0]: 已收敛 @ epoch 90 (best_epoch=85, best_loss=0.054137, final_loss=0.065594)
+    ✓ 保存(FedTL-FT): artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/models/model_fore_station60_extreme0_fedtl_ft.pth
+
+======================================================================
+场站 62 的Few-shot适应
+======================================================================
+
+  极端天气类别 1 (HighWind):
+    样本数: 2
+    训练轮数: 100, few-shot loss=MSE
+    adapt/val: 1 / 1
+      [FedTL-FT] [Epoch 1/100] [loss_mse: 0.196919] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 2/100] [loss_mse: 0.165872] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 3/100] [loss_mse: 0.155851] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 4/100] [loss_mse: 0.178281] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 5/100] [loss_mse: 0.143706] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 6/100] [loss_mse: 0.186232] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 7/100] [loss_mse: 0.176737] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 8/100] [loss_mse: 0.176084] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 9/100] [loss_mse: 0.145812] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station62_class0]: 首次达到收敛条件 @ epoch 10 (best_epoch=5, best_loss=0.143706, final_loss=0.156290)
+      [FedTL-FT] [Epoch 10/100] [loss_mse: 0.156290] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 20/100] [loss_mse: 0.186219] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station62_class0]: 首次达到收敛条件 @ epoch 21 (best_epoch=16, best_loss=0.139116, final_loss=0.184461)
+      [FedTL-FT] [Epoch 30/100] [loss_mse: 0.189092] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 40/100] [loss_mse: 0.227549] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station62_class0]: 首次达到收敛条件 @ epoch 48 (best_epoch=43, best_loss=0.129619, final_loss=0.172542)
+      [FedTL-FT] [Epoch 50/100] [loss_mse: 0.176892] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 60/100] [loss_mse: 0.190847] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station62_class0]: 首次达到收敛条件 @ epoch 62 (best_epoch=57, best_loss=0.121335, final_loss=0.156584)
+      [FedTL-FT] [Epoch 70/100] [loss_mse: 0.135252] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 80/100] [loss_mse: 0.137967] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 90/100] [loss_mse: 0.128632] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 100/100] [loss_mse: 0.148840] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station62_class0]: 已收敛 @ epoch 62 (best_epoch=57, best_loss=0.121335, final_loss=0.148840)
+    ✓ 保存(FedTL-FT): artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/models/model_fore_station62_extreme0_fedtl_ft.pth
+
+======================================================================
+场站 63 的Few-shot适应
+======================================================================
+
+  极端天气类别 1 (HighWind):
+    样本数: 3
+    训练轮数: 100, few-shot loss=MSE
+    adapt/val: 2 / 1
+      [FedTL-FT] [Epoch 1/100] [loss_mse: 0.124156] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 2/100] [loss_mse: 0.107951] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 3/100] [loss_mse: 0.112563] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 4/100] [loss_mse: 0.166308] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 5/100] [loss_mse: 0.121409] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 6/100] [loss_mse: 0.116443] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 7/100] [loss_mse: 0.101843] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 8/100] [loss_mse: 0.103580] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 9/100] [loss_mse: 0.142793] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 10/100] [loss_mse: 0.129206] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station63_class0]: 首次达到收敛条件 @ epoch 12 (best_epoch=7, best_loss=0.101843, final_loss=0.151788)
+      [FedTL-FT] [Epoch 20/100] [loss_mse: 0.113003] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station63_class0]: 首次达到收敛条件 @ epoch 28 (best_epoch=23, best_loss=0.098896, final_loss=0.116836)
+      [FedTL-FT] [Epoch 30/100] [loss_mse: 0.126445] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 40/100] [loss_mse: 0.100876] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station63_class0]: 首次达到收敛条件 @ epoch 43 (best_epoch=38, best_loss=0.085357, final_loss=0.188136)
+      [FedTL-FT] [Epoch 50/100] [loss_mse: 0.106133] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 60/100] [loss_mse: 0.115935] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station63_class0]: 首次达到收敛条件 @ epoch 67 (best_epoch=62, best_loss=0.084981, final_loss=0.111302)
+      [FedTL-FT] [Epoch 70/100] [loss_mse: 0.110261] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station63_class0]: 首次达到收敛条件 @ epoch 76 (best_epoch=71, best_loss=0.083271, final_loss=0.130434)
+      [FedTL-FT] [Epoch 80/100] [loss_mse: 0.127014] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station63_class0]: 首次达到收敛条件 @ epoch 83 (best_epoch=78, best_loss=0.082811, final_loss=0.138257)
+      [FedTL-FT] [Epoch 90/100] [loss_mse: 0.126965] [anchor_loss: 0.000000]
+      [FedTL-FT] [Epoch 100/100] [loss_mse: 0.120398] [anchor_loss: 0.000000]
+  收敛检测[few_shot:fedtl_ft_station63_class0]: 已收敛 @ epoch 83 (best_epoch=78, best_loss=0.082811, final_loss=0.120398)
+    ✓ 保存(FedTL-FT): artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/models/model_fore_station63_extreme0_fedtl_ft.pth
+✓ FT sweep记录已保存: artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/ft_sweep_fedtl.csv
+
+✓ Few-shot训练完成，生成了 4 个个性化模型
+
+======================================================================
+生成所有场站的测试预测结果
+======================================================================
+
+场站 59 预测:
+  ✓ 极端类别1(HighWind)（Pretrain/Local-Meta-NoFT/FedTL-FT）
+
+场站 60 预测:
+  ✓ 极端类别1(HighWind)（Pretrain/Local-Meta-NoFT/FedTL-FT）
+
+场站 62 预测:
+  ✓ 极端类别1(HighWind)（Pretrain/Local-Meta-NoFT/FedTL-FT）
+
+场站 63 预测:
+  ✓ 极端类别1(HighWind)（Pretrain/Local-Meta-NoFT/FedTL-FT）
+
+保存所有场站测试结果...
+✓ 已保存: artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/all_stations_test_results.mat
+✓ 收敛检测报告已保存: artifacts/high_wind_spring_noft_four_client/ablation-fedtl-fedavg-ft-sweep-1k/training_convergence_report.json
+
+======================================================================
+✓✓✓ 训练和测试全部完成！
+生成的个性化微调模型: 4个（含 ）
+======================================================================

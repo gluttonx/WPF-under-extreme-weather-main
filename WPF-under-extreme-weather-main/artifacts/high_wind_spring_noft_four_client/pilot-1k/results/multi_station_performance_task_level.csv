@@ -1,0 +1,19 @@
+﻿Protocol,Sample_Interval_Hours,Window_Points,Window_Span_Hours,Station,Extreme_Class,Eval_Payload_Key,Model,Samples,nMAE_%,nRMSE_%,WD_%,R_p<0.05_%
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Extreme_Weather_Class1,p_test_extre_class1,Pretrain,2.0,28.0746,34.3881,26.1396,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Extreme_Weather_Class1,p_test_extre_class1,Local-Meta-NoFT,2.0,28.4065,34.1754,26.293,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Extreme_Weather_Class1,p_test_extre_class1,Selective Fed-Normal-Meta-NoFT,2.0,30.9587,35.4377,30.9535,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Extreme_Weather_Class1,p_test_extre_class1,Pretrain,2.0,36.0109,42.7183,33.8612,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Extreme_Weather_Class1,p_test_extre_class1,Local-Meta-NoFT,2.0,35.7324,41.7627,34.1245,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Extreme_Weather_Class1,p_test_extre_class1,Selective Fed-Normal-Meta-NoFT,2.0,41.971,46.7006,41.971,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Extreme_Weather_Class1,p_test_extre_class1,Pretrain,2.0,35.0164,40.7833,27.2369,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Extreme_Weather_Class1,p_test_extre_class1,Local-Meta-NoFT,2.0,37.22,43.2853,31.8693,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Extreme_Weather_Class1,p_test_extre_class1,Selective Fed-Normal-Meta-NoFT,2.0,32.7265,37.2986,24.4679,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Extreme_Weather_Class1,p_test_extre_class1,Pretrain,2.0,43.9417,48.5382,33.5434,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Extreme_Weather_Class1,p_test_extre_class1,Local-Meta-NoFT,2.0,43.2648,47.4098,32.9449,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Extreme_Weather_Class1,p_test_extre_class1,Selective Fed-Normal-Meta-NoFT,2.0,42.7711,46.8213,36.0741,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Extreme_Weather_Class1,Overall_Average,Local-Meta-NoFT,2.0,36.1559,41.6583,31.3079,37.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Extreme_Weather_Class1,Overall_Average,Pretrain,2.0,35.7609,41.607,30.1953,12.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Extreme_Weather_Class1,Overall_Average,Selective Fed-Normal-Meta-NoFT,2.0,37.1068,41.5645,33.3666,62.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Extreme_Weather_Class1,Overall_SampleWeighted,Local-Meta-NoFT,8.0,36.1559,41.6583,31.3079,37.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Extreme_Weather_Class1,Overall_SampleWeighted,Pretrain,8.0,35.7609,41.607,30.1953,12.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Extreme_Weather_Class1,Overall_SampleWeighted,Selective Fed-Normal-Meta-NoFT,8.0,37.1068,41.5646,33.3666,62.5

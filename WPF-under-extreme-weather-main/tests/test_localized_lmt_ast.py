@@ -1,4 +1,3 @@
-import re
 import unittest
 from pathlib import Path
 
@@ -19,10 +18,15 @@ class LocalizedLMTContractTest(unittest.TestCase):
 
     def test_results_export_uses_three_model_main_table(self):
         text = RESULTS_FILE.read_text(encoding="utf-8")
-        self.assertRegex(
-            text,
-            r"model_names\s*=\s*\[\s*'LMT'\s*,\s*'Extreme-FedAvg'\s*,\s*'Proposed-A'\s*\]",
-        )
+
+        for token in [
+            "def resolve_model_names():",
+            "'LMT'",
+            "'Extreme-FedAvg'",
+            "'Proposed-A'",
+        ]:
+            self.assertIn(token, text)
+
         self.assertNotIn("'Meta_Learning'", text)
         self.assertNotIn("'Pre_Training'", text)
 

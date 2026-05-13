@@ -1,0 +1,5 @@
+﻿Methods,FL,Meta,Pretrain,TL,nMAE_%,nRMSE_%,WD_%,Training_duration_s
+FedTL-FT,✓,×,✓,✓,36.1575,41.7137,30.0754,324.04
+EWFSL-FT,×,✓,✓,✓,32.5566,38.4623,26.3312,407.85
+TA-SFML w/o FL,×,✓,✓,×,20.3581,22.0539,19.7265,615.3
+TA-SFML-Cal (Ours),✓,✓,✓,×,13.4085,15.8514,11.9646,7450.37

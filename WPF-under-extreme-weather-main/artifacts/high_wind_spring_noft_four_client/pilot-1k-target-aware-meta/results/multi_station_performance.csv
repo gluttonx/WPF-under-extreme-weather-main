@@ -1,0 +1,25 @@
+﻿Protocol,Sample_Interval_Hours,Window_Points,Window_Span_Hours,Station,Model,HighWind_nMAE_%,HighWind_nRMSE_%,HighWind_WD_%,Training_duration_s,R_p<0.05_%
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Pretrain,28.0746,34.3881,26.1396,,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Local-Meta-NoFT,28.4065,34.1754,26.293,0.0,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Target-Aware Pretrain,27.7354,30.4231,26.2013,202.31,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Target-Aware Meta-NoFT,16.8109,18.6762,14.9672,615.3,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Pretrain,36.0109,42.7183,33.8612,,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Local-Meta-NoFT,35.7324,41.7627,34.1245,0.0,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Target-Aware Pretrain,34.5241,35.509,34.5241,202.31,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Target-Aware Meta-NoFT,21.3565,22.7144,21.1423,615.3,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Pretrain,35.0164,40.7833,27.2369,,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Local-Meta-NoFT,37.22,43.2853,31.8693,0.0,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Target-Aware Pretrain,30.3364,32.7232,29.7851,202.31,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Target-Aware Meta-NoFT,20.1189,23.0851,19.9631,615.3,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Pretrain,43.9417,48.5382,33.5434,,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Local-Meta-NoFT,43.2648,47.4098,32.9449,0.0,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Target-Aware Pretrain,32.4194,33.3998,32.4194,202.31,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Target-Aware Meta-NoFT,23.1592,23.7547,22.8613,615.3,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Pretrain,35.7609,41.607,30.1953,,12.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Local-Meta-NoFT,36.1559,41.6583,31.3079,0.0,37.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Target-Aware Pretrain,31.2538,33.0138,30.7325,202.31,75.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Target-Aware Meta-NoFT,20.3614,22.0576,19.7335,615.3,62.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Pretrain,35.7609,41.607,30.1953,,12.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Local-Meta-NoFT,36.1559,41.6583,31.3079,0.0,37.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Target-Aware Pretrain,31.2538,33.0138,30.7325,202.31,75.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Target-Aware Meta-NoFT,20.3614,22.0576,19.7335,615.3,62.5

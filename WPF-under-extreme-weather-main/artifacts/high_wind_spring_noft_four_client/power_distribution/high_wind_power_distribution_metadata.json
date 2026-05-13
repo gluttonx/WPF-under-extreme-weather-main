@@ -1,0 +1,11 @@
+{
+  "normal_train_start": null,
+  "normal_train_end": null,
+  "data_source": "raw_base_excel_rows",
+  "high_wind_filter": "2022-04 extreme_high_wind raw rows",
+  "extreme_support_sampling_policy": "raw_rows_no_downsampling_no_window_filtering",
+  "stations": [
+    "59",
+    "60"
+  ]
+}

@@ -1,0 +1,127 @@
+
+======================================================================
+stage=eval
+env  PROTOCOL_NAME=four_client_2h_6point_high_wind_spring_noft_protocol PROTOCOL_DATA_DIR=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client PROTOCOL_METADATA_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/protocol_metadata.json SAMPLE_INTERVAL_HOURS=2 DOWNSAMPLE_OFFSET=1 LEN_REALP=6 POINTS_PER_DAY=12 PHASE_AUGMENT_STATIONS=1 PHASE_AUGMENT_COMPLEMENTARY_OFFSET=0 ARTIFACT_DIR=artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed-biascal MODEL_OUTPUT_DIR=artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed-biascal/models BASE_MODEL_OUTPUT_DIR=artifacts/high_wind_spring_noft_four_client/pilot-1k/models TARGET_AWARE_BASE_MODEL_OUTPUT_DIR=artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-meta/models TARGET_AWARE_SELECTIVE_FED_BASE_MODEL_OUTPUT_DIR=artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed/models LOCAL_PRETRAIN_INIT_MODEL_DIR= LOCAL_META_INIT_MODEL_DIR= TARGET_AWARE_PRETRAIN_INIT_MODEL_DIR= TARGET_AWARE_META_INIT_MODEL_DIR= TARGET_AWARE_SELECTIVE_FED_META_INIT_MODEL_DIR= LOCAL_PRETRAIN_EPOCH_OFFSET=0 LOCAL_META_EPOCH_OFFSET=0 TARGET_AWARE_PRETRAIN_EPOCH_OFFSET=0 TARGET_AWARE_META_EPOCH_OFFSET=0 TARGET_AWARE_SELECTIVE_FED_META_EPOCH_OFFSET=0 LOGS_TRAIN_DIR=artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed-biascal/logs_train CONVERGENCE_REPORT_PATH=artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed-biascal/training_convergence_report.json ALL_STATIONS_TEST_RESULTS_PATH=artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed-biascal/all_stations_test_results.mat RESULTS_OUTPUT_PATH=artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed-biascal/results/multi_station_performance.csv TASK_RESULTS_OUTPUT_PATH=artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed-biascal/results/multi_station_performance_task_level.csv YEARLY_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_ENABLED=0 YEARLY_PROTOCOL_METADATA_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/protocol_metadata.json HIGH_TEMP_ONLY_SUMMER_PROTOCOL=0 HIGH_WIND_SPRING_NOFT_PROTOCOL=1 HIGH_WIND_NORMAL_TRAIN_START=2022-04-01T00:00:00+00:00 HIGH_WIND_NORMAL_TRAIN_END=2022-04-29T16:00:00+00:00 USE_FEDERATION=1 RUN_FEDERATED_PRETRAIN=0 TRAIN_META_ONLY_BASELINE=0 TRAIN_PRETRAIN_ONLY=0 SKIP_LOCAL_PRETRAIN=0 SKIP_LOCAL_META=0 ENABLE_FED_NORMAL_META_PROPOSED=0 FED_NORMAL_META_SELF_FLOOR=0.3 SKIP_FED_NORMAL_META=0 FED_NORMAL_META_RESTORE_BEST=0 FED_NORMAL_META_SAVE_BEST=0 FED_NORMAL_META_USE_BEST=0 ENABLE_SELECTIVE_FED_NORMAL_META=0 SELECTIVE_FED_META_PROXY_RATIO=0.2 SELECTIVE_FED_META_SELF_FLOOR=0.5 SELECTIVE_FED_META_GAIN_MARGIN=0.0 SELECTIVE_FED_META_GAIN_GAMMA=1.0 HWA_PRETRAIN_LOSS=0 HWA_META_LOSS=0 HWA_SELECTIVE_PROXY_LOSS=0 HWA_WIND_FEATURE_INDEX=0 HWA_WIND_THRESHOLD=10.0 HWA_WIND_RAMP_END=13.9 HWA_HIGH_WIND_WEIGHT=4.0 HWA_PRETRAIN_WINDOWED=0 ENABLE_TARGET_AWARE_META_NOFT=1 SKIP_TARGET_AWARE_PRETRAIN=1 SKIP_TARGET_AWARE_META=1 ENABLE_TARGET_AWARE_SELECTIVE_FED_META=1 SKIP_TARGET_AWARE_SELECTIVE_FED_META=1 ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT=0 ENABLE_TARGET_AWARE_SELECTIVE_FED_BIAS_CAL=1 SKIP_LEGACY_EXTREME_ADAPTATION=0 TARGET_AWARE_PRETRAIN_HWA_LOSS=1 TARGET_AWARE_META_CDRM_WEIGHT=0.0 TARGET_AWARE_META_SIM_FLOOR=0.05 TARGET_AWARE_META_TASK_WEIGHT_ETA=1.0 TARGET_AWARE_META_WIND_MEAN_THRESHOLD=13.9 TARGET_AWARE_META_WIND_MAX_THRESHOLD=17.2 TARGET_AWARE_META_MIN_EXTREME_POINTS=3 TARGET_AWARE_SELECTIVE_FED_TOP_K=1 TARGET_AWARE_SELECTIVE_FED_SELF_FLOOR=0.7 TARGET_AWARE_SELECTIVE_FED_SOURCE_ALPHA_CAP=0.3 TARGET_AWARE_SELECTIVE_FED_ALPHA_GRID= TARGET_AWARE_SELECTIVE_FED_GAIN_MARGIN=0.0 TARGET_AWARE_SELECTIVE_FED_GAIN_GAMMA=1.0 TARGET_AWARE_SELECTIVE_FED_PROXY_NORMAL_MAX_WINDOWS=8 TARGET_AWARE_SELECTIVE_FED_PROXY_EXTREME_WEIGHT=2.0 TARGET_AWARE_SELECTIVE_FED_PROXY_NORMAL_WEIGHT=1.0 TARGET_AWARE_SELECTIVE_FED_BIAS_CAL_MIN=0.0 TARGET_AWARE_SELECTIVE_FED_BIAS_CAL_MAX=0.15 GLOBAL_SEED=1029 META_TASKS_PER_EPOCH=2 META_SUPPORT_SHOTS=4 META_QUERY_SHOTS=4 EVAL_MODEL_SET=fed-meta-noft SKIP_EXTREME_ADAPTATION_STAGE=1 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=1000 PROPOSED_META_EPOCHS=1000 META_ONLY_META_EPOCHS=1000 FEW_SHOT_EPOCHS=0 FEW_SHOT_LR=0.0002 EXTREME_TARGET_REFINEMENT_EPOCHS=0 EXTREME_SUPPORT_WINDOW_CAP=0 PRETRAIN_LOG_INTERVAL=50 META_LOG_INTERVAL=50 FEW_SHOT_LOG_INTERVAL=10
+exec /root/miniconda3/bin/python -u generate_multi_station_results.py
+======================================================================
+======================================================================
+生成多场站测试结果CSV
+======================================================================
+
+数据协议:
+  Protocol=four_client_2h_6point_high_wind_spring_noft_protocol
+  PROTOCOL_DATA_DIR=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client
+  PROTOCOL_METADATA_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/protocol_metadata.json
+  SAMPLE_INTERVAL_HOURS=2
+  DOWNSAMPLE_OFFSET=1
+  LEN_REALP=6
+  POINTS_PER_DAY=12
+  WINDOW_SPAN_HOURS=12
+
+生成预测...
+
+场站 59:
+  ✓ Pretrain 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_pre_station59_local.pth
+  ✓ Local-Meta-NoFT 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_train_task_query_local_meta_station59.pth
+  ✓ Target-Aware Pretrain 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-meta/models/model_fore_pre_station59_target_aware.pth
+  ✓ Target-Aware Meta-NoFT 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-meta/models/model_fore_train_task_query_target_aware_meta_station59.pth
+  ✓ Target-Aware Selective Fed-Meta-NoFT 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed/models/model_fore_train_task_query_target_aware_selective_fed_meta_station59.pth
+  ✓ Target-Aware Selective Fed-Meta-NoFT + BiasCal 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed/models/model_fore_train_task_query_target_aware_selective_fed_meta_station59.pth, bias=0.082289, proxy_windows=10
+
+场站 60:
+  ✓ Pretrain 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_pre_station60_local.pth
+  ✓ Local-Meta-NoFT 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_train_task_query_local_meta_station60.pth
+  ✓ Target-Aware Pretrain 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-meta/models/model_fore_pre_station60_target_aware.pth
+  ✓ Target-Aware Meta-NoFT 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-meta/models/model_fore_train_task_query_target_aware_meta_station60.pth
+  ✓ Target-Aware Selective Fed-Meta-NoFT 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed/models/model_fore_train_task_query_target_aware_selective_fed_meta_station60.pth
+  ✓ Target-Aware Selective Fed-Meta-NoFT + BiasCal 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed/models/model_fore_train_task_query_target_aware_selective_fed_meta_station60.pth, bias=0.081711, proxy_windows=10
+
+场站 62:
+  ✓ Pretrain 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_pre_station62_local.pth
+  ✓ Local-Meta-NoFT 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_train_task_query_local_meta_station62.pth
+  ✓ Target-Aware Pretrain 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-meta/models/model_fore_pre_station62_target_aware.pth
+  ✓ Target-Aware Meta-NoFT 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-meta/models/model_fore_train_task_query_target_aware_meta_station62.pth
+  ✓ Target-Aware Selective Fed-Meta-NoFT 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed/models/model_fore_train_task_query_target_aware_selective_fed_meta_station62.pth
+  ✓ Target-Aware Selective Fed-Meta-NoFT + BiasCal 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed/models/model_fore_train_task_query_target_aware_selective_fed_meta_station62.pth, bias=0.106633, proxy_windows=10
+
+场站 63:
+  ✓ Pretrain 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_pre_station63_local.pth
+  ✓ Local-Meta-NoFT 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_train_task_query_local_meta_station63.pth
+  ✓ Target-Aware Pretrain 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-meta/models/model_fore_pre_station63_target_aware.pth
+  ✓ Target-Aware Meta-NoFT 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-meta/models/model_fore_train_task_query_target_aware_meta_station63.pth
+  ✓ Target-Aware Selective Fed-Meta-NoFT 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed/models/model_fore_train_task_query_target_aware_selective_fed_meta_station63.pth
+  ✓ Target-Aware Selective Fed-Meta-NoFT + BiasCal 使用: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed/models/model_fore_train_task_query_target_aware_selective_fed_meta_station63.pth, bias=0.095965, proxy_windows=11
+
+Bias calibration 参数已保存: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed-biascal/target_aware_selective_fed_bias_calibration.csv
+
+计算Overall Average（按Extreme_Class + Model跨4场站平均）...
+
+======================================================================
+✓✓✓ 多场站结果已生成（Table III/IV 风格）！
+======================================================================
+
+生成文件: artifacts/high_wind_spring_noft_four_client/pilot-1k-target-aware-selective-fed-biascal/results/multi_station_performance.csv
+总行数: 36
+  - 每场站: 6模型 = 6行
+  - 4场站: 24行
+  - Overall summaries: 12行
+  - 总计: 36行
+
+======================================================================
+性能对比表格（横向展开）:
+======================================================================
+                                            Protocol  Sample_Interval_Hours  Window_Points  Window_Span_Hours                Station                                          Model  HighWind_nMAE_%  HighWind_nRMSE_%  HighWind_WD_%  Training_duration_s  R_p<0.05_%
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     59                                       Pretrain          28.0797           34.3900        26.1410                  NaN         0.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     59                                Local-Meta-NoFT          28.3945           34.1625        26.2954                  NaN         0.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     59                          Target-Aware Pretrain          27.7527           30.4573        26.1942                  NaN        50.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     59                         Target-Aware Meta-NoFT          16.8266           18.6990        14.9597                  NaN        50.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     59           Target-Aware Selective Fed-Meta-NoFT          15.6329           16.6707        13.2415                  NaN        50.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     59 Target-Aware Selective Fed-Meta-NoFT + BiasCal          14.2614           15.6910        12.4374                  NaN       100.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     60                                       Pretrain          35.9987           42.7090        33.8503                  NaN        50.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     60                                Local-Meta-NoFT          35.7300           41.7621        34.1227                  NaN       100.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     60                          Target-Aware Pretrain          34.5318           35.5183        34.5318                  NaN       100.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     60                         Target-Aware Meta-NoFT          21.3604           22.7178        21.1490                  NaN       100.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     60           Target-Aware Selective Fed-Meta-NoFT          17.4945           18.3730        16.4879                  NaN       100.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     60 Target-Aware Selective Fed-Meta-NoFT + BiasCal          10.6852           11.6568         9.4045                  NaN        50.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     62                                       Pretrain          35.0131           40.7827        27.2410                  NaN         0.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     62                                Local-Meta-NoFT          37.2201           43.2862        31.8692                  NaN        50.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     62                          Target-Aware Pretrain          30.3394           32.7200        29.7891                  NaN        50.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     62                         Target-Aware Meta-NoFT          20.1013           23.0554        19.9461                  NaN        50.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     62           Target-Aware Selective Fed-Meta-NoFT          16.4006           21.2490        16.3240                  NaN        50.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     62 Target-Aware Selective Fed-Meta-NoFT + BiasCal          16.6234           21.1232        14.8886                  NaN         0.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     63                                       Pretrain          43.9287           48.5334        33.5304                  NaN         0.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     63                                Local-Meta-NoFT          43.2846           47.4348        32.9687                  NaN         0.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     63                          Target-Aware Pretrain          32.4255           33.4043        32.4255                  NaN       100.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     63                         Target-Aware Meta-NoFT          23.1443           23.7435        22.8513                  NaN        50.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     63           Target-Aware Selective Fed-Meta-NoFT          19.7433           20.7089        19.1250                  NaN        50.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12                     63 Target-Aware Selective Fed-Meta-NoFT + BiasCal          12.0639           14.9346        11.1279                  NaN         0.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12        Overall_Average                                       Pretrain          35.7550           41.6038        30.1907                  NaN        12.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12        Overall_Average                                Local-Meta-NoFT          36.1573           41.6614        31.3140                  NaN        37.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12        Overall_Average                          Target-Aware Pretrain          31.2624           33.0250        30.7352                  NaN        75.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12        Overall_Average                         Target-Aware Meta-NoFT          20.3581           22.0539        19.7265                  NaN        62.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12        Overall_Average           Target-Aware Selective Fed-Meta-NoFT          17.3178           19.2504        16.2946                  NaN        62.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12        Overall_Average Target-Aware Selective Fed-Meta-NoFT + BiasCal          13.4085           15.8514        11.9646                  NaN        37.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12 Overall_SampleWeighted                                       Pretrain          35.7550           41.6038        30.1907                  NaN        12.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12 Overall_SampleWeighted                                Local-Meta-NoFT          36.1573           41.6614        31.3140                  NaN        37.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12 Overall_SampleWeighted                          Target-Aware Pretrain          31.2624           33.0250        30.7352                  NaN        75.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12 Overall_SampleWeighted                         Target-Aware Meta-NoFT          20.3581           22.0539        19.7265                  NaN        62.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12 Overall_SampleWeighted           Target-Aware Selective Fed-Meta-NoFT          17.3178           19.2504        16.2946                  NaN        62.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12 Overall_SampleWeighted Target-Aware Selective Fed-Meta-NoFT + BiasCal          13.4085           15.8514        11.9646                  NaN        37.5
+
+======================================================================
+Overall summaries（论文口径 + sample-weighted，横向展开）:
+======================================================================
+                                            Protocol  Sample_Interval_Hours  Window_Points  Window_Span_Hours                Station                                          Model  HighWind_nMAE_%  HighWind_nRMSE_%  HighWind_WD_%  Training_duration_s  R_p<0.05_%
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12        Overall_Average                                       Pretrain          35.7550           41.6038        30.1907                  NaN        12.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12        Overall_Average                                Local-Meta-NoFT          36.1573           41.6614        31.3140                  NaN        37.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12        Overall_Average                          Target-Aware Pretrain          31.2624           33.0250        30.7352                  NaN        75.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12        Overall_Average                         Target-Aware Meta-NoFT          20.3581           22.0539        19.7265                  NaN        62.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12        Overall_Average           Target-Aware Selective Fed-Meta-NoFT          17.3178           19.2504        16.2946                  NaN        62.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12        Overall_Average Target-Aware Selective Fed-Meta-NoFT + BiasCal          13.4085           15.8514        11.9646                  NaN        37.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12 Overall_SampleWeighted                                       Pretrain          35.7550           41.6038        30.1907                  NaN        12.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12 Overall_SampleWeighted                                Local-Meta-NoFT          36.1573           41.6614        31.3140                  NaN        37.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12 Overall_SampleWeighted                          Target-Aware Pretrain          31.2624           33.0250        30.7352                  NaN        75.0
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12 Overall_SampleWeighted                         Target-Aware Meta-NoFT          20.3581           22.0539        19.7265                  NaN        62.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12 Overall_SampleWeighted           Target-Aware Selective Fed-Meta-NoFT          17.3178           19.2504        16.2946                  NaN        62.5
+four_client_2h_6point_high_wind_spring_noft_protocol                      2              6                 12 Overall_SampleWeighted Target-Aware Selective Fed-Meta-NoFT + BiasCal          13.4085           15.8514        11.9646                  NaN        37.5
+======================================================================

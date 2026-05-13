@@ -1,0 +1,37 @@
+﻿Protocol,Sample_Interval_Hours,Window_Points,Window_Span_Hours,Station,Model,HighWind_nMAE_%,HighWind_nRMSE_%,HighWind_WD_%,Training_duration_s,R_p<0.05_%
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Pretrain,28.0797,34.39,26.141,,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Local-Meta-NoFT,28.3945,34.1625,26.2954,,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Target-Aware Pretrain,27.7527,30.4573,26.1942,,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Target-Aware Meta-NoFT,16.8266,18.699,14.9597,,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Target-Aware Selective Fed-Meta-NoFT,15.6329,16.6707,13.2415,,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Target-Aware Selective Fed-Meta-NoFT + BiasCal,14.2614,15.691,12.4374,,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Pretrain,35.9987,42.709,33.8503,,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Local-Meta-NoFT,35.73,41.7621,34.1227,,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Target-Aware Pretrain,34.5318,35.5183,34.5318,,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Target-Aware Meta-NoFT,21.3604,22.7178,21.149,,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Target-Aware Selective Fed-Meta-NoFT,17.4945,18.373,16.4879,,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Target-Aware Selective Fed-Meta-NoFT + BiasCal,10.6852,11.6568,9.4045,,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Pretrain,35.0131,40.7827,27.241,,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Local-Meta-NoFT,37.2201,43.2862,31.8692,,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Target-Aware Pretrain,30.3394,32.72,29.7891,,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Target-Aware Meta-NoFT,20.1013,23.0554,19.9461,,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Target-Aware Selective Fed-Meta-NoFT,16.4006,21.249,16.324,,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Target-Aware Selective Fed-Meta-NoFT + BiasCal,16.6234,21.1232,14.8886,,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Pretrain,43.9287,48.5334,33.5304,,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Local-Meta-NoFT,43.2846,47.4348,32.9687,,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Target-Aware Pretrain,32.4255,33.4043,32.4255,,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Target-Aware Meta-NoFT,23.1443,23.7435,22.8513,,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Target-Aware Selective Fed-Meta-NoFT,19.7433,20.7089,19.125,,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Target-Aware Selective Fed-Meta-NoFT + BiasCal,12.0639,14.9346,11.1279,,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Pretrain,35.755,41.6038,30.1907,,12.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Local-Meta-NoFT,36.1573,41.6614,31.314,,37.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Target-Aware Pretrain,31.2624,33.025,30.7352,,75.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Target-Aware Meta-NoFT,20.3581,22.0539,19.7265,,62.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Target-Aware Selective Fed-Meta-NoFT,17.3178,19.2504,16.2946,,62.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Target-Aware Selective Fed-Meta-NoFT + BiasCal,13.4085,15.8514,11.9646,,37.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Pretrain,35.755,41.6038,30.1907,,12.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Local-Meta-NoFT,36.1573,41.6614,31.314,,37.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Target-Aware Pretrain,31.2624,33.025,30.7352,,75.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Target-Aware Meta-NoFT,20.3581,22.0539,19.7265,,62.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Target-Aware Selective Fed-Meta-NoFT,17.3178,19.2504,16.2946,,62.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Target-Aware Selective Fed-Meta-NoFT + BiasCal,13.4085,15.8514,11.9646,,37.5

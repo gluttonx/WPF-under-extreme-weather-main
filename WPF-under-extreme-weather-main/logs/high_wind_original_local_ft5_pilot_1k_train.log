@@ -1,0 +1,427 @@
+
+======================================================================
+stage=train
+env  PROTOCOL_NAME=four_client_2h_6point_high_wind_spring_noft_protocol PROTOCOL_DATA_DIR=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client PROTOCOL_METADATA_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/protocol_metadata.json SAMPLE_INTERVAL_HOURS=2 DOWNSAMPLE_OFFSET=1 LEN_REALP=6 POINTS_PER_DAY=12 PHASE_AUGMENT_STATIONS=1 PHASE_AUGMENT_COMPLEMENTARY_OFFSET=0 ARTIFACT_DIR=artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5 MODEL_OUTPUT_DIR=artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models BASE_MODEL_OUTPUT_DIR=artifacts/high_wind_spring_noft_four_client/pilot-1k/models TARGET_AWARE_BASE_MODEL_OUTPUT_DIR=artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models TARGET_AWARE_SELECTIVE_FED_BASE_MODEL_OUTPUT_DIR=artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models LOCAL_PRETRAIN_INIT_MODEL_DIR= LOCAL_META_INIT_MODEL_DIR= TARGET_AWARE_PRETRAIN_INIT_MODEL_DIR= TARGET_AWARE_META_INIT_MODEL_DIR= TARGET_AWARE_SELECTIVE_FED_META_INIT_MODEL_DIR= LOCAL_PRETRAIN_EPOCH_OFFSET=0 LOCAL_META_EPOCH_OFFSET=0 TARGET_AWARE_PRETRAIN_EPOCH_OFFSET=0 TARGET_AWARE_META_EPOCH_OFFSET=0 TARGET_AWARE_SELECTIVE_FED_META_EPOCH_OFFSET=0 LOGS_TRAIN_DIR=artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/logs_train CONVERGENCE_REPORT_PATH=artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/training_convergence_report.json ALL_STATIONS_TEST_RESULTS_PATH=artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/all_stations_test_results.mat RESULTS_OUTPUT_PATH=artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/results/multi_station_performance.csv TASK_RESULTS_OUTPUT_PATH=artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/results/multi_station_performance_task_level.csv YEARLY_PROTOCOL_ENABLED=1 SEASONAL_PROTOCOL_ENABLED=0 YEARLY_PROTOCOL_METADATA_PATH=/tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/protocol_metadata.json HIGH_TEMP_ONLY_SUMMER_PROTOCOL=0 HIGH_WIND_SPRING_NOFT_PROTOCOL=1 HIGH_WIND_NORMAL_TRAIN_START=2022-04-01T00:00:00+00:00 HIGH_WIND_NORMAL_TRAIN_END=2022-04-29T16:00:00+00:00 USE_FEDERATION=1 RUN_FEDERATED_PRETRAIN=0 TRAIN_META_ONLY_BASELINE=0 TRAIN_PRETRAIN_ONLY=0 SKIP_LOCAL_PRETRAIN=1 SKIP_LOCAL_META=1 ENABLE_FED_NORMAL_META_PROPOSED=0 FED_NORMAL_META_SELF_FLOOR=0.3 SKIP_FED_NORMAL_META=1 FED_NORMAL_META_RESTORE_BEST=0 FED_NORMAL_META_SAVE_BEST=0 FED_NORMAL_META_USE_BEST=0 ENABLE_SELECTIVE_FED_NORMAL_META=0 SELECTIVE_FED_META_PROXY_RATIO=0.2 SELECTIVE_FED_META_SELF_FLOOR=0.5 SELECTIVE_FED_META_GAIN_MARGIN=0.0 SELECTIVE_FED_META_GAIN_GAMMA=1.0 HWA_PRETRAIN_LOSS=0 HWA_META_LOSS=0 HWA_SELECTIVE_PROXY_LOSS=0 HWA_WIND_FEATURE_INDEX=0 HWA_WIND_THRESHOLD=10.0 HWA_WIND_RAMP_END=13.9 HWA_HIGH_WIND_WEIGHT=4.0 HWA_PRETRAIN_WINDOWED=0 ENABLE_TARGET_AWARE_META_NOFT=0 SKIP_TARGET_AWARE_PRETRAIN=0 SKIP_TARGET_AWARE_META=0 ENABLE_TARGET_AWARE_SELECTIVE_FED_META=0 SKIP_TARGET_AWARE_SELECTIVE_FED_META=0 ENABLE_TARGET_AWARE_SELECTIVE_FED_LOCAL_FT=0 ENABLE_LEGACY_LOCAL_FT=1 ENABLE_TARGET_AWARE_META_BIAS_CAL=0 ENABLE_TARGET_AWARE_SELECTIVE_FED_BIAS_CAL=0 SKIP_LEGACY_EXTREME_ADAPTATION=0 TARGET_AWARE_PRETRAIN_HWA_LOSS=1 TARGET_AWARE_META_CDRM_WEIGHT=0.0 TARGET_AWARE_META_SIM_FLOOR=0.05 TARGET_AWARE_META_TASK_WEIGHT_ETA=1.0 TARGET_AWARE_META_WIND_MEAN_THRESHOLD=13.9 TARGET_AWARE_META_WIND_MAX_THRESHOLD=17.2 TARGET_AWARE_META_MIN_EXTREME_POINTS=3 TARGET_AWARE_SELECTIVE_FED_TOP_K=1 TARGET_AWARE_SELECTIVE_FED_SELF_FLOOR=0.7 TARGET_AWARE_SELECTIVE_FED_SOURCE_ALPHA_CAP=0.3 TARGET_AWARE_SELECTIVE_FED_ALPHA_GRID= TARGET_AWARE_SELECTIVE_FED_GAIN_MARGIN=0.0 TARGET_AWARE_SELECTIVE_FED_GAIN_GAMMA=1.0 TARGET_AWARE_SELECTIVE_FED_PROXY_NORMAL_MAX_WINDOWS=8 TARGET_AWARE_SELECTIVE_FED_PROXY_EXTREME_WEIGHT=2.0 TARGET_AWARE_SELECTIVE_FED_PROXY_NORMAL_WEIGHT=1.0 TARGET_AWARE_SELECTIVE_FED_BIAS_CAL_MIN=0.0 TARGET_AWARE_SELECTIVE_FED_BIAS_CAL_MAX=0.15 GLOBAL_SEED=1029 META_TASKS_PER_EPOCH=2 META_SUPPORT_SHOTS=4 META_QUERY_SHOTS=4 EVAL_MODEL_SET=baseline-triplet SKIP_EXTREME_ADAPTATION_STAGE=0 PROPOSED_META_SAMPLER_MODE=balanced PRETRAIN_EPOCHS=1000 PROPOSED_META_EPOCHS=1000 META_ONLY_META_EPOCHS=1000 FEW_SHOT_EPOCHS=5 FEW_SHOT_LR=5e-5 EXTREME_TARGET_REFINEMENT_EPOCHS=5 EXTREME_SUPPORT_WINDOW_CAP=0 EXTREME_TARGET_ADAPT_MAX_WINDOWS=0 PRETRAIN_LOG_INTERVAL=50 META_LOG_INTERVAL=50 FEW_SHOT_LOG_INTERVAL=1
+exec /root/miniconda3/bin/python -u DemoModelTraining.py
+======================================================================
+======================================================================
+数据协议配置
+======================================================================
+  protocol_name: four_client_2h_6point_high_wind_spring_noft_protocol
+  protocol_data_dir: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client
+  protocol_metadata_path: /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/protocol_metadata.json
+  yearly_protocol_enabled: True
+  seasonal_protocol_enabled: False
+  sample_interval_hours: 2
+  downsample_offset: 1
+  len_realp: 6
+  points_per_day: 12
+  window_span_hours: 12
+  artifact_dir: artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5
+  model_output_dir: artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models
+  base_model_output_dir: artifacts/high_wind_spring_noft_four_client/pilot-1k/models
+  target_aware_base_model_output_dir: artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models
+  target_aware_selective_fed_base_model_output_dir: artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models
+  local_pretrain_init_model_dir: (none)
+  local_meta_init_model_dir: (none)
+  target_aware_pretrain_init_model_dir: (none)
+  target_aware_meta_init_model_dir: (none)
+  target_aware_selective_fed_meta_init_model_dir: (none)
+  local_pretrain_epoch_offset: 0
+  local_meta_epoch_offset: 0
+  target_aware_pretrain_epoch_offset: 0
+  target_aware_meta_epoch_offset: 0
+  target_aware_selective_fed_meta_epoch_offset: 0
+  logs_train_dir: artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/logs_train
+  train_pretrain_only: False
+  enable_fed_normal_meta_proposed: False
+  fed_normal_meta_self_floor: 0.3
+  skip_fed_normal_meta: True
+  fed_normal_meta_restore_best: False
+  fed_normal_meta_save_best: False
+  fed_normal_meta_use_best: False
+  enable_selective_fed_normal_meta: False
+  selective_fed_meta_proxy_ratio: 0.2
+  selective_fed_meta_self_floor: 0.5
+  selective_fed_meta_gain_margin: 0.0
+  selective_fed_meta_gain_gamma: 1.0
+  hwa_pretrain_loss: False
+  hwa_meta_loss: False
+  hwa_selective_proxy_loss: False
+  hwa_wind_feature_index: 0
+  hwa_wind_threshold: 10.0
+  hwa_wind_ramp_end: 13.9
+  hwa_high_wind_weight: 4.0
+  hwa_pretrain_windowed: False
+  enable_target_aware_meta_noft: False
+  skip_target_aware_pretrain: False
+  skip_target_aware_meta: False
+  enable_target_aware_selective_fed_meta: False
+  skip_target_aware_selective_fed_meta: False
+  enable_target_aware_selective_fed_local_ft: False
+  skip_legacy_extreme_adaptation: False
+  target_aware_pretrain_hwa_loss: True
+  target_aware_meta_cdrm_weight: 0.0
+  target_aware_meta_sim_floor: 0.05
+  target_aware_meta_task_weight_eta: 1.0
+  target_aware_meta_wind_mean_threshold: 13.9
+  target_aware_meta_wind_max_threshold: 17.2
+  target_aware_meta_min_extreme_points: 3
+  target_aware_selective_fed_top_k: 1
+  target_aware_selective_fed_self_floor: 0.7
+  target_aware_selective_fed_source_alpha_cap: 0.3
+  target_aware_selective_fed_alpha_grid: (auto)
+  target_aware_selective_fed_gain_margin: 0.0
+  target_aware_selective_fed_proxy_normal_max_windows: 8
+  target_aware_selective_fed_proxy_extreme_weight: 2.0
+  target_aware_selective_fed_proxy_normal_weight: 1.0
+  global_seed: 1029
+  skip_extreme_adaptation_stage: False
+  few_shot_lr: 5e-05
+======================================================================
+联邦模式：加载4个场站数据（59, 60, 62, 63）
+======================================================================
+  加载 /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/59wf_4_train.mat...
+  加载 /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/60wf_4_train.mat...
+  加载 /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/62wf_4_train.mat...
+  加载 /tmp/wpf-worktrees/restore-raw-data-83688a3/WPF-under-extreme-weather-main/protocol_data/high_wind_spring_noft_four_client/63wf_4_train.mat...
+
+======================================================================
+准备所有场站的完整数据（元训练+极端天气+测试集）
+======================================================================
+
+准备联邦客户端数据（常规天气）...
+  处理场站 59...
+    shape: (1, 318, 5) → (1, 318, 1)
+  处理场站 60...
+    shape: (1, 323, 5) → (1, 323, 1)
+  处理场站 62...
+    shape: (1, 319, 5) → (1, 319, 1)
+  处理场站 63...
+    shape: (1, 324, 5) → (1, 324, 1)
+  总数据量: 1284 样本
+
+准备所有场站的元训练和测试数据（4场站一视同仁）...
+
+  场站 59:
+    测试集2023: (2, 6, 1)
+    聚类类别: 4类
+    极端天气: 1类
+
+  场站 60:
+    测试集2023: (2, 6, 1)
+    聚类类别: 4类
+    极端天气: 1类
+
+  场站 62:
+    测试集2023: (2, 6, 1)
+    聚类类别: 4类
+    极端天气: 1类
+
+  场站 63:
+    测试集2023: (2, 6, 1)
+    聚类类别: 4类
+    极端天气: 1类
+
+✓ 所有场站数据准备完成！
+#########################################################################——————————本地预训练（Local Pre-train）——————————############################################################
+场站数量: 4, 场站: 59, 60, 62, 63
+
+======================================================================
+开始本地预训练: station 59
+======================================================================
+✓ 跳过本地预训练，复用已有 checkpoint: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_pre_station59_local.pth
+
+======================================================================
+开始本地预训练: station 60
+======================================================================
+✓ 跳过本地预训练，复用已有 checkpoint: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_pre_station60_local.pth
+
+======================================================================
+开始本地预训练: station 62
+======================================================================
+✓ 跳过本地预训练，复用已有 checkpoint: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_pre_station62_local.pth
+
+======================================================================
+开始本地预训练: station 63
+======================================================================
+✓ 跳过本地预训练，复用已有 checkpoint: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_pre_station63_local.pth
+
+======================================================================
+开始本地元训练: station 59
+======================================================================
+✓ 跳过本地元训练，复用已有 checkpoint: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_train_task_query_local_meta_station59.pth
+
+======================================================================
+开始本地元训练: station 60
+======================================================================
+✓ 跳过本地元训练，复用已有 checkpoint: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_train_task_query_local_meta_station60.pth
+
+======================================================================
+开始本地元训练: station 62
+======================================================================
+✓ 跳过本地元训练，复用已有 checkpoint: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_train_task_query_local_meta_station62.pth
+
+======================================================================
+开始本地元训练: station 63
+======================================================================
+✓ 跳过本地元训练，复用已有 checkpoint: artifacts/high_wind_spring_noft_four_client/pilot-1k/models/model_fore_train_task_query_local_meta_station63.pth
+##################################################################——————————test_task_support（Few-shot适应：共12个模型）——————————############################################################
+
+======================================================================
+场站 59 的Few-shot适应
+======================================================================
+
+  极端天气类别 1 (HighWind):
+    样本数: 2
+    训练轮数: 5, few-shot loss=MSE
+    adapt/val: 1 / 1
+      [LMT] [Epoch 1/5] [loss_mse: 0.198621] [anchor_loss: 0.000000]
+      [LMT] [Epoch 2/5] [loss_mse: 0.212417] [anchor_loss: 0.000000]
+      [LMT] [Epoch 3/5] [loss_mse: 0.203270] [anchor_loss: 0.000000]
+      [LMT] [Epoch 4/5] [loss_mse: 0.213036] [anchor_loss: 0.000000]
+      [LMT] [Epoch 5/5] [loss_mse: 0.211530] [anchor_loss: 0.000000]
+  收敛检测[few_shot:lmt_station59_class0]: 未收敛 (best_epoch=1, best_loss=0.198621, final_loss=0.211530)
+    ✓ 保存(LMT): artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models/model_fore_station59_extreme0.pth
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.098870, final_loss=0.098870)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.136971, final_loss=0.136971)
+    [screen:extreme_source] source_station=60 -> target_station=59, candidate=2, gated=2, effective=2
+      [extreme_source:60->target59] [Epoch 1/5] [loss_mse: 0.089142] [anchor_loss: 0.000000]
+      [extreme_source:60->target59] [Epoch 2/5] [loss_mse: 0.102447] [anchor_loss: 0.000000]
+      [extreme_source:60->target59] [Epoch 3/5] [loss_mse: 0.091666] [anchor_loss: 0.000000]
+      [extreme_source:60->target59] [Epoch 4/5] [loss_mse: 0.119502] [anchor_loss: 0.000000]
+      [extreme_source:60->target59] [Epoch 5/5] [loss_mse: 0.061409] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_source_station60_to_59_class0]: 未收敛 (best_epoch=5, best_loss=0.061409, final_loss=0.061409)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.211394, final_loss=0.211394)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.199474, final_loss=0.199474)
+    [screen:extreme_source] source_station=62 -> target_station=59, candidate=2, gated=2, effective=2
+      [extreme_source:62->target59] [Epoch 1/5] [loss_mse: 0.206801] [anchor_loss: 0.000000]
+      [extreme_source:62->target59] [Epoch 2/5] [loss_mse: 0.212473] [anchor_loss: 0.000000]
+      [extreme_source:62->target59] [Epoch 3/5] [loss_mse: 0.238540] [anchor_loss: 0.000000]
+      [extreme_source:62->target59] [Epoch 4/5] [loss_mse: 0.242015] [anchor_loss: 0.000000]
+      [extreme_source:62->target59] [Epoch 5/5] [loss_mse: 0.185911] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_source_station62_to_59_class0]: 未收敛 (best_epoch=5, best_loss=0.185911, final_loss=0.185911)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.061161, final_loss=0.061161)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.195441, final_loss=0.195441)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.130041, final_loss=0.130041)
+    [screen:extreme_source] source_station=63 -> target_station=59, candidate=3, gated=3, effective=2
+      [extreme_source:63->target59] [Epoch 1/5] [loss_mse: 0.148656] [anchor_loss: 0.000000]
+      [extreme_source:63->target59] [Epoch 2/5] [loss_mse: 0.082222] [anchor_loss: 0.000000]
+      [extreme_source:63->target59] [Epoch 3/5] [loss_mse: 0.072360] [anchor_loss: 0.000000]
+      [extreme_source:63->target59] [Epoch 4/5] [loss_mse: 0.045048] [anchor_loss: 0.000000]
+      [extreme_source:63->target59] [Epoch 5/5] [loss_mse: 0.076352] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_source_station63_to_59_class0]: 未收敛 (best_epoch=4, best_loss=0.045048, final_loss=0.076352)
+      [Extreme-FedAvg:target_refine] [Epoch 1/5] [loss_mse: 0.214068] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 2/5] [loss_mse: 0.195188] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 3/5] [loss_mse: 0.216700] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 4/5] [loss_mse: 0.247084] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 5/5] [loss_mse: 0.178176] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_fedavg_station59_class0]: 未收敛 (best_epoch=5, best_loss=0.178176, final_loss=0.178176)
+    ✓ 保存(Extreme-FedAvg): artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models/model_fore_station59_extreme0_extreme_fedavg.pth weights={'59': 0.25, '60': 0.25, '62': 0.25, '63': 0.25}
+      [Proposed-A:target_refine] [Epoch 1/5] [loss_mse: 0.208222] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 2/5] [loss_mse: 0.184406] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 3/5] [loss_mse: 0.250605] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 4/5] [loss_mse: 0.224919] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 5/5] [loss_mse: 0.166696] [anchor_loss: 0.000000]
+  收敛检测[few_shot:proposed_a_station59_class0]: 未收敛 (best_epoch=5, best_loss=0.166696, final_loss=0.166696)
+    ✓ 保存(Proposed-A): artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models/model_fore_station59_extreme0_proposed_a.pth weights={'59': 0.5, '60': 0.16742655038044288, '62': 0.16103241677113292, '63': 0.1715410328484242} selection={'selected': 'proposed', 'proposed_val_loss': 0.2253575474023819, 'lmt_val_loss': 0.2273312360048294, 'margin': 0.0}
+
+======================================================================
+场站 60 的Few-shot适应
+======================================================================
+
+  极端天气类别 1 (HighWind):
+    样本数: 2
+    训练轮数: 5, few-shot loss=MSE
+    adapt/val: 1 / 1
+      [LMT] [Epoch 1/5] [loss_mse: 0.076298] [anchor_loss: 0.000000]
+      [LMT] [Epoch 2/5] [loss_mse: 0.076012] [anchor_loss: 0.000000]
+      [LMT] [Epoch 3/5] [loss_mse: 0.035100] [anchor_loss: 0.000000]
+      [LMT] [Epoch 4/5] [loss_mse: 0.079998] [anchor_loss: 0.000000]
+      [LMT] [Epoch 5/5] [loss_mse: 0.059773] [anchor_loss: 0.000000]
+  收敛检测[few_shot:lmt_station60_class0]: 未收敛 (best_epoch=3, best_loss=0.035100, final_loss=0.059773)
+    ✓ 保存(LMT): artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models/model_fore_station60_extreme0.pth
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.141868, final_loss=0.141868)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.126645, final_loss=0.126645)
+    [screen:extreme_source] source_station=59 -> target_station=60, candidate=2, gated=2, effective=2
+      [extreme_source:59->target60] [Epoch 1/5] [loss_mse: 0.183334] [anchor_loss: 0.000000]
+      [extreme_source:59->target60] [Epoch 2/5] [loss_mse: 0.193591] [anchor_loss: 0.000000]
+      [extreme_source:59->target60] [Epoch 3/5] [loss_mse: 0.140612] [anchor_loss: 0.000000]
+      [extreme_source:59->target60] [Epoch 4/5] [loss_mse: 0.177379] [anchor_loss: 0.000000]
+      [extreme_source:59->target60] [Epoch 5/5] [loss_mse: 0.137044] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_source_station59_to_60_class0]: 未收敛 (best_epoch=5, best_loss=0.137044, final_loss=0.137044)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.153540, final_loss=0.153540)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.147326, final_loss=0.147326)
+    [screen:extreme_source] source_station=62 -> target_station=60, candidate=2, gated=2, effective=2
+      [extreme_source:62->target60] [Epoch 1/5] [loss_mse: 0.188773] [anchor_loss: 0.000000]
+      [extreme_source:62->target60] [Epoch 2/5] [loss_mse: 0.184394] [anchor_loss: 0.000000]
+      [extreme_source:62->target60] [Epoch 3/5] [loss_mse: 0.216594] [anchor_loss: 0.000000]
+      [extreme_source:62->target60] [Epoch 4/5] [loss_mse: 0.156337] [anchor_loss: 0.000000]
+      [extreme_source:62->target60] [Epoch 5/5] [loss_mse: 0.144105] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_source_station62_to_60_class0]: 未收敛 (best_epoch=5, best_loss=0.144105, final_loss=0.144105)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.038650, final_loss=0.038650)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.160170, final_loss=0.160170)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.059816, final_loss=0.059816)
+    [screen:extreme_source] source_station=63 -> target_station=60, candidate=3, gated=3, effective=2
+      [extreme_source:63->target60] [Epoch 1/5] [loss_mse: 0.158195] [anchor_loss: 0.000000]
+      [extreme_source:63->target60] [Epoch 2/5] [loss_mse: 0.136751] [anchor_loss: 0.000000]
+      [extreme_source:63->target60] [Epoch 3/5] [loss_mse: 0.163320] [anchor_loss: 0.000000]
+      [extreme_source:63->target60] [Epoch 4/5] [loss_mse: 0.214024] [anchor_loss: 0.000000]
+      [extreme_source:63->target60] [Epoch 5/5] [loss_mse: 0.138871] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_source_station63_to_60_class0]: 未收敛 (best_epoch=2, best_loss=0.136751, final_loss=0.138871)
+      [Extreme-FedAvg:target_refine] [Epoch 1/5] [loss_mse: 0.045909] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 2/5] [loss_mse: 0.055090] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 3/5] [loss_mse: 0.048495] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 4/5] [loss_mse: 0.094142] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 5/5] [loss_mse: 0.062250] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_fedavg_station60_class0]: 未收敛 (best_epoch=1, best_loss=0.045909, final_loss=0.062250)
+    ✓ 保存(Extreme-FedAvg): artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models/model_fore_station60_extreme0_extreme_fedavg.pth weights={'60': 0.25, '59': 0.25, '62': 0.25, '63': 0.25}
+      [Proposed-A:target_refine] [Epoch 1/5] [loss_mse: 0.072214] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 2/5] [loss_mse: 0.049024] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 3/5] [loss_mse: 0.059113] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 4/5] [loss_mse: 0.099357] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 5/5] [loss_mse: 0.045716] [anchor_loss: 0.000000]
+  收敛检测[few_shot:proposed_a_station60_class0]: 未收敛 (best_epoch=5, best_loss=0.045716, final_loss=0.045716)
+    ✓ 保存(Proposed-A): artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models/model_fore_station60_extreme0_proposed_a.pth weights={'60': 0.5, '59': 0.16218945956422964, '62': 0.16227514727572465, '63': 0.1755353931600457} selection={'selected': 'proposed', 'proposed_val_loss': 0.0759207233786583, 'lmt_val_loss': 0.07747528702020645, 'margin': 0.0}
+
+======================================================================
+场站 62 的Few-shot适应
+======================================================================
+
+  极端天气类别 1 (HighWind):
+    样本数: 2
+    训练轮数: 5, few-shot loss=MSE
+    adapt/val: 1 / 1
+      [LMT] [Epoch 1/5] [loss_mse: 0.267001] [anchor_loss: 0.000000]
+      [LMT] [Epoch 2/5] [loss_mse: 0.230300] [anchor_loss: 0.000000]
+      [LMT] [Epoch 3/5] [loss_mse: 0.239143] [anchor_loss: 0.000000]
+      [LMT] [Epoch 4/5] [loss_mse: 0.236980] [anchor_loss: 0.000000]
+      [LMT] [Epoch 5/5] [loss_mse: 0.225866] [anchor_loss: 0.000000]
+  收敛检测[few_shot:lmt_station62_class0]: 未收敛 (best_epoch=5, best_loss=0.225866, final_loss=0.225866)
+    ✓ 保存(LMT): artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models/model_fore_station62_extreme0.pth
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.335278, final_loss=0.335278)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.264954, final_loss=0.264954)
+    [screen:extreme_source] source_station=59 -> target_station=62, candidate=2, gated=2, effective=2
+      [extreme_source:59->target62] [Epoch 1/5] [loss_mse: 0.262591] [anchor_loss: 0.000000]
+      [extreme_source:59->target62] [Epoch 2/5] [loss_mse: 0.276754] [anchor_loss: 0.000000]
+      [extreme_source:59->target62] [Epoch 3/5] [loss_mse: 0.254248] [anchor_loss: 0.000000]
+      [extreme_source:59->target62] [Epoch 4/5] [loss_mse: 0.322989] [anchor_loss: 0.000000]
+      [extreme_source:59->target62] [Epoch 5/5] [loss_mse: 0.313001] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_source_station59_to_62_class0]: 未收敛 (best_epoch=3, best_loss=0.254248, final_loss=0.313001)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.147650, final_loss=0.147650)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.122921, final_loss=0.122921)
+    [screen:extreme_source] source_station=60 -> target_station=62, candidate=2, gated=2, effective=2
+      [extreme_source:60->target62] [Epoch 1/5] [loss_mse: 0.091570] [anchor_loss: 0.000000]
+      [extreme_source:60->target62] [Epoch 2/5] [loss_mse: 0.073562] [anchor_loss: 0.000000]
+      [extreme_source:60->target62] [Epoch 3/5] [loss_mse: 0.135893] [anchor_loss: 0.000000]
+      [extreme_source:60->target62] [Epoch 4/5] [loss_mse: 0.108059] [anchor_loss: 0.000000]
+      [extreme_source:60->target62] [Epoch 5/5] [loss_mse: 0.092893] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_source_station60_to_62_class0]: 未收敛 (best_epoch=2, best_loss=0.073562, final_loss=0.092893)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.142625, final_loss=0.142625)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.231932, final_loss=0.231932)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.136713, final_loss=0.136713)
+    [screen:extreme_source] source_station=63 -> target_station=62, candidate=3, gated=3, effective=2
+      [extreme_source:63->target62] [Epoch 1/5] [loss_mse: 0.073772] [anchor_loss: 0.000000]
+      [extreme_source:63->target62] [Epoch 2/5] [loss_mse: 0.068627] [anchor_loss: 0.000000]
+      [extreme_source:63->target62] [Epoch 3/5] [loss_mse: 0.077186] [anchor_loss: 0.000000]
+      [extreme_source:63->target62] [Epoch 4/5] [loss_mse: 0.107591] [anchor_loss: 0.000000]
+      [extreme_source:63->target62] [Epoch 5/5] [loss_mse: 0.079384] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_source_station63_to_62_class0]: 未收敛 (best_epoch=2, best_loss=0.068627, final_loss=0.079384)
+      [Extreme-FedAvg:target_refine] [Epoch 1/5] [loss_mse: 0.261360] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 2/5] [loss_mse: 0.263484] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 3/5] [loss_mse: 0.308390] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 4/5] [loss_mse: 0.298922] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 5/5] [loss_mse: 0.283669] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_fedavg_station62_class0]: 未收敛 (best_epoch=1, best_loss=0.261360, final_loss=0.283669)
+    ✓ 保存(Extreme-FedAvg): artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models/model_fore_station62_extreme0_extreme_fedavg.pth weights={'62': 0.25, '59': 0.25, '60': 0.25, '63': 0.25}
+      [Proposed-A:target_refine] [Epoch 1/5] [loss_mse: 0.256478] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 2/5] [loss_mse: 0.250825] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 3/5] [loss_mse: 0.290933] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 4/5] [loss_mse: 0.246613] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 5/5] [loss_mse: 0.289431] [anchor_loss: 0.000000]
+  收敛检测[few_shot:proposed_a_station62_class0]: 未收敛 (best_epoch=4, best_loss=0.246613, final_loss=0.289431)
+    ✓ 保存(Proposed-A): artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models/model_fore_station62_extreme0_proposed_a.pth weights={'62': 0.5, '59': 0.16382442103381728, '60': 0.17674706636487086, '63': 0.15942851260131186} selection={'selected': 'proposed', 'proposed_val_loss': 0.27179068326950073, 'lmt_val_loss': 0.2752682864665985, 'margin': 0.0}
+
+======================================================================
+场站 63 的Few-shot适应
+======================================================================
+
+  极端天气类别 1 (HighWind):
+    样本数: 3
+    训练轮数: 5, few-shot loss=MSE
+    adapt/val: 2 / 1
+      [LMT] [Epoch 1/5] [loss_mse: 0.074883] [anchor_loss: 0.000000]
+      [LMT] [Epoch 2/5] [loss_mse: 0.093049] [anchor_loss: 0.000000]
+      [LMT] [Epoch 3/5] [loss_mse: 0.084411] [anchor_loss: 0.000000]
+      [LMT] [Epoch 4/5] [loss_mse: 0.106795] [anchor_loss: 0.000000]
+      [LMT] [Epoch 5/5] [loss_mse: 0.083613] [anchor_loss: 0.000000]
+  收敛检测[few_shot:lmt_station63_class0]: 未收敛 (best_epoch=1, best_loss=0.074883, final_loss=0.083613)
+    ✓ 保存(LMT): artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models/model_fore_station63_extreme0.pth
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.218770, final_loss=0.218770)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.129597, final_loss=0.129597)
+    [screen:extreme_source] source_station=59 -> target_station=63, candidate=2, gated=2, effective=2
+      [extreme_source:59->target63] [Epoch 1/5] [loss_mse: 0.168512] [anchor_loss: 0.000000]
+      [extreme_source:59->target63] [Epoch 2/5] [loss_mse: 0.202756] [anchor_loss: 0.000000]
+      [extreme_source:59->target63] [Epoch 3/5] [loss_mse: 0.175079] [anchor_loss: 0.000000]
+      [extreme_source:59->target63] [Epoch 4/5] [loss_mse: 0.210797] [anchor_loss: 0.000000]
+      [extreme_source:59->target63] [Epoch 5/5] [loss_mse: 0.202426] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_source_station59_to_63_class0]: 未收敛 (best_epoch=1, best_loss=0.168512, final_loss=0.202426)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.084708, final_loss=0.084708)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.085961, final_loss=0.085961)
+    [screen:extreme_source] source_station=60 -> target_station=63, candidate=2, gated=2, effective=2
+      [extreme_source:60->target63] [Epoch 1/5] [loss_mse: 0.074018] [anchor_loss: 0.000000]
+      [extreme_source:60->target63] [Epoch 2/5] [loss_mse: 0.076982] [anchor_loss: 0.000000]
+      [extreme_source:60->target63] [Epoch 3/5] [loss_mse: 0.098515] [anchor_loss: 0.000000]
+      [extreme_source:60->target63] [Epoch 4/5] [loss_mse: 0.079273] [anchor_loss: 0.000000]
+      [extreme_source:60->target63] [Epoch 5/5] [loss_mse: 0.062063] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_source_station60_to_63_class0]: 未收敛 (best_epoch=5, best_loss=0.062063, final_loss=0.062063)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.147364, final_loss=0.147364)
+  收敛检测[few_shot:few_shot]: 未收敛 (best_epoch=1, best_loss=0.148669, final_loss=0.148669)
+    [screen:extreme_source] source_station=62 -> target_station=63, candidate=2, gated=2, effective=2
+      [extreme_source:62->target63] [Epoch 1/5] [loss_mse: 0.159773] [anchor_loss: 0.000000]
+      [extreme_source:62->target63] [Epoch 2/5] [loss_mse: 0.207452] [anchor_loss: 0.000000]
+      [extreme_source:62->target63] [Epoch 3/5] [loss_mse: 0.183188] [anchor_loss: 0.000000]
+      [extreme_source:62->target63] [Epoch 4/5] [loss_mse: 0.173483] [anchor_loss: 0.000000]
+      [extreme_source:62->target63] [Epoch 5/5] [loss_mse: 0.182155] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_source_station62_to_63_class0]: 未收敛 (best_epoch=1, best_loss=0.159773, final_loss=0.182155)
+      [Extreme-FedAvg:target_refine] [Epoch 1/5] [loss_mse: 0.156218] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 2/5] [loss_mse: 0.109996] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 3/5] [loss_mse: 0.135440] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 4/5] [loss_mse: 0.129639] [anchor_loss: 0.000000]
+      [Extreme-FedAvg:target_refine] [Epoch 5/5] [loss_mse: 0.106236] [anchor_loss: 0.000000]
+  收敛检测[few_shot:extreme_fedavg_station63_class0]: 未收敛 (best_epoch=5, best_loss=0.106236, final_loss=0.106236)
+    ✓ 保存(Extreme-FedAvg): artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models/model_fore_station63_extreme0_extreme_fedavg.pth weights={'63': 0.25, '59': 0.25, '60': 0.25, '62': 0.25}
+      [Proposed-A:target_refine] [Epoch 1/5] [loss_mse: 0.109882] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 2/5] [loss_mse: 0.095093] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 3/5] [loss_mse: 0.098133] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 4/5] [loss_mse: 0.130811] [anchor_loss: 0.000000]
+      [Proposed-A:target_refine] [Epoch 5/5] [loss_mse: 0.108347] [anchor_loss: 0.000000]
+  收敛检测[few_shot:proposed_a_station63_class0]: 未收敛 (best_epoch=2, best_loss=0.095093, final_loss=0.108347)
+    ✓ 保存(Proposed-A): artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/models/model_fore_station63_extreme0_proposed_a.pth weights={'63': 0.5, '59': 0.16247714243715447, '60': 0.17257352842256635, '62': 0.16494932914027916} selection={'selected': 'proposed', 'proposed_val_loss': 0.08539944887161255, 'lmt_val_loss': 0.08651038259267807, 'margin': 0.0}
+
+✓ Few-shot训练完成，生成了 12 个个性化模型
+
+======================================================================
+生成所有场站的测试预测结果
+======================================================================
+
+场站 59 预测:
+  ✓ 极端类别1(HighWind)（Pretrain/Local-Meta-NoFT/LMT/Extreme-FedAvg/Proposed-A）
+
+场站 60 预测:
+  ✓ 极端类别1(HighWind)（Pretrain/Local-Meta-NoFT/LMT/Extreme-FedAvg/Proposed-A）
+
+场站 62 预测:
+  ✓ 极端类别1(HighWind)（Pretrain/Local-Meta-NoFT/LMT/Extreme-FedAvg/Proposed-A）
+
+场站 63 预测:
+  ✓ 极端类别1(HighWind)（Pretrain/Local-Meta-NoFT/LMT/Extreme-FedAvg/Proposed-A）
+
+保存所有场站测试结果...
+✓ 已保存: artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/all_stations_test_results.mat
+✓ 收敛检测报告已保存: artifacts/high_wind_spring_noft_four_client/pilot-1k-original-local-ft5/training_convergence_report.json
+
+======================================================================
+✓✓✓ 训练和测试全部完成！
+生成的个性化微调模型: 12个（含 LMT / Extreme-FedAvg / Proposed-A）
+======================================================================

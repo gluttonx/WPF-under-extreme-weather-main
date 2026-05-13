@@ -1,0 +1,7 @@
+﻿Protocol,Sample_Interval_Hours,Window_Points,Window_Span_Hours,Station,Extreme_Class,Eval_Payload_Key,Model,Samples,nMAE_%,nRMSE_%,WD_%,R_p<0.05_%
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Extreme_Weather_Class1,p_test_extre_class1,FedTL-FT,2.0,29.852,34.8574,25.0587,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Extreme_Weather_Class1,p_test_extre_class1,FedTL-FT,2.0,42.2105,48.2166,36.3285,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Extreme_Weather_Class1,p_test_extre_class1,FedTL-FT,2.0,28.5767,32.6632,25.3218,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Extreme_Weather_Class1,p_test_extre_class1,FedTL-FT,2.0,43.9909,51.1177,33.5926,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Extreme_Weather_Class1,Overall_Average,FedTL-FT,2.0,36.1575,41.7137,30.0754,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Extreme_Weather_Class1,Overall_SampleWeighted,FedTL-FT,8.0,36.1575,41.7137,30.0754,0.0

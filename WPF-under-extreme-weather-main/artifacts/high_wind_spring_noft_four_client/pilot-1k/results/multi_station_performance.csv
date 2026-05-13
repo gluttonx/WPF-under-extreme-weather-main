@@ -1,0 +1,19 @@
+﻿Protocol,Sample_Interval_Hours,Window_Points,Window_Span_Hours,Station,Model,HighWind_nMAE_%,HighWind_nRMSE_%,HighWind_WD_%,Training_duration_s,R_p<0.05_%
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Pretrain,28.0746,34.3881,26.1396,90.09,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Local-Meta-NoFT,28.4065,34.1754,26.293,383.02,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,59,Selective Fed-Normal-Meta-NoFT,30.9587,35.4377,30.9535,1403.48,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Pretrain,36.0109,42.7183,33.8612,90.09,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Local-Meta-NoFT,35.7324,41.7627,34.1245,383.02,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,60,Selective Fed-Normal-Meta-NoFT,41.971,46.7006,41.971,1403.48,100.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Pretrain,35.0164,40.7833,27.2369,90.09,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Local-Meta-NoFT,37.22,43.2853,31.8693,383.02,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,62,Selective Fed-Normal-Meta-NoFT,32.7265,37.2986,24.4679,1403.48,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Pretrain,43.9417,48.5382,33.5434,90.09,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Local-Meta-NoFT,43.2648,47.4098,32.9449,383.02,0.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,63,Selective Fed-Normal-Meta-NoFT,42.7711,46.8213,36.0741,1403.48,50.0
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Pretrain,35.7609,41.607,30.1953,90.09,12.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Local-Meta-NoFT,36.1559,41.6583,31.3079,383.02,37.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_Average,Selective Fed-Normal-Meta-NoFT,37.1068,41.5645,33.3666,1403.48,62.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Pretrain,35.7609,41.607,30.1953,90.09,12.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Local-Meta-NoFT,36.1559,41.6583,31.3079,383.02,37.5
+four_client_2h_6point_high_wind_spring_noft_protocol,2,6,12,Overall_SampleWeighted,Selective Fed-Normal-Meta-NoFT,37.1068,41.5646,33.3666,1403.48,62.5

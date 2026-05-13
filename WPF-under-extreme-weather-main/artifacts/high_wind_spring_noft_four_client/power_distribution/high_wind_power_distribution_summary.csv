@@ -1,0 +1,4 @@
+station_id,normal_n,normal_mean,normal_median,high_wind_n,high_wind_mean,high_wind_median
+59,668,0.517463,0.486200,52,0.884904,0.936800
+60,678,0.580354,0.673950,42,0.790686,0.855050
+ALL,1346,0.549142,0.611450,94,0.842806,0.911400

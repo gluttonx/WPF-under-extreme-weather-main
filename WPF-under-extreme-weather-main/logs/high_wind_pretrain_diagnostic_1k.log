@@ -1,0 +1,305 @@
+======================================================================
+High-wind Pretrain Diagnostic
+======================================================================
+protocol_data_dir=protocol_data/high_wind_spring_noft_four_client
+artifact_dir=artifacts/high_wind_spring_noft_four_client/pretrain-diagnostic
+stations=59,60,62,63
+variants=constant_0p9,train_mean,train_median,long_sequence,window6,window6_highwind_weighted
+epochs=1000 device=cuda len_realp=6
+high_wind_threshold=10.0 high_wind_weight=4.0
+
+station=59 train_points=318 test_windows=2 test_true_mean=0.7824
+  constant_0p9: nMAE=13.8717% pred_mean=0.9000 bias=11.7617%
+  train_mean: nMAE=27.1808% pred_mean=0.5320 bias=-25.0365%
+  train_median: nMAE=24.8367% pred_mean=0.5789 bias=-20.3483%
+station=59 variant=long_sequence epoch=1/1000 train_weighted_mse=0.436853
+station=59 variant=long_sequence epoch=50/1000 train_weighted_mse=0.390481
+station=59 variant=long_sequence epoch=100/1000 train_weighted_mse=0.323886
+station=59 variant=long_sequence epoch=150/1000 train_weighted_mse=0.189775
+station=59 variant=long_sequence epoch=200/1000 train_weighted_mse=0.134626
+station=59 variant=long_sequence epoch=250/1000 train_weighted_mse=0.109069
+station=59 variant=long_sequence epoch=300/1000 train_weighted_mse=0.107324
+station=59 variant=long_sequence epoch=350/1000 train_weighted_mse=0.084018
+station=59 variant=long_sequence epoch=400/1000 train_weighted_mse=0.074969
+station=59 variant=long_sequence epoch=450/1000 train_weighted_mse=0.063250
+station=59 variant=long_sequence epoch=500/1000 train_weighted_mse=0.057056
+station=59 variant=long_sequence epoch=550/1000 train_weighted_mse=0.054231
+station=59 variant=long_sequence epoch=600/1000 train_weighted_mse=0.057844
+station=59 variant=long_sequence epoch=650/1000 train_weighted_mse=0.051536
+station=59 variant=long_sequence epoch=700/1000 train_weighted_mse=0.046437
+station=59 variant=long_sequence epoch=750/1000 train_weighted_mse=0.041909
+station=59 variant=long_sequence epoch=800/1000 train_weighted_mse=0.046113
+station=59 variant=long_sequence epoch=850/1000 train_weighted_mse=0.045650
+station=59 variant=long_sequence epoch=900/1000 train_weighted_mse=0.039769
+station=59 variant=long_sequence epoch=950/1000 train_weighted_mse=0.041471
+station=59 variant=long_sequence epoch=1000/1000 train_weighted_mse=0.039820
+  long_sequence: nMAE=32.1049% pred_mean=0.5332 bias=-24.9202%
+station=59 variant=window6 epoch=1/1000 train_weighted_mse=0.429994
+station=59 variant=window6 epoch=50/1000 train_weighted_mse=0.381455
+station=59 variant=window6 epoch=100/1000 train_weighted_mse=0.304860
+station=59 variant=window6 epoch=150/1000 train_weighted_mse=0.183898
+station=59 variant=window6 epoch=200/1000 train_weighted_mse=0.137384
+station=59 variant=window6 epoch=250/1000 train_weighted_mse=0.139769
+station=59 variant=window6 epoch=300/1000 train_weighted_mse=0.142882
+station=59 variant=window6 epoch=350/1000 train_weighted_mse=0.138175
+station=59 variant=window6 epoch=400/1000 train_weighted_mse=0.140110
+station=59 variant=window6 epoch=450/1000 train_weighted_mse=0.131961
+station=59 variant=window6 epoch=500/1000 train_weighted_mse=0.139228
+station=59 variant=window6 epoch=550/1000 train_weighted_mse=0.138345
+station=59 variant=window6 epoch=600/1000 train_weighted_mse=0.139237
+station=59 variant=window6 epoch=650/1000 train_weighted_mse=0.139349
+station=59 variant=window6 epoch=700/1000 train_weighted_mse=0.134839
+station=59 variant=window6 epoch=750/1000 train_weighted_mse=0.132624
+station=59 variant=window6 epoch=800/1000 train_weighted_mse=0.134207
+station=59 variant=window6 epoch=850/1000 train_weighted_mse=0.140664
+station=59 variant=window6 epoch=900/1000 train_weighted_mse=0.136368
+station=59 variant=window6 epoch=950/1000 train_weighted_mse=0.136417
+station=59 variant=window6 epoch=1000/1000 train_weighted_mse=0.135697
+  window6: nMAE=27.9100% pred_mean=0.5261 bias=-25.6242%
+station=59 variant=window6_highwind_weighted epoch=1/1000 train_weighted_mse=0.611623
+station=59 variant=window6_highwind_weighted epoch=50/1000 train_weighted_mse=0.557765
+station=59 variant=window6_highwind_weighted epoch=100/1000 train_weighted_mse=0.473487
+station=59 variant=window6_highwind_weighted epoch=150/1000 train_weighted_mse=0.296744
+station=59 variant=window6_highwind_weighted epoch=200/1000 train_weighted_mse=0.140266
+station=59 variant=window6_highwind_weighted epoch=250/1000 train_weighted_mse=0.125691
+station=59 variant=window6_highwind_weighted epoch=300/1000 train_weighted_mse=0.125016
+station=59 variant=window6_highwind_weighted epoch=350/1000 train_weighted_mse=0.123854
+station=59 variant=window6_highwind_weighted epoch=400/1000 train_weighted_mse=0.120668
+station=59 variant=window6_highwind_weighted epoch=450/1000 train_weighted_mse=0.128772
+station=59 variant=window6_highwind_weighted epoch=500/1000 train_weighted_mse=0.123422
+station=59 variant=window6_highwind_weighted epoch=550/1000 train_weighted_mse=0.122228
+station=59 variant=window6_highwind_weighted epoch=600/1000 train_weighted_mse=0.119478
+station=59 variant=window6_highwind_weighted epoch=650/1000 train_weighted_mse=0.118997
+station=59 variant=window6_highwind_weighted epoch=700/1000 train_weighted_mse=0.116467
+station=59 variant=window6_highwind_weighted epoch=750/1000 train_weighted_mse=0.121843
+station=59 variant=window6_highwind_weighted epoch=800/1000 train_weighted_mse=0.121054
+station=59 variant=window6_highwind_weighted epoch=850/1000 train_weighted_mse=0.124570
+station=59 variant=window6_highwind_weighted epoch=900/1000 train_weighted_mse=0.117459
+station=59 variant=window6_highwind_weighted epoch=950/1000 train_weighted_mse=0.122432
+station=59 variant=window6_highwind_weighted epoch=1000/1000 train_weighted_mse=0.119177
+  window6_highwind_weighted: nMAE=21.2695% pred_mean=0.6853 bias=-9.7047%
+
+station=60 train_points=323 test_windows=2 test_true_mean=0.9137
+  constant_0p9: nMAE=5.5525% pred_mean=0.9000 bias=-1.3675%
+  train_mean: nMAE=33.4693% pred_mean=0.5790 bias=-33.4693%
+  train_median: nMAE=26.8875% pred_mean=0.6448 bias=-26.8875%
+station=60 variant=long_sequence epoch=1/1000 train_weighted_mse=0.446415
+station=60 variant=long_sequence epoch=50/1000 train_weighted_mse=0.392377
+station=60 variant=long_sequence epoch=100/1000 train_weighted_mse=0.306220
+station=60 variant=long_sequence epoch=150/1000 train_weighted_mse=0.154735
+station=60 variant=long_sequence epoch=200/1000 train_weighted_mse=0.108547
+station=60 variant=long_sequence epoch=250/1000 train_weighted_mse=0.106928
+station=60 variant=long_sequence epoch=300/1000 train_weighted_mse=0.105208
+station=60 variant=long_sequence epoch=350/1000 train_weighted_mse=0.096950
+station=60 variant=long_sequence epoch=400/1000 train_weighted_mse=0.090022
+station=60 variant=long_sequence epoch=450/1000 train_weighted_mse=0.084140
+station=60 variant=long_sequence epoch=500/1000 train_weighted_mse=0.075395
+station=60 variant=long_sequence epoch=550/1000 train_weighted_mse=0.071024
+station=60 variant=long_sequence epoch=600/1000 train_weighted_mse=0.068668
+station=60 variant=long_sequence epoch=650/1000 train_weighted_mse=0.055962
+station=60 variant=long_sequence epoch=700/1000 train_weighted_mse=0.047503
+station=60 variant=long_sequence epoch=750/1000 train_weighted_mse=0.051795
+station=60 variant=long_sequence epoch=800/1000 train_weighted_mse=0.044975
+station=60 variant=long_sequence epoch=850/1000 train_weighted_mse=0.051342
+station=60 variant=long_sequence epoch=900/1000 train_weighted_mse=0.050664
+station=60 variant=long_sequence epoch=950/1000 train_weighted_mse=0.045275
+station=60 variant=long_sequence epoch=1000/1000 train_weighted_mse=0.049352
+  long_sequence: nMAE=39.3716% pred_mean=0.5661 bias=-34.7530%
+station=60 variant=window6 epoch=1/1000 train_weighted_mse=0.437162
+station=60 variant=window6 epoch=50/1000 train_weighted_mse=0.384256
+station=60 variant=window6 epoch=100/1000 train_weighted_mse=0.292410
+station=60 variant=window6 epoch=150/1000 train_weighted_mse=0.150670
+station=60 variant=window6 epoch=200/1000 train_weighted_mse=0.128864
+station=60 variant=window6 epoch=250/1000 train_weighted_mse=0.126903
+station=60 variant=window6 epoch=300/1000 train_weighted_mse=0.122860
+station=60 variant=window6 epoch=350/1000 train_weighted_mse=0.120911
+station=60 variant=window6 epoch=400/1000 train_weighted_mse=0.120603
+station=60 variant=window6 epoch=450/1000 train_weighted_mse=0.122135
+station=60 variant=window6 epoch=500/1000 train_weighted_mse=0.122357
+station=60 variant=window6 epoch=550/1000 train_weighted_mse=0.124200
+station=60 variant=window6 epoch=600/1000 train_weighted_mse=0.123526
+station=60 variant=window6 epoch=650/1000 train_weighted_mse=0.120043
+station=60 variant=window6 epoch=700/1000 train_weighted_mse=0.117623
+station=60 variant=window6 epoch=750/1000 train_weighted_mse=0.122596
+station=60 variant=window6 epoch=800/1000 train_weighted_mse=0.116126
+station=60 variant=window6 epoch=850/1000 train_weighted_mse=0.122290
+station=60 variant=window6 epoch=900/1000 train_weighted_mse=0.122359
+station=60 variant=window6 epoch=950/1000 train_weighted_mse=0.119390
+station=60 variant=window6 epoch=1000/1000 train_weighted_mse=0.119376
+  window6: nMAE=33.9526% pred_mean=0.5741 bias=-33.9526%
+station=60 variant=window6_highwind_weighted epoch=1/1000 train_weighted_mse=0.596919
+station=60 variant=window6_highwind_weighted epoch=50/1000 train_weighted_mse=0.530392
+station=60 variant=window6_highwind_weighted epoch=100/1000 train_weighted_mse=0.432592
+station=60 variant=window6_highwind_weighted epoch=150/1000 train_weighted_mse=0.241166
+station=60 variant=window6_highwind_weighted epoch=200/1000 train_weighted_mse=0.111279
+station=60 variant=window6_highwind_weighted epoch=250/1000 train_weighted_mse=0.107875
+station=60 variant=window6_highwind_weighted epoch=300/1000 train_weighted_mse=0.110105
+station=60 variant=window6_highwind_weighted epoch=350/1000 train_weighted_mse=0.110030
+station=60 variant=window6_highwind_weighted epoch=400/1000 train_weighted_mse=0.112935
+station=60 variant=window6_highwind_weighted epoch=450/1000 train_weighted_mse=0.114024
+station=60 variant=window6_highwind_weighted epoch=500/1000 train_weighted_mse=0.107994
+station=60 variant=window6_highwind_weighted epoch=550/1000 train_weighted_mse=0.109173
+station=60 variant=window6_highwind_weighted epoch=600/1000 train_weighted_mse=0.108130
+station=60 variant=window6_highwind_weighted epoch=650/1000 train_weighted_mse=0.107237
+station=60 variant=window6_highwind_weighted epoch=700/1000 train_weighted_mse=0.100316
+station=60 variant=window6_highwind_weighted epoch=750/1000 train_weighted_mse=0.103170
+station=60 variant=window6_highwind_weighted epoch=800/1000 train_weighted_mse=0.105720
+station=60 variant=window6_highwind_weighted epoch=850/1000 train_weighted_mse=0.106796
+station=60 variant=window6_highwind_weighted epoch=900/1000 train_weighted_mse=0.104859
+station=60 variant=window6_highwind_weighted epoch=950/1000 train_weighted_mse=0.103250
+station=60 variant=window6_highwind_weighted epoch=1000/1000 train_weighted_mse=0.104210
+  window6_highwind_weighted: nMAE=21.5409% pred_mean=0.6983 bias=-21.5409%
+
+station=62 train_points=319 test_windows=2 test_true_mean=0.7591
+  constant_0p9: nMAE=16.3900% pred_mean=0.9000 bias=14.0900%
+  train_mean: nMAE=30.7720% pred_mean=0.5241 bias=-23.5007%
+  train_median: nMAE=31.1467% pred_mean=0.5166 bias=-24.2500%
+station=62 variant=long_sequence epoch=1/1000 train_weighted_mse=0.416956
+station=62 variant=long_sequence epoch=50/1000 train_weighted_mse=0.365864
+station=62 variant=long_sequence epoch=100/1000 train_weighted_mse=0.287892
+station=62 variant=long_sequence epoch=150/1000 train_weighted_mse=0.150491
+station=62 variant=long_sequence epoch=200/1000 train_weighted_mse=0.128607
+station=62 variant=long_sequence epoch=250/1000 train_weighted_mse=0.123140
+station=62 variant=long_sequence epoch=300/1000 train_weighted_mse=0.099893
+station=62 variant=long_sequence epoch=350/1000 train_weighted_mse=0.080354
+station=62 variant=long_sequence epoch=400/1000 train_weighted_mse=0.070379
+station=62 variant=long_sequence epoch=450/1000 train_weighted_mse=0.069683
+station=62 variant=long_sequence epoch=500/1000 train_weighted_mse=0.062686
+station=62 variant=long_sequence epoch=550/1000 train_weighted_mse=0.059041
+station=62 variant=long_sequence epoch=600/1000 train_weighted_mse=0.052348
+station=62 variant=long_sequence epoch=650/1000 train_weighted_mse=0.048308
+station=62 variant=long_sequence epoch=700/1000 train_weighted_mse=0.052176
+station=62 variant=long_sequence epoch=750/1000 train_weighted_mse=0.045674
+station=62 variant=long_sequence epoch=800/1000 train_weighted_mse=0.043878
+station=62 variant=long_sequence epoch=850/1000 train_weighted_mse=0.044311
+station=62 variant=long_sequence epoch=900/1000 train_weighted_mse=0.046000
+station=62 variant=long_sequence epoch=950/1000 train_weighted_mse=0.039832
+station=62 variant=long_sequence epoch=1000/1000 train_weighted_mse=0.041183
+  long_sequence: nMAE=29.7408% pred_mean=0.5154 bias=-24.3723%
+station=62 variant=window6 epoch=1/1000 train_weighted_mse=0.406032
+station=62 variant=window6 epoch=50/1000 train_weighted_mse=0.357451
+station=62 variant=window6 epoch=100/1000 train_weighted_mse=0.280110
+station=62 variant=window6 epoch=150/1000 train_weighted_mse=0.173045
+station=62 variant=window6 epoch=200/1000 train_weighted_mse=0.148914
+station=62 variant=window6 epoch=250/1000 train_weighted_mse=0.149853
+station=62 variant=window6 epoch=300/1000 train_weighted_mse=0.140525
+station=62 variant=window6 epoch=350/1000 train_weighted_mse=0.136807
+station=62 variant=window6 epoch=400/1000 train_weighted_mse=0.141909
+station=62 variant=window6 epoch=450/1000 train_weighted_mse=0.140725
+station=62 variant=window6 epoch=500/1000 train_weighted_mse=0.138461
+station=62 variant=window6 epoch=550/1000 train_weighted_mse=0.143148
+station=62 variant=window6 epoch=600/1000 train_weighted_mse=0.138301
+station=62 variant=window6 epoch=650/1000 train_weighted_mse=0.142080
+station=62 variant=window6 epoch=700/1000 train_weighted_mse=0.145787
+station=62 variant=window6 epoch=750/1000 train_weighted_mse=0.138912
+station=62 variant=window6 epoch=800/1000 train_weighted_mse=0.143469
+station=62 variant=window6 epoch=850/1000 train_weighted_mse=0.139591
+station=62 variant=window6 epoch=900/1000 train_weighted_mse=0.139829
+station=62 variant=window6 epoch=950/1000 train_weighted_mse=0.140860
+station=62 variant=window6 epoch=1000/1000 train_weighted_mse=0.141000
+  window6: nMAE=31.5874% pred_mean=0.5180 bias=-24.1088%
+station=62 variant=window6_highwind_weighted epoch=1/1000 train_weighted_mse=0.595106
+station=62 variant=window6_highwind_weighted epoch=50/1000 train_weighted_mse=0.532764
+station=62 variant=window6_highwind_weighted epoch=100/1000 train_weighted_mse=0.453448
+station=62 variant=window6_highwind_weighted epoch=150/1000 train_weighted_mse=0.317337
+station=62 variant=window6_highwind_weighted epoch=200/1000 train_weighted_mse=0.155564
+station=62 variant=window6_highwind_weighted epoch=250/1000 train_weighted_mse=0.126926
+station=62 variant=window6_highwind_weighted epoch=300/1000 train_weighted_mse=0.133409
+station=62 variant=window6_highwind_weighted epoch=350/1000 train_weighted_mse=0.125186
+station=62 variant=window6_highwind_weighted epoch=400/1000 train_weighted_mse=0.122513
+station=62 variant=window6_highwind_weighted epoch=450/1000 train_weighted_mse=0.125705
+station=62 variant=window6_highwind_weighted epoch=500/1000 train_weighted_mse=0.127934
+station=62 variant=window6_highwind_weighted epoch=550/1000 train_weighted_mse=0.124827
+station=62 variant=window6_highwind_weighted epoch=600/1000 train_weighted_mse=0.120248
+station=62 variant=window6_highwind_weighted epoch=650/1000 train_weighted_mse=0.122505
+station=62 variant=window6_highwind_weighted epoch=700/1000 train_weighted_mse=0.124979
+station=62 variant=window6_highwind_weighted epoch=750/1000 train_weighted_mse=0.120280
+station=62 variant=window6_highwind_weighted epoch=800/1000 train_weighted_mse=0.134471
+station=62 variant=window6_highwind_weighted epoch=850/1000 train_weighted_mse=0.129276
+station=62 variant=window6_highwind_weighted epoch=900/1000 train_weighted_mse=0.120252
+station=62 variant=window6_highwind_weighted epoch=950/1000 train_weighted_mse=0.121728
+station=62 variant=window6_highwind_weighted epoch=1000/1000 train_weighted_mse=0.120159
+  window6_highwind_weighted: nMAE=22.2691% pred_mean=0.6844 bias=-7.4709%
+
+station=63 train_points=324 test_windows=2 test_true_mean=0.8884
+  constant_0p9: nMAE=8.1325% pred_mean=0.9000 bias=1.1575%
+  train_mean: nMAE=33.2640% pred_mean=0.5813 bias=-30.7083%
+  train_median: nMAE=25.7133% pred_mean=0.6719 bias=-21.6475%
+station=63 variant=long_sequence epoch=1/1000 train_weighted_mse=0.442143
+station=63 variant=long_sequence epoch=50/1000 train_weighted_mse=0.388669
+station=63 variant=long_sequence epoch=100/1000 train_weighted_mse=0.297823
+station=63 variant=long_sequence epoch=150/1000 train_weighted_mse=0.132688
+station=63 variant=long_sequence epoch=200/1000 train_weighted_mse=0.107504
+station=63 variant=long_sequence epoch=250/1000 train_weighted_mse=0.097824
+station=63 variant=long_sequence epoch=300/1000 train_weighted_mse=0.095498
+station=63 variant=long_sequence epoch=350/1000 train_weighted_mse=0.090044
+station=63 variant=long_sequence epoch=400/1000 train_weighted_mse=0.080139
+station=63 variant=long_sequence epoch=450/1000 train_weighted_mse=0.071902
+station=63 variant=long_sequence epoch=500/1000 train_weighted_mse=0.067579
+station=63 variant=long_sequence epoch=550/1000 train_weighted_mse=0.064918
+station=63 variant=long_sequence epoch=600/1000 train_weighted_mse=0.053810
+station=63 variant=long_sequence epoch=650/1000 train_weighted_mse=0.050098
+station=63 variant=long_sequence epoch=700/1000 train_weighted_mse=0.048491
+station=63 variant=long_sequence epoch=750/1000 train_weighted_mse=0.048512
+station=63 variant=long_sequence epoch=800/1000 train_weighted_mse=0.044316
+station=63 variant=long_sequence epoch=850/1000 train_weighted_mse=0.043943
+station=63 variant=long_sequence epoch=900/1000 train_weighted_mse=0.042913
+station=63 variant=long_sequence epoch=950/1000 train_weighted_mse=0.043068
+station=63 variant=long_sequence epoch=1000/1000 train_weighted_mse=0.038202
+  long_sequence: nMAE=40.0298% pred_mean=0.5733 bias=-31.5084%
+station=63 variant=window6 epoch=1/1000 train_weighted_mse=0.446818
+station=63 variant=window6 epoch=50/1000 train_weighted_mse=0.392596
+station=63 variant=window6 epoch=100/1000 train_weighted_mse=0.310056
+station=63 variant=window6 epoch=150/1000 train_weighted_mse=0.163255
+station=63 variant=window6 epoch=200/1000 train_weighted_mse=0.120278
+station=63 variant=window6 epoch=250/1000 train_weighted_mse=0.122437
+station=63 variant=window6 epoch=300/1000 train_weighted_mse=0.119901
+station=63 variant=window6 epoch=350/1000 train_weighted_mse=0.119260
+station=63 variant=window6 epoch=400/1000 train_weighted_mse=0.121153
+station=63 variant=window6 epoch=450/1000 train_weighted_mse=0.116621
+station=63 variant=window6 epoch=500/1000 train_weighted_mse=0.121707
+station=63 variant=window6 epoch=550/1000 train_weighted_mse=0.119379
+station=63 variant=window6 epoch=600/1000 train_weighted_mse=0.120155
+station=63 variant=window6 epoch=650/1000 train_weighted_mse=0.119193
+station=63 variant=window6 epoch=700/1000 train_weighted_mse=0.115914
+station=63 variant=window6 epoch=750/1000 train_weighted_mse=0.119247
+station=63 variant=window6 epoch=800/1000 train_weighted_mse=0.115690
+station=63 variant=window6 epoch=850/1000 train_weighted_mse=0.116310
+station=63 variant=window6 epoch=900/1000 train_weighted_mse=0.114677
+station=63 variant=window6 epoch=950/1000 train_weighted_mse=0.119829
+station=63 variant=window6 epoch=1000/1000 train_weighted_mse=0.111144
+  window6: nMAE=34.4519% pred_mean=0.5763 bias=-31.2149%
+station=63 variant=window6_highwind_weighted epoch=1/1000 train_weighted_mse=0.597790
+station=63 variant=window6_highwind_weighted epoch=50/1000 train_weighted_mse=0.526369
+station=63 variant=window6_highwind_weighted epoch=100/1000 train_weighted_mse=0.422035
+station=63 variant=window6_highwind_weighted epoch=150/1000 train_weighted_mse=0.264405
+station=63 variant=window6_highwind_weighted epoch=200/1000 train_weighted_mse=0.117060
+station=63 variant=window6_highwind_weighted epoch=250/1000 train_weighted_mse=0.108694
+station=63 variant=window6_highwind_weighted epoch=300/1000 train_weighted_mse=0.104492
+station=63 variant=window6_highwind_weighted epoch=350/1000 train_weighted_mse=0.110140
+station=63 variant=window6_highwind_weighted epoch=400/1000 train_weighted_mse=0.102624
+station=63 variant=window6_highwind_weighted epoch=450/1000 train_weighted_mse=0.102044
+station=63 variant=window6_highwind_weighted epoch=500/1000 train_weighted_mse=0.101149
+station=63 variant=window6_highwind_weighted epoch=550/1000 train_weighted_mse=0.098558
+station=63 variant=window6_highwind_weighted epoch=600/1000 train_weighted_mse=0.097637
+station=63 variant=window6_highwind_weighted epoch=650/1000 train_weighted_mse=0.099041
+station=63 variant=window6_highwind_weighted epoch=700/1000 train_weighted_mse=0.100964
+station=63 variant=window6_highwind_weighted epoch=750/1000 train_weighted_mse=0.102522
+station=63 variant=window6_highwind_weighted epoch=800/1000 train_weighted_mse=0.104203
+station=63 variant=window6_highwind_weighted epoch=850/1000 train_weighted_mse=0.103753
+station=63 variant=window6_highwind_weighted epoch=900/1000 train_weighted_mse=0.098076
+station=63 variant=window6_highwind_weighted epoch=950/1000 train_weighted_mse=0.095569
+station=63 variant=window6_highwind_weighted epoch=1000/1000 train_weighted_mse=0.098562
+  window6_highwind_weighted: nMAE=22.4940% pred_mean=0.6975 bias=-19.0930%
+
+Overall sample-weighted:
+  constant_0p9: nMAE=10.9867% pred_mean=0.9000 bias=6.4104%
+  long_sequence: nMAE=35.3118% pred_mean=0.5470 bias=-28.8885%
+  train_mean: nMAE=31.1715% pred_mean=0.5541 bias=-28.1787%
+  train_median: nMAE=27.1460% pred_mean=0.6031 bias=-23.2833%
+  window6: nMAE=31.9754% pred_mean=0.5486 bias=-28.7251%
+  window6_highwind_weighted: nMAE=21.8934% pred_mean=0.6914 bias=-14.4524%
+
+Saved: artifacts/high_wind_spring_noft_four_client/pretrain-diagnostic/diagnostic_results.csv
+Saved: artifacts/high_wind_spring_noft_four_client/pretrain-diagnostic/diagnostic_overall.csv
+Saved: artifacts/high_wind_spring_noft_four_client/pretrain-diagnostic/diagnostic_predictions.csv
